@@ -135,18 +135,52 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CORE-01..10 | TBD (Phase 1) | Pending |
-| SPRING-01..05 | TBD (Phase 2) | Pending |
-| BODY-01..03 | TBD (Phase 3) | Pending |
-| DB-01..07 | TBD (Phase 4) | Pending |
-| CHAIN-01..05 | TBD (Phase 5) | Pending |
-| MAP-01..04 | TBD (Phase 5) | Pending |
+| CORE-01 | Phase 1 — Foundation & Postman Parity | Pending |
+| CORE-02 | Phase 1 — Foundation & Postman Parity | Pending |
+| CORE-03 | Phase 1 — Foundation & Postman Parity | Pending |
+| CORE-04 | Phase 1 — Foundation & Postman Parity | Pending |
+| CORE-05 | Phase 1 — Foundation & Postman Parity | Pending |
+| CORE-06 | Phase 1 — Foundation & Postman Parity | Pending |
+| CORE-07 | Phase 1 — Foundation & Postman Parity | Pending |
+| CORE-08 | Phase 1 — Foundation & Postman Parity | Pending |
+| CORE-09 | Phase 1 — Foundation & Postman Parity | Pending |
+| CORE-10 | Phase 1 — Foundation & Postman Parity | Pending |
+| SPRING-01 | Phase 2 — Spring Project Detection | Pending |
+| SPRING-02 | Phase 2 — Spring Project Detection | Pending |
+| SPRING-03 | Phase 2 — Spring Project Detection | Pending |
+| SPRING-04 | Phase 2 — Spring Project Detection | Pending |
+| SPRING-05 | Phase 2 — Spring Project Detection | Pending |
+| BODY-01 | Phase 3 — Body Generation (DTO + DB) | Pending |
+| BODY-02 | Phase 3 — Body Generation (DTO + DB) | Pending |
+| BODY-03 | Phase 3 — Body Generation (DTO + DB) | Pending |
+| DB-01 | Phase 3 — Body Generation (DTO + DB) | Pending |
+| DB-02 | Phase 3 — Body Generation (DTO + DB) | Pending |
+| DB-03 | Phase 3 — Body Generation (DTO + DB) | Pending |
+| DB-04 | Phase 3 — Body Generation (DTO + DB) | Pending |
+| DB-05 | Phase 3 — Body Generation (DTO + DB) | Pending |
+| DB-06 | Phase 3 — Body Generation (DTO + DB) | Pending |
+| DB-07 | Phase 3 — Body Generation (DTO + DB) | Pending |
+| CHAIN-01 | Phase 4 — Workflow Chains & Response Mapping | Pending |
+| CHAIN-02 | Phase 4 — Workflow Chains & Response Mapping | Pending |
+| CHAIN-03 | Phase 4 — Workflow Chains & Response Mapping | Pending |
+| CHAIN-04 | Phase 4 — Workflow Chains & Response Mapping | Pending |
+| CHAIN-05 | Phase 4 — Workflow Chains & Response Mapping | Pending |
+| MAP-01 | Phase 4 — Workflow Chains & Response Mapping | Pending |
+| MAP-02 | Phase 4 — Workflow Chains & Response Mapping | Pending |
+| MAP-03 | Phase 4 — Workflow Chains & Response Mapping | Pending |
+| MAP-04 | Phase 4 — Workflow Chains & Response Mapping | Pending |
 
 **Coverage:**
 - v1 requirements: 34 total
-- Mapped to phases: 0 (filled by roadmap)
-- Unmapped: 34 (will become 0 after roadmap)
+- Mapped to phases: 34/34 ✓
+- Unmapped: 0
+
+**Phase distribution:**
+- Phase 1: 10 requirements (CORE-01..10)
+- Phase 2: 5 requirements (SPRING-01..05)
+- Phase 3: 10 requirements (BODY-01..03 + DB-01..07)
+- Phase 4: 9 requirements (CHAIN-01..05 + MAP-01..04)
 
 ---
 *Requirements defined: 2026-06-03*
-*Last updated: 2026-06-03 after initial definition*
+*Last updated: 2026-06-03 — roadmap created, 34/34 v1 requirements mapped*
