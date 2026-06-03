@@ -1,0 +1,47 @@
+:root[data-theme="light"] {
+  --color-bg: oklch(0.98 0.005 250);
+  --color-bg-elevated: oklch(1 0 0);
+  --color-fg: oklch(0.2 0.01 250);
+  --color-fg-muted: oklch(0.45 0.01 250);
+  --color-border: oklch(0.85 0.01 250);
+  --color-accent: oklch(0.55 0.18 230);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"] {
+    --color-bg: oklch(0.18 0.01 250);
+    --color-bg-elevated: oklch(0.22 0.01 250);
+    --color-fg: oklch(0.92 0.01 250);
+    --color-fg-muted: oklch(0.65 0.01 250);
+    --color-border: oklch(0.3 0.01 250);
+    --color-accent: oklch(0.7 0.15 230);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root[data-theme="system"] {
+    --color-bg: oklch(0.98 0.005 250);
+    --color-bg-elevated: oklch(1 0 0);
+    --color-fg: oklch(0.2 0.01 250);
+    --color-fg-muted: oklch(0.45 0.01 250);
+    --color-border: oklch(0.85 0.01 250);
+    --color-accent: oklch(0.55 0.18 230);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-fg);
+}
+
+.app-shell {
+  background: var(--color-bg);
+  color: var(--color-fg);
+}

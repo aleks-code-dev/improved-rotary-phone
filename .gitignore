@@ -1,0 +1,15 @@
+node_modules/
+dist/
+out/
+*.log
+.DS_Store
+Thumbs.db
+helper/build/
+helper/.gradle/
+helper/bin/
+.vscode/
+.idea/
+*.tsbuildinfo
+release/
+.env
+.env.local

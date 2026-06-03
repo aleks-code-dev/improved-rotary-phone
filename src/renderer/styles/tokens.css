@@ -1,0 +1,31 @@
+:root {
+  --color-method-get: oklch(0.7 0.15 230);
+  --color-method-post: oklch(0.7 0.15 145);
+  --color-method-put: oklch(0.75 0.15 50);
+  --color-method-patch: oklch(0.65 0.15 290);
+  --color-method-delete: oklch(0.65 0.18 25);
+  --color-method-head: oklch(0.6 0.01 250);
+  --color-method-options: oklch(0.6 0.01 250);
+  --color-status-2xx: oklch(0.65 0.18 145);
+  --color-status-3xx: oklch(0.7 0.12 230);
+  --color-status-4xx: oklch(0.75 0.15 50);
+  --color-status-5xx: oklch(0.65 0.18 25);
+  --color-bg: oklch(0.98 0.005 250);
+  --color-bg-elevated: oklch(1 0 0);
+  --color-fg: oklch(0.2 0.01 250);
+  --color-fg-muted: oklch(0.45 0.01 250);
+  --color-border: oklch(0.85 0.01 250);
+  --color-accent: oklch(0.55 0.18 230);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --font-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Menlo, monospace;
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --radius-1: 4px;
+  --radius-2: 8px;
+}

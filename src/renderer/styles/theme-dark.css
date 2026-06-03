@@ -1,0 +1,25 @@
+:root[data-theme="dark"] {
+  --color-bg: oklch(0.18 0.01 250);
+  --color-bg-elevated: oklch(0.22 0.01 250);
+  --color-fg: oklch(0.92 0.01 250);
+  --color-fg-muted: oklch(0.65 0.01 250);
+  --color-border: oklch(0.3 0.01 250);
+  --color-accent: oklch(0.7 0.15 230);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-fg);
+}
+
+.app-shell {
+  background: var(--color-bg);
+  color: var(--color-fg);
+}

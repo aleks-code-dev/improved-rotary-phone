@@ -1,0 +1,45 @@
+import { app } from 'electron';
+import path from 'node:path';
+
+let _dataDir: string | null = null;
+
+export function getUserDataPath(): string {
+  return app.getPath('userData');
+}
+
+export function getDataDir(): string | null {
+  return _dataDir;
+}
+
+export function setDataDir(dir: string): void {
+  _dataDir = dir;
+}
+
+export function getHelperJarPath(): string {
+  return path.join(_dataDir || getUserDataPath(), 'bin', 'postmanclone-helper.jar');
+}
+
+export function getBundledHelperJarPath(): string {
+  return path.join(process.resourcesPath || '', 'helper', 'postmanclone-helper.jar');
+}
+
+export function getLogsDir(): string {
+  return path.join(_dataDir || getUserDataPath(), 'logs');
+}
+
+export function getCollectionsDir(): string {
+  return path.join(_dataDir || getUserDataPath(), 'collections');
+}
+
+export function getEnvironmentsDir(): string {
+  return path.join(_dataDir || getUserDataPath(), 'environments');
+}
+
+export function ensureDirs(): void {
+  const base = _dataDir || getUserDataPath();
+  const dirs = [base, path.join(base, 'bin'), path.join(base, 'logs'),
+               path.join(base, 'collections'), path.join(base, 'environments')];
+  for (const dir of dirs) {
+    require('node:fs').mkdirSync(dir, { recursive: true });
+  }
+}
