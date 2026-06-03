@@ -1,0 +1,152 @@
+# Requirements: PostmanClone
+
+**Defined:** 2026-06-03
+**Core Value:** A Spring project becomes a live, executable API playground the moment you point this app at its root folder — endpoints detected, bodies generated, chains runnable, no manual spec authoring required.
+
+## v1 Requirements
+
+Requirements for initial release. Each maps to roadmap phases. Sourced from the user's idea document, validated against research in `.planning/research/`.
+
+### CORE — Postman Parity (Table Stakes)
+
+- [ ] **CORE-01**: User can build and send HTTP requests (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS)
+- [ ] **CORE-02**: User can view the equivalent cURL command for any request
+- [ ] **CORE-03**: User can define and reuse variables (environment, collection, global scopes)
+- [ ] **CORE-04**: User can save requests into named collections
+- [ ] **CORE-05**: User can set headers, query params, path params, and request body
+- [ ] **CORE-06**: User can view formatted response (status, headers, body, timing)
+- [ ] **CORE-07**: User can set authentication per request (Bearer, Basic, API key, none)
+- [ ] **CORE-08**: User can switch between request body modes (none, form-data, url-encoded, raw JSON/XML/text, binary)
+- [ ] **CORE-09**: User can persist a request history per collection
+- [ ] **CORE-10**: User can import and export collections in Postman v2.1 JSON format
+
+### SPRING — Spring Project Integration (Differentiator)
+
+- [ ] **SPRING-01**: User can point the app at a local Spring project root and the app scans it
+- [ ] **SPRING-02**: App detects all `@RestController` / `@Controller` endpoints (method, path, HTTP verb, path/query params, consumes/produces)
+- [ ] **SPRING-03**: App resolves the request body DTO class for endpoints that accept a body (POST, PUT, PATCH)
+- [ ] **SPRING-04**: Detected endpoints appear in the sidebar organized by controller
+- [ ] **SPRING-05**: User can open a detected endpoint and have a prefilled request built automatically (path, method, body schema)
+
+### BODY — DTO Schema Mode (Differentiator)
+
+- [ ] **BODY-01**: User can generate a JSON request body whose shape matches the DTO/class schema (field names, types, nesting, enums, collections, optionals)
+- [ ] **BODY-02**: Generated DTO-schema JSON includes sensible placeholder values (e.g., `"string"`, `0`, `true`) that the user can edit
+- [ ] **BODY-03**: App handles recursive types without infinite loops (cycle detection / `$ref`-style markers or truncation with warning)
+
+### DB — Database Data Mode (Differentiator)
+
+- [ ] **DB-01**: User can connect the app to a database (JDBC) used by the Spring project
+- [ ] **DB-02**: App lists available tables and their columns for the connected database
+- [ ] **DB-03**: User picks a table for a given endpoint's request body
+- [ ] **DB-04**: App fetches rows from the picked table and produces JSON shaped to match the endpoint's request body schema
+- [ ] **DB-05**: App maps table columns to body schema fields (user can override the mapping when names don't match)
+- [ ] **DB-06**: User can pick which row (by id, by query, or "first N") becomes the body
+- [ ] **DB-07**: DB credentials are stored locally (OS keychain) and never sent off-device or logged
+
+### CHAIN — Request Chaining (Differentiator)
+
+- [ ] **CHAIN-01**: User can define an ordered chain of N requests
+- [ ] **CHAIN-02**: User can reference variables set from a previous chain step's response in a later step's URL/headers/body
+- [ ] **CHAIN-03**: User can run the whole chain end-to-end and view per-step results in sequence
+- [ ] **CHAIN-04**: User can re-run a single step in the chain without rerunning earlier steps
+- [ ] **CHAIN-05**: Chain definitions are saved with the collection
+
+### MAP — Response-to-Body Mapping for Chains (Differentiator)
+
+- [ ] **MAP-01**: When building a later step's body, user can pull a field from any earlier step's response (e.g., `step1.response.body.id` → `body.userId`)
+- [ ] **MAP-02**: Mappings are explicit and editable (drag/select field from response tree to a field in the target body)
+- [ ] **MAP-03**: Mappings resolve at chain-run time, not edit time, so changing an earlier step's response automatically flows downstream
+- [ ] **MAP-04**: User can preview the resolved body for any step before running the chain
+
+## v2 Requirements
+
+Deferred to future release. Tracked but not in current roadmap. Sourced from research SUMMARY.md and PITFALLS.md.
+
+### Imports & Specs
+
+- **IMPRT-01**: User can import OpenAPI 3.x specs to seed collections
+- **IMPRT-02**: User can export chains in a Postman-extension JSON that round-trips losslessly
+
+### Spring Awareness Deepening
+
+- **SPRING-06**: App watches the Spring project for file changes and refreshes the endpoint list (no manual rescan)
+- **SPRING-07**: App supports Spring WebFlux (`Mono`/`Flux`) return types in addition to MVC
+- **SPRING-08**: App supports Kotlin Spring controllers (`.kt` files)
+- **SPRING-09**: App handles multi-module Gradle Kotlin DSL projects (Maven `<modules>` already supported in v1)
+- **SPRING-10**: App detects CSRF tokens in responses and offers to auto-inject them in subsequent requests
+
+### Auth Deepening
+
+- **AUTH-01**: User can configure OAuth 2.0 flows (auth code, client credentials, refresh)
+- **AUTH-02**: User can configure mTLS (client certificate) per request or per environment
+- **AUTH-03**: User can configure Hawk, AWS SigV4, OAuth1 (Postman v2.1 round-trip parity)
+
+### Database Deepening
+
+- **DB-08**: SQL Server 2016+ support
+- **DB-09**: Per-connection advanced settings (pool size, statement timeout, fetch size)
+
+### Response Handling
+
+- **RESP-01**: User can preview image responses inline
+- **RESP-02**: User can run assertions (status code, JSON path match, header match) on responses
+- **RESP-03**: App supports streaming / SSE / chunked transfer responses (with size cap)
+
+### Code Generation & Mocking
+
+- **GEN-01**: User can generate a typed client (TS/Java) from a request collection
+- **MOCK-01**: App can spin up a mock server from detected endpoints + sample bodies
+
+### Protocol Support
+
+- **PROTO-01**: GraphQL request mode (introspection-driven body builder)
+- **PROTO-02**: gRPC request mode (reflection-driven)
+- **PROTO-03**: WebSocket / SSE request mode (event log view)
+
+### Editor / UX
+
+- **UX-01**: Tabs for multiple open requests
+- **UX-02**: Dark/light theme switcher
+- **UX-03**: Cookie jar management
+
+## Out of Scope
+
+Explicitly excluded. Documented to prevent scope creep.
+
+| Feature | Reason |
+|---------|--------|
+| Non-Spring backends (Node, Go, Python, .NET) | Single-ecosystem focus; multi-stack is a separate effort |
+| Modifying / scaffolding the Spring project | App is read-only on the project (consumer, not modifier) |
+| Cloud sync, team workspaces, sharing collections | Local single-user tool; collaboration deferred |
+| API monitoring, scheduled runs, webhooks | Out of v1 scope; orthogonal feature area |
+| GraphQL / gRPC / WebSocket in v1 | REST/HTTP only — see v2 PROTO-* for future |
+| Auto-detecting endpoint↔table mapping | User explicitly owns this decision; inference is often wrong |
+| CI/CD integrations | Local developer tool only |
+| Mobile app | Desktop-first (Electron) only |
+| Full scripting engine (pre-request scripts, tests) | Chain + MAP covers v1 workflow needs; scripting is v2+ |
+| AI/LLM-based body generation or test generation | Not in scope; mechanical generation (DTO/DB) is the path |
+| Plugin system / extension points | Not in v1; v2 candidate if user demand appears |
+| Oracle / SQL Server native data types beyond JSON-shaped data | Raw JSON-shaped data is enough for v1 body generation |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| CORE-01..10 | TBD (Phase 1) | Pending |
+| SPRING-01..05 | TBD (Phase 2) | Pending |
+| BODY-01..03 | TBD (Phase 3) | Pending |
+| DB-01..07 | TBD (Phase 4) | Pending |
+| CHAIN-01..05 | TBD (Phase 5) | Pending |
+| MAP-01..04 | TBD (Phase 5) | Pending |
+
+**Coverage:**
+- v1 requirements: 34 total
+- Mapped to phases: 0 (filled by roadmap)
+- Unmapped: 34 (will become 0 after roadmap)
+
+---
+*Requirements defined: 2026-06-03*
+*Last updated: 2026-06-03 after initial definition*
