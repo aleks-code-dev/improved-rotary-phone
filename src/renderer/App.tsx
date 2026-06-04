@@ -1,20 +1,49 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { RequestEditor } from './components/RequestEditor';
 import { ResponseViewer } from './components/ResponseViewer';
 import { StatusBar } from './components/StatusBar';
 import { FirstRunDialog } from './components/FirstRunDialog';
+import { ConfirmQuitModal } from './components/ConfirmQuitModal';
+import { useTabs } from './state/useTabs';
 
 export function App() {
   const [bootstrap, setBootstrap] = useState<any>(null);
   const [theme, setTheme] = useState<'system' | 'dark' | 'light'>('system');
+  const [showQuitModal, setShowQuitModal] = useState(false);
 
   useEffect(() => {
     window.api.app.bootstrap().then((result) => {
       setBootstrap(result);
       setTheme(result.theme);
       applyTheme(result.theme);
+      // D-21: Hydrate tabs from previous session
+      if (result.savedTabs && result.savedTabs.length > 0) {
+        useTabs.getState().hydrate(result.savedTabs, result.activeTabId ?? null);
+      }
     });
+
+    // D-21: Listen for app quit request
+    const unsub = window.api.app.onQuitRequest(() => {
+      const tabs = useTabs.getState().openTabs;
+      const dirtyCount = tabs.filter((t) => t.isDirty).length;
+      if (dirtyCount > 0) {
+        setShowQuitModal(true);
+      } else {
+        window.api.app.confirmQuit({ canQuit: true });
+      }
+    });
+    return unsub;
+  }, []);
+
+  const handleQuitConfirm = useCallback(() => {
+    setShowQuitModal(false);
+    window.api.app.confirmQuit({ canQuit: true });
+  }, []);
+
+  const handleQuitDismiss = useCallback(() => {
+    setShowQuitModal(false);
+    window.api.app.confirmQuit({ canQuit: false });
   }, []);
 
   function applyTheme(t: 'system' | 'dark' | 'light') {
@@ -40,6 +69,8 @@ export function App() {
     }} />;
   }
 
+  const dirtyCount = useTabs((s) => s.openTabs.filter((t) => t.isDirty).length);
+
   return (
     <div className="app-shell" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
@@ -50,6 +81,12 @@ export function App() {
         </div>
       </div>
       <StatusBar />
+      <ConfirmQuitModal
+        open={showQuitModal}
+        dirtyCount={dirtyCount}
+        onConfirm={handleQuitConfirm}
+        onDismiss={handleQuitDismiss}
+      />
     </div>
   );
 }

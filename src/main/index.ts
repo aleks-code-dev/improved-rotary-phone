@@ -1,12 +1,14 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import log from './logging/log.js';
 import { registerIpcRouter } from './ipc/router.js';
 import { supervisor } from './jvm/supervisor.js';
 import { ensureDirs } from './storage/paths.js';
 import { createMainWindow } from './window.js';
+import { isQuitApproved } from './ipc/quitState.js';
 
 let mainWindow: BrowserWindow | null = null;
+let quitRequested = false;
 
 app.whenReady().then(async () => {
   try {
@@ -38,7 +40,12 @@ app.on('window-all-closed', () => {
   app.quit();
 });
 
-app.on('before-quit', async () => {
+app.on('before-quit', async (event) => {
+  if (!isQuitApproved() && mainWindow && !mainWindow.isDestroyed()) {
+    event.preventDefault();
+    mainWindow.webContents.send('app:quitRequest', { reason: 'before-quit' });
+    return;
+  }
   log.info('app quitting, shutting down helper');
   supervisor.shutdown();
 });
