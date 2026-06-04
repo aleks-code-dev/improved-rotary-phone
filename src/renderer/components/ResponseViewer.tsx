@@ -1,12 +1,5 @@
 import { useState } from 'react';
 
-interface DiagnoseResult {
-  ok: boolean;
-  error?: { code: string; message: string };
-  timing: { dns: number; connect: number; tls: number; request: number; wait: number; response: number; total: number };
-  target: { url: string; host: string; port: number };
-}
-
 export function ResponseViewer() {
   const [activeTab, setActiveTab] = useState<'body' | 'headers' | 'cookies' | 'timing'>('body');
 
@@ -35,7 +28,7 @@ export function ResponseViewer() {
 
       <div style={{ flex: 1, padding: 'var(--space-4)', overflow: 'auto', fontFamily: 'var(--font-mono)', fontSize: 13 }}>
         <div style={{ color: 'var(--color-fg-muted)', textAlign: 'center', padding: 'var(--space-6)' }}>
-          Empty response
+          Click "Diagnose Connection" above to test connectivity
         </div>
       </div>
     </div>

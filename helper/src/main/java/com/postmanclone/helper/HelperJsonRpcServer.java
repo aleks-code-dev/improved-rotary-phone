@@ -33,10 +33,10 @@ public class HelperJsonRpcServer {
 
                     String response;
                     if ("initialize".equals(method)) {
-                        response = mapper.writeValueAsString(new Object[]{
+                        response = mapper.writeValueAsString(
                             Map.of("jsonrpc", "2.0", "id", id,
                                    "result", Map.of("version", "0.1.0", "capabilities", new String[]{"initialize", "helper.ping"}))
-                        });
+                        );
                     } else if ("helper.ping".equals(method)) {
                         // notification - no response
                         continue;

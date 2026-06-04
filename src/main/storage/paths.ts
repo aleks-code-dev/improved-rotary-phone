@@ -20,6 +20,9 @@ export function getHelperJarPath(): string {
 }
 
 export function getBundledHelperJarPath(): string {
+  if (!app.isPackaged) {
+    return path.join(app.getAppPath(), 'resources', 'helper', 'postmanclone-helper.jar');
+  }
   return path.join(process.resourcesPath || '', 'helper', 'postmanclone-helper.jar');
 }
 

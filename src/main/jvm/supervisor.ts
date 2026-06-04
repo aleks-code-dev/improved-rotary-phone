@@ -1,9 +1,10 @@
 import { spawn, ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
+import fs from 'node:fs';
 import path from 'path';
 import log from '../logging/log.js';
 import { findJava } from './jdkDetect.js';
-import { getBundledHelperJarPath, getHelperJarPath } from '../storage/paths.js';
+import { getBundledHelperJarPath, getHelperJarPath, getLogsDir } from '../storage/paths.js';
 import { JsonRpcClientImpl } from './client.js';
 import type { HelperStatus } from '../ipc/channels.js';
 
@@ -39,7 +40,7 @@ export class Supervisor extends EventEmitter {
     const bundledJar = getBundledHelperJarPath();
 
     const fs = await import('node:fs');
-    if (!fs.existsSync(jarPath) && fs.existsSync(bundledJar)) {
+    if (fs.existsSync(bundledJar)) {
       const dir = path.dirname(jarPath);
       fs.mkdirSync(dir, { recursive: true });
       fs.copyFileSync(bundledJar, jarPath);
@@ -49,7 +50,11 @@ export class Supervisor extends EventEmitter {
   }
 
   private spawnHelper(): void {
-    const jdk = findJava()!;
+    const jdk = findJava();
+    if (!jdk) {
+      this.setStatus({ state: 'offline', reason: 'JDK not found', since: Date.now() });
+      return;
+    }
     const jarPath = getHelperJarPath();
 
     this.setStatus({ state: 'starting' });
@@ -59,6 +64,12 @@ export class Supervisor extends EventEmitter {
         stdio: ['pipe', 'pipe', 'pipe'],
         windowsHide: true,
       });
+
+      if (this.child.stderr) {
+        const helperLogPath = path.join(getLogsDir(), 'helper.log');
+        const helperLogStream = fs.createWriteStream(helperLogPath, { flags: 'a' });
+        this.child.stderr.pipe(helperLogStream);
+      }
 
       this.client = new JsonRpcClientImpl(this.child);
 
@@ -121,3 +132,15 @@ export class Supervisor extends EventEmitter {
     this.emit('status', status);
   }
 }
+
+const supervisor = new Supervisor();
+
+export async function restartHelper(): Promise<HelperStatus> {
+  return supervisor.restart();
+}
+
+export function getHelperStatus(): HelperStatus {
+  return supervisor.getStatus();
+}
+
+export { supervisor };

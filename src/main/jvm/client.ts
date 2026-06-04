@@ -1,5 +1,5 @@
 import { spawn, ChildProcess } from 'child_process';
-import log from '../../logging/log.js';
+import log from '../logging/log.js';
 
 export interface JsonRpcClient {
   request(method: string, params?: object): Promise<any>;

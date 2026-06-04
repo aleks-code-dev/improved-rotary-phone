@@ -1,16 +1,9 @@
-import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
-import log from 'electron-log/main.js';
+import log from './logging/log.js';
 import { registerIpcRouter } from './ipc/router.js';
-import { Supervisor } from './jvm/supervisor.js';
-import { ensureDirs, getLogsDir, getBundledHelperJarPath, getHelperJarPath } from './storage/paths.js';
-import { atomicWrite } from './storage/atomicWrite.js';
-
-log.initialize();
-log.transports.file.level = 'info';
-log.transports.file.maxSize = 10 * 1024 * 1024;
-
-const supervisor = new Supervisor();
+import { supervisor } from './jvm/supervisor.js';
+import { ensureDirs } from './storage/paths.js';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -21,7 +14,7 @@ function createMainWindow(): BrowserWindow {
     minWidth: 800,
     minHeight: 500,
     webPreferences: {
-      preload: path.join(__dirname, '../preload/index.cjs'),
+      preload: path.join(__dirname, '../preload/index.js'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
@@ -46,7 +39,7 @@ app.whenReady().then(async () => {
     log.error('failed to setup', err);
   }
 
-  registerIpcRouter(supervisor);
+  registerIpcRouter();
   mainWindow = createMainWindow();
 
   supervisor.on('status', (status) => {

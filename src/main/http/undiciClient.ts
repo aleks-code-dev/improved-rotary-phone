@@ -1,5 +1,4 @@
 import { fetch, Agent } from 'undici';
-import type { RequestSpec } from '../ipc/channels.js';
 
 interface Timing {
   dns: number; connect: number; tls: number;
@@ -21,14 +20,15 @@ export async function sendRequest(
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), spec.timeoutMs || 30000);
-    const combinedSignal = anySignalOf([signal, controller.signal]);
+    const timeout = setTimeout(() => {
+      try { controller.abort(); } catch {}
+    }, spec.timeoutMs || 30000);
 
     const agent = new Agent({ keepAliveTimeout: 5000, keepAliveMaxTimeout: 15000 });
     const url = new URL(spec.url);
 
     const response = await fetch(spec.url, {
-      signal: combinedSignal,
+      signal: controller.signal,
       dispatcher: agent,
       headers: { Origin: url.protocol + '//' + url.host },
     });
@@ -50,13 +50,4 @@ export async function sendRequest(
       target: { url: spec.url, host: new URL(spec.url).hostname, port: 0 },
     };
   }
-}
-
-function anySignalOf(signals: AbortSignal[]): AbortSignal {
-  return {
-    addEventListener() {},
-    removeEventListener() {},
-    get aborted() { return signals.some(s => s.aborted); },
-    dispatchEvent() { return false; }
-  } as AbortSignal;
 }

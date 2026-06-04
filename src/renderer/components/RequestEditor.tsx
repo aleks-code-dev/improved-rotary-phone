@@ -12,16 +12,23 @@ const METHOD_COLORS: Record<string, string> = {
   OPTIONS: 'var(--color-method-options)',
 };
 
+interface DiagnoseResult {
+  ok: boolean;
+  error?: { code: string; message: string };
+  timing: { dns: number; connect: number; tls: number; request: number; wait: number; response: number; total: number };
+  target: { url: string; host: string; port: number };
+}
+
 export function RequestEditor() {
   const [method, setMethod] = useState<string>('GET');
   const [url, setUrl] = useState('');
-  const [diagnoseResult, setDiagnoseResult] = useState<any>(null);
   const [diagnosing, setDiagnosing] = useState(false);
+  const [diagnoseResult, setDiagnoseResult] = useState<DiagnoseResult | null>(null);
 
   async function handleDiagnose() {
     setDiagnosing(true);
     try {
-      const result = await window.api.request.diagnose();
+      const result = await window.api.request.diagnose() as DiagnoseResult;
       setDiagnoseResult(result);
     } finally {
       setDiagnosing(false);
@@ -118,6 +125,40 @@ export function RequestEditor() {
           <span key={tab} style={{ padding: 'var(--space-1) var(--space-2)', color: 'var(--color-fg-muted)', cursor: 'pointer', borderBottom: '2px solid transparent' }}>{tab}</span>
         ))}
       </div>
+
+      {diagnoseResult && (
+        <div style={{
+          marginTop: 'var(--space-3)',
+          padding: 'var(--space-3)',
+          background: 'var(--color-bg-elevated)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-1)',
+          fontSize: 13,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-2)' }}>
+            <span style={{
+              background: diagnoseResult.ok ? 'var(--color-method-get)' : 'var(--color-method-delete)',
+              color: 'white', padding: '2px 8px', borderRadius: 'var(--radius-1)', fontWeight: 600, fontSize: 12,
+            }}>
+              {diagnoseResult.ok ? 'OK' : (diagnoseResult.error?.code || 'ERROR')}
+            </span>
+            <span style={{ color: 'var(--color-fg-muted)', fontFamily: 'var(--font-mono)' }}>
+              {diagnoseResult.target.host}:{diagnoseResult.target.port}
+            </span>
+          </div>
+          {!diagnoseResult.ok && diagnoseResult.error && (
+            <div style={{ color: 'var(--color-method-delete)', fontWeight: 600, marginBottom: 4 }}>
+              {diagnoseResult.error.code}
+            </div>
+          )}
+          {!diagnoseResult.ok && diagnoseResult.error && (
+            <div style={{ color: 'var(--color-fg)' }}>{diagnoseResult.error.message}</div>
+          )}
+          <div style={{ display: 'flex', gap: 'var(--space-4)', marginTop: 'var(--space-2)', color: 'var(--color-fg-muted)' }}>
+            {diagnoseResult.timing.total > 0 && <span>Total: {diagnoseResult.timing.total}ms</span>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@
   "name": "postmanclone",
   "version": "0.1.0",
   "description": "Postman-like API client for Java Spring developers",
-  "main": "dist/main/index.js",
+  "main": "out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
@@ -11,26 +11,26 @@
     "test": "echo no test runner configured in v1 && exit 0"
   },
   "dependencies": {
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "zustand": "5.0.12",
+    "@monaco-editor/react": "^4.7.0",
     "@tanstack/react-query": "5.90.3",
-    "zod": "4.0.1",
-    "undici": "^7.27.0",
     "electron-log": "^5.4.4",
     "electron-store": "^11.0.2",
-    "@monaco-editor/react": "^4.7.0"
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "undici": "^7.27.0",
+    "zod": "4.0.1",
+    "zustand": "5.0.12"
   },
   "devDependencies": {
-    "electron": "42.3.3",
-    "electron-vite": "^5.0.0",
-    "electron-builder": "^26.8.1",
-    "vite": "8.0.0",
-    "@vitejs/plugin-react": "^6.0.0",
-    "typescript": "^5.6.0",
     "@types/node": "^22",
     "@types/react": "^19",
-    "@types/react-dom": "^19"
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.0",
+    "electron": "^42.3.3",
+    "electron-builder": "^26.8.1",
+    "electron-vite": "^5.0.0",
+    "typescript": "^5.6.0",
+    "vite": "^8.0.0"
   },
   "build": {
     "appId": "com.postmanclone.app",

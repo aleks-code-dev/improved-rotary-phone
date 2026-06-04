@@ -13,3 +13,9 @@ helper/bin/
 release/
 .env
 .env.local
+
+# Generated JS / declarations in src/ (stale tsc output — .ts/.tsx source is the truth)
+src/**/*.js
+src/renderer/**/*.d.ts
+!src/renderer/env.d.ts
+!src/**/*.cjs

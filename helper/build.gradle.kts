@@ -1,6 +1,7 @@
 plugins {
     java
     application
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 repositories {
@@ -22,11 +23,8 @@ application {
     mainClass.set("com.postmanclone.helper.Main")
 }
 
-tasks.named<Jar>("jar") {
-    manifest {
-        attributes(
-            "Main-Class" to "com.postmanclone.helper.Main",
-            "Class-Path" to configurations.getByName("runtimeClasspath").files.joinToString(" ") { it.name }
-        )
-    }
+tasks.shadowJar {
+    archiveBaseName.set("postmanclone-helper")
+    archiveClassifier.set("")
+    mergeServiceFiles()
 }
