@@ -76,7 +76,8 @@ export function RequestEditor() {
         />
 
         <button
-          disabled={!isValidUrl}
+          disabled
+          title="Sending requests ships in a future update"
           style={{
             padding: 'var(--space-2) var(--space-4)',
             background: 'var(--color-accent)',
@@ -84,8 +85,8 @@ export function RequestEditor() {
             border: 'none',
             borderRadius: 'var(--radius-1)',
             fontWeight: 600,
-            cursor: isValidUrl ? 'pointer' : 'not-allowed',
-            opacity: isValidUrl ? 1 : 0.5,
+            cursor: 'not-allowed',
+            opacity: 0.5,
           }}
         >
           Send
