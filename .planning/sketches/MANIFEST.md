@@ -21,3 +21,5 @@ The builder is a power tool, not a design showcase. Colors derive from HTTP meth
 | 006 | database-connection | What does the IntelliJ-style DB connection screen look like? | B | [database, connection, form] |
 | 007 | db-table-row-picker | How do users browse tables and pick a row from a connected DB? | D | [database, table, picker, body] |
 | 008 | db-body-preview | How is generated JSON from DB rows previewed and accepted into the request body? | skip — covered by 007-D | [database, body, preview, json] |
+| 009 | chain-overview | How are chains listed, created, and how do users navigate between chain links? | A | [chain, navigation, links] |
+| 010 | chain-link-builder | How does the chain link builder show previous link data and let users reference it? | null | [chain, builder, data-reference] |
