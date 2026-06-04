@@ -2,6 +2,22 @@ import { fetch, Agent, ProxyAgent } from 'undici';
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 import type { RequestSpec, ResponseResult } from '../ipc/channels.js';
+import { applyBasicAuth } from '../auth/basic.js';
+import { applyBearerAuth } from '../auth/bearer.js';
+import { applyApiKeyAuth } from '../auth/api-key.js';
+
+/**
+ * Send an HTTP request using undici with a pre-resolved RequestSpec.
+ * Auth is already applied at the IPC level (variables:resolve → sendResolvedRequest).
+ * This function is the post-resolution send path used by request:send after
+ * variable resolution completes.
+ */
+export async function sendResolvedRequest(
+  spec: RequestSpec,
+  signal: AbortSignal
+): Promise<ResponseResult> {
+  return sendRequest(spec, signal);
+}
 
 /**
  * Send an HTTP request using undici with full RequestSpec support.

@@ -116,6 +116,110 @@ export const WriteFileArgsSchema = z.object({
 });
 export const WriteFileResultSchema = z.object({ ok: z.boolean() });
 
+// --- 01-03: Collections schemas ---
+export const CollectionsListResultSchema = z.array(z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  info: z.object({ name: z.string(), _postman_id: z.string() }),
+}));
+
+export const CollectionReadArgsSchema = z.object({ id: z.string().uuid() });
+export const CollectionCreateArgsSchema = z.object({ name: z.string().min(1).max(200) });
+export const CollectionCreateResultSchema = z.object({ id: z.string().uuid() });
+export const CollectionUpdateArgsSchema = z.object({ id: z.string().uuid(), collection: z.any() });
+export const CollectionDeleteArgsSchema = z.object({ id: z.string().uuid() });
+
+// --- 01-03: Environments schemas ---
+export const EnvironmentsListResultSchema = z.array(z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  active: z.boolean(),
+}));
+
+export const EnvironmentReadArgsSchema = z.object({ id: z.string().uuid() });
+export const EnvironmentCreateArgsSchema = z.object({
+  name: z.string().min(1),
+  values: z.array(z.object({
+    key: z.string(), value: z.string(),
+    enabled: z.boolean().default(true), secret: z.boolean().default(false),
+  })).default([]),
+  proxy: z.string().url().optional(),
+});
+export const EnvironmentCreateResultSchema = z.object({ id: z.string().uuid() });
+export const EnvironmentUpdateArgsSchema = z.object({ id: z.string().uuid(), env: z.any() });
+export const EnvironmentDeleteArgsSchema = z.object({ id: z.string().uuid() });
+export const EnvironmentSetActiveArgsSchema = z.object({ id: z.string().uuid().nullable() });
+
+// --- 01-03: History schemas ---
+export const HistoryListArgsSchema = z.object({
+  collectionId: z.string().uuid(),
+  search: z.string().optional(),
+});
+export const HistoryListResultSchema = z.array(z.any());
+export const HistoryDeleteArgsSchema = z.object({
+  collectionId: z.string().uuid(),
+  entryId: z.string().uuid(),
+});
+
+// --- 01-03: Variables schemas ---
+export const VariablesResolveArgsSchema = z.object({
+  spec: RequestSpecSchema,
+  activeEnvId: z.string().uuid().nullable(),
+  activeCollectionId: z.string().uuid().nullable(),
+  globals: z.array(z.object({ key: z.string(), value: z.string() })).default([]),
+});
+export const VariablesResolveResultSchema = z.object({
+  resolved: RequestSpecSchema,
+  unresolved: z.array(z.string()),
+});
+
+// --- 01-03: Import/Export schemas ---
+export const ImportPostmanArgsSchema = z.object({ jsonText: z.string() });
+export const ImportPostmanResultSchema = z.object({
+  id: z.string().uuid(),
+  preview: z.object({ itemCount: z.number(), folderCount: z.number() }),
+});
+export const ExportPostmanArgsSchema = z.object({ id: z.string().uuid() });
+export const ExportPostmanResultSchema = z.object({ json: z.string() });
+
+// --- 01-03: cURL schemas ---
+export const CurlImportArgsSchema = z.object({ text: z.string() });
+export const CurlImportResultSchema = z.union([
+  z.object({ ok: z.literal(true), spec: RequestSpecSchema }),
+  z.object({ ok: z.literal(false), error: z.string() }),
+]);
+export const CurlGenerateArgsSchema = z.object({
+  spec: RequestSpecSchema,
+  resolvedUrl: z.string().optional(),
+});
+export const CurlGenerateResultSchema = z.object({ curl: z.string() });
+
+// --- 01-03: Network diagnose result (reuse from 01-01) ---
+export const NetworkDiagnoseResultSchema = RequestDiagnoseResultSchema;
+
+// --- 01-03: State save schemas ---
+export const StateSaveArgsSchema = z.object({
+  openTabs: z.array(z.object({
+    id: z.string(), method: z.string(), url: z.string(),
+    isDirty: z.boolean().default(false),
+  })),
+  activeTabId: z.string().nullable(),
+});
+
+// --- 01-03: Quit confirmation schemas ---
+export const ConfirmQuitArgsSchema = z.object({ canQuit: z.boolean() });
+
+// --- 01-03: Globals schemas ---
+export const GlobalsUpdateArgsSchema = z.object({
+  values: z.array(z.object({
+    key: z.string().min(1).max(200),
+    value: z.string(),
+  })),
+});
+
+// --- 01-03: Read file schemas ---
+export const ReadFileArgsSchema = z.object({ path: z.string().min(1) });
+
 // Inferred types for all schemas
 export type HelperStatus = z.infer<typeof HelperStatusSchema>;
 export type AppBootstrapResult = z.infer<typeof AppBootstrapResultSchema>;
@@ -133,3 +237,34 @@ export type ShowSaveDialogArgs = z.infer<typeof ShowSaveDialogArgsSchema>;
 export type ShowSaveDialogResult = z.infer<typeof ShowSaveDialogResultSchema>;
 export type WriteFileArgs = z.infer<typeof WriteFileArgsSchema>;
 export type WriteFileResult = z.infer<typeof WriteFileResultSchema>;
+
+// 01-03 types
+export type CollectionsListResult = z.infer<typeof CollectionsListResultSchema>;
+export type CollectionReadArgs = z.infer<typeof CollectionReadArgsSchema>;
+export type CollectionCreateArgs = z.infer<typeof CollectionCreateArgsSchema>;
+export type CollectionCreateResult = z.infer<typeof CollectionCreateResultSchema>;
+export type CollectionUpdateArgs = z.infer<typeof CollectionUpdateArgsSchema>;
+export type CollectionDeleteArgs = z.infer<typeof CollectionDeleteArgsSchema>;
+export type EnvironmentsListResult = z.infer<typeof EnvironmentsListResultSchema>;
+export type EnvironmentReadArgs = z.infer<typeof EnvironmentReadArgsSchema>;
+export type EnvironmentCreateArgs = z.infer<typeof EnvironmentCreateArgsSchema>;
+export type EnvironmentCreateResult = z.infer<typeof EnvironmentCreateResultSchema>;
+export type EnvironmentUpdateArgs = z.infer<typeof EnvironmentUpdateArgsSchema>;
+export type EnvironmentDeleteArgs = z.infer<typeof EnvironmentDeleteArgsSchema>;
+export type EnvironmentSetActiveArgs = z.infer<typeof EnvironmentSetActiveArgsSchema>;
+export type HistoryListArgs = z.infer<typeof HistoryListArgsSchema>;
+export type HistoryDeleteArgs = z.infer<typeof HistoryDeleteArgsSchema>;
+export type VariablesResolveArgs = z.infer<typeof VariablesResolveArgsSchema>;
+export type VariablesResolveResult = z.infer<typeof VariablesResolveResultSchema>;
+export type ImportPostmanArgs = z.infer<typeof ImportPostmanArgsSchema>;
+export type ImportPostmanResult = z.infer<typeof ImportPostmanResultSchema>;
+export type ExportPostmanArgs = z.infer<typeof ExportPostmanArgsSchema>;
+export type ExportPostmanResult = z.infer<typeof ExportPostmanResultSchema>;
+export type CurlImportArgs = z.infer<typeof CurlImportArgsSchema>;
+export type CurlImportResult = z.infer<typeof CurlImportResultSchema>;
+export type CurlGenerateArgs = z.infer<typeof CurlGenerateArgsSchema>;
+export type CurlGenerateResult = z.infer<typeof CurlGenerateResultSchema>;
+export type StateSaveArgs = z.infer<typeof StateSaveArgsSchema>;
+export type ConfirmQuitArgs = z.infer<typeof ConfirmQuitArgsSchema>;
+export type GlobalsUpdateArgs = z.infer<typeof GlobalsUpdateArgsSchema>;
+export type ReadFileArgs = z.infer<typeof ReadFileArgsSchema>;
