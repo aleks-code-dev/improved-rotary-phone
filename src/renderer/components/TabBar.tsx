@@ -24,6 +24,7 @@ export function TabBar() {
         <div
           key={tab.id}
           draggable
+          className={`tab ${dragOverId === tab.id ? 'drag-over' : ''}`}
           onDragStart={(e) => {
             e.dataTransfer.setData('text/tab-id', tab.id);
             e.dataTransfer.effectAllowed = 'move';
@@ -90,9 +91,12 @@ export function TabBar() {
           <button
             onClick={(e) => {
               e.stopPropagation();
+              if (tab.isDirty && !window.confirm('You have unsaved changes. Close anyway?')) {
+                return;
+              }
               closeTab(tab.id);
             }}
-          className={`tab ${dragOverId === tab.id ? 'drag-over' : ''}`}
+            style={{
               background: 'transparent',
               border: 'none',
               color: 'var(--color-fg-muted)',
@@ -108,7 +112,6 @@ export function TabBar() {
           </button>
         </div>
       ))}
-      {/* New tab button */}
       <div
         onClick={() => useTabs.getState().addTab()}
         style={{

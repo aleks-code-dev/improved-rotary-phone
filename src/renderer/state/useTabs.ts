@@ -6,6 +6,9 @@ export interface Tab {
   url: string;
   body: { mode: 'none' } | { mode: 'raw'; contentType: string; text: string };
   isDirty?: boolean;
+  sourceCollectionId?: string;
+  sourceItemIndex?: number;
+  sourceItemName?: string;
 }
 
 let nextTabId = 1;

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useTabs } from './useTabs';
 
 // Local types matching main-process RequestSpec shape
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
@@ -135,6 +136,7 @@ export const useRequest = create<RequestStore>((set, get) => ({
 
   setMethod(tabId, method) {
     set((s) => {
+      useTabs.getState().markDirty(tabId);
       const spec = s.specs[tabId] ?? createDefaultSpec();
       return { specs: { ...s.specs, [tabId]: { ...spec, method } } };
     });
@@ -142,6 +144,7 @@ export const useRequest = create<RequestStore>((set, get) => ({
 
   setUrl(tabId, url) {
     set((s) => {
+      useTabs.getState().markDirty(tabId);
       const spec = s.specs[tabId] ?? createDefaultSpec();
       return { specs: { ...s.specs, [tabId]: { ...spec, url } } };
     });
@@ -149,6 +152,7 @@ export const useRequest = create<RequestStore>((set, get) => ({
 
   addHeader(tabId, header) {
     set((s) => {
+      useTabs.getState().markDirty(tabId);
       const spec = s.specs[tabId] ?? createDefaultSpec();
       return {
         specs: {
@@ -161,6 +165,7 @@ export const useRequest = create<RequestStore>((set, get) => ({
 
   updateHeader(tabId, index, partial) {
     set((s) => {
+      useTabs.getState().markDirty(tabId);
       const spec = s.specs[tabId] ?? createDefaultSpec();
       const headers = [...spec.headers];
       headers[index] = { ...headers[index], ...partial };
@@ -170,6 +175,7 @@ export const useRequest = create<RequestStore>((set, get) => ({
 
   removeHeader(tabId, index) {
     set((s) => {
+      useTabs.getState().markDirty(tabId);
       const spec = s.specs[tabId];
       if (!spec) return s;
       const headers = spec.headers.filter((_, i) => i !== index);
@@ -179,6 +185,7 @@ export const useRequest = create<RequestStore>((set, get) => ({
 
   addQueryParam(tabId) {
     set((s) => {
+      useTabs.getState().markDirty(tabId);
       const spec = s.specs[tabId] ?? createDefaultSpec();
       return {
         specs: {
@@ -191,6 +198,7 @@ export const useRequest = create<RequestStore>((set, get) => ({
 
   updateQueryParam(tabId, index, partial) {
     set((s) => {
+      useTabs.getState().markDirty(tabId);
       const spec = s.specs[tabId] ?? createDefaultSpec();
       const params = [...spec.queryParams];
       params[index] = { ...params[index], ...partial };
@@ -200,6 +208,7 @@ export const useRequest = create<RequestStore>((set, get) => ({
 
   removeQueryParam(tabId, index) {
     set((s) => {
+      useTabs.getState().markDirty(tabId);
       const spec = s.specs[tabId];
       if (!spec) return s;
       const params = spec.queryParams.filter((_, i) => i !== index);
@@ -209,6 +218,7 @@ export const useRequest = create<RequestStore>((set, get) => ({
 
   addPathParam(tabId) {
     set((s) => {
+      useTabs.getState().markDirty(tabId);
       const spec = s.specs[tabId] ?? createDefaultSpec();
       return {
         specs: {
@@ -221,6 +231,7 @@ export const useRequest = create<RequestStore>((set, get) => ({
 
   updatePathParam(tabId, index, partial) {
     set((s) => {
+      useTabs.getState().markDirty(tabId);
       const spec = s.specs[tabId] ?? createDefaultSpec();
       const params = [...spec.pathParams];
       params[index] = { ...params[index], ...partial };
@@ -230,6 +241,7 @@ export const useRequest = create<RequestStore>((set, get) => ({
 
   removePathParam(tabId, index) {
     set((s) => {
+      useTabs.getState().markDirty(tabId);
       const spec = s.specs[tabId];
       if (!spec) return s;
       const params = spec.pathParams.filter((_, i) => i !== index);
@@ -239,6 +251,7 @@ export const useRequest = create<RequestStore>((set, get) => ({
 
   setBody(tabId, body) {
     set((s) => {
+      useTabs.getState().markDirty(tabId);
       const spec = s.specs[tabId] ?? createDefaultSpec();
       return { specs: { ...s.specs, [tabId]: { ...spec, body } } };
     });
@@ -246,6 +259,7 @@ export const useRequest = create<RequestStore>((set, get) => ({
 
   setAuth(tabId, auth) {
     set((s) => {
+      useTabs.getState().markDirty(tabId);
       const spec = s.specs[tabId] ?? createDefaultSpec();
       return { specs: { ...s.specs, [tabId]: { ...spec, auth } } };
     });
@@ -253,6 +267,7 @@ export const useRequest = create<RequestStore>((set, get) => ({
 
   setSettings(tabId, partial) {
     set((s) => {
+      useTabs.getState().markDirty(tabId);
       const spec = s.specs[tabId] ?? createDefaultSpec();
       return { specs: { ...s.specs, [tabId]: { ...spec, settings: { ...spec.settings, ...partial } } } };
     });

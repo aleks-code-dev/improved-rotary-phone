@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { useCollectionsList, useCreateCollection } from '../../hooks/useCollections';
+import { useState, useCallback } from 'react';
+import { useCollectionsList, useCreateCollection, useCollection } from '../../hooks/useCollections';
 import { useTabs } from '../../state/useTabs';
+import { useRequest } from '../../state/useRequest';
 import { useCollectionsStore } from '../../store/collections';
 
 export function CollectionsTree() {
@@ -11,14 +12,25 @@ export function CollectionsTree() {
   const setActiveCollection = useCollectionsStore((s) => s.setActiveCollection);
   const [showNewModal, setShowNewModal] = useState(false);
   const [newName, setNewName] = useState('');
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  // Track which collection's full data we need to fetch on expand
+  const [loadId, setLoadId] = useState<string | null>(null);
 
-  const handleCreate = () => {
-    if (newName.trim()) {
-      createCollection.mutate(newName.trim());
-      setNewName('');
-      setShowNewModal(false);
-    }
-  };
+  // Fetch full collection when expanding (includes item[] with requests)
+  const { data: fullCollection } = useCollection(loadId);
+
+  const toggleExpand = useCallback((colId: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(colId)) {
+        next.delete(colId);
+      } else {
+        next.add(colId);
+        setLoadId(colId); // trigger fetch
+      }
+      return next;
+    });
+  }, []);
 
   if (isLoading) return <div style={mutedStyle}>Loading collections...</div>;
 
@@ -52,21 +64,108 @@ export function CollectionsTree() {
       {list.length === 0 ? (
         <div style={mutedStyle}>No collections yet</div>
       ) : (
-        list.map((col: any) => (
-          <div
-            key={col.id}
-            onClick={() => setActiveCollection(col.id)}
-            style={{
-              ...treeItemStyle,
-              fontWeight: activeCollectionId === col.id ? 600 : 400,
-              color: activeCollectionId === col.id ? 'var(--color-fg)' : 'var(--color-fg-muted)',
-              background: activeCollectionId === col.id ? 'var(--color-bg-hover)' : 'transparent',
-            }}
-          >
-            <span style={{ marginRight: 'var(--space-1)' }}>📁</span>
-            <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{col.name}</span>
-          </div>
-        ))
+        list.map((col: any) => {
+          const isExpanded = expanded.has(col.id);
+          // Show item count from metadata immediately; refresh from full collection on expand
+          const items = (fullCollection && col.id === loadId)
+            ? (fullCollection.item ?? [])
+            : [];
+          const displayCount = (fullCollection && col.id === loadId)
+            ? items.length
+            : (col.itemCount ?? 0);
+          return (
+            <div key={col.id}>
+              <div
+                onClick={() => {
+                  setActiveCollection(col.id);
+                  toggleExpand(col.id);
+                }}
+                style={{
+                  ...treeItemStyle,
+                  fontWeight: activeCollectionId === col.id ? 600 : 400,
+                  color: activeCollectionId === col.id ? 'var(--color-fg)' : 'var(--color-fg-muted)',
+                  background: activeCollectionId === col.id ? 'var(--color-bg-hover)' : 'transparent',
+                }}
+              >
+                <span style={{ marginRight: 'var(--space-1)', fontSize: 10 }}>
+                  {isExpanded ? '▼' : '▶'}
+                </span>
+                <span style={{ marginRight: 'var(--space-1)' }}>📁</span>
+                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{col.name}</span>
+                <span style={{ fontSize: 10, color: 'var(--color-fg-muted)' }}>{displayCount}</span>
+              </div>
+              {isExpanded && items.map((item: any, i: number) => (
+                <div
+                  key={item.id ?? i}
+                  onClick={() => {
+                    const method = (item.request?.method ?? 'GET') as any;
+                    const url = typeof item.request?.url === 'string'
+                      ? item.request.url
+                      : (item.request?.url?.raw ?? '');
+                    const tabId = addTab({ 
+                      method, 
+                      url,
+                      sourceCollectionId: col.id,
+                      sourceItemIndex: i,
+                      sourceItemName: item.name,
+                    });
+                    // Load full spec into the request store
+                    const urlStr = typeof item.request?.url === 'string'
+                      ? item.request.url
+                      : (item.request?.url?.raw ?? '');
+                    const headers = (item.request?.header || []).map((h: any) => ({
+                      key: h.key, value: h.value, enabled: true,
+                    }));
+                    const bodyMode = item.request?.body?.mode || 'none';
+                    const qp = (item as any)._queryParams || [];
+                    useRequest.getState().setSpec(tabId, {
+                      requestId: crypto.randomUUID(),
+                      method: method,
+                      url: urlStr,
+                      headers,
+                      queryParams: qp,
+                      pathParams: [],
+                      body: bodyMode === 'none' ? { mode: 'none' }
+                        : bodyMode === 'raw' ? { mode: 'raw', contentType: 'application/json', text: item.request?.body?.raw || '' }
+                        : bodyMode === 'urlencoded' ? { mode: 'urlencoded', fields: item.request?.body?.urlencoded || [] }
+                        : bodyMode === 'form-data' ? { mode: 'form-data', fields: item.request?.body?.formdata || [] }
+                        : { mode: 'none' },
+                      auth: item.request?.auth || { type: 'none' },
+                      settings: {
+                        timeoutMs: 30000, followRedirects: true,
+                        maxRedirects: 10, sslVerify: true, saveCookiesToJar: false,
+                      },
+                    });
+                  }}
+                  style={{
+                    ...treeItemStyle,
+                    paddingLeft: 'var(--space-5)',
+                    cursor: 'pointer',
+                  }}
+                  title={item.request?.url?.raw ?? item.request?.url ?? ''}
+                >
+                  <span style={{
+                    color: `var(--color-method-${(item.request?.method ?? 'get').toLowerCase()})`,
+                    fontWeight: 600,
+                    fontSize: 10,
+                    marginRight: 'var(--space-1)',
+                  }}>
+                    {item.request?.method ?? 'GET'}
+                  </span>
+                  <span style={{
+                    fontSize: 11,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    flex: 1,
+                  }}>
+                    {item.name ?? (item.request?.url?.raw ?? item.request?.url ?? 'Untitled')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          );
+        })
       )}
     </div>
   );
