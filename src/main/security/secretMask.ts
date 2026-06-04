@@ -11,4 +11,31 @@ export function maskHeadersForStorage(headers: Array<{ key: string; value: strin
   );
 }
 
+export type AuthConfig =
+  | { type: 'none' }
+  | { type: 'bearer'; token: string }
+  | { type: 'basic'; username: string; password: string }
+  | { type: 'api-key'; key: string; value: string; in: 'header' | 'query' };
+
+export function maskAuthForStorage(auth: AuthConfig): AuthConfig {
+  switch (auth.type) {
+    case 'none':
+      return auth;
+    case 'bearer': {
+      const masked = maskForStorage(auth.token);
+      return { ...auth, token: JSON.stringify(masked) };
+    }
+    case 'basic': {
+      const maskedPass = maskForStorage(auth.password);
+      return { ...auth, password: JSON.stringify(maskedPass) };
+    }
+    case 'api-key': {
+      const maskedVal = maskForStorage(auth.value);
+      return { ...auth, value: JSON.stringify(maskedVal) };
+    }
+    default:
+      return auth;
+  }
+}
+
 export const SECRET_HEADER_NAMES = ['authorization', 'cookie', 'x-api-key', 'proxy-authorization'] as const;

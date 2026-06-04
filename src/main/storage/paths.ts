@@ -38,6 +38,30 @@ export function getEnvironmentsDir(): string {
   return path.join(_dataDir || getUserDataPath(), 'environments');
 }
 
+export function getCollectionDir(id: string): string {
+  return path.join(_dataDir || getUserDataPath(), 'collections', id);
+}
+
+export function getCollectionJsonPath(id: string): string {
+  return path.join(_dataDir || getUserDataPath(), 'collections', id, 'collection.json');
+}
+
+export function getCollectionHistoryDir(id: string): string {
+  return path.join(_dataDir || getUserDataPath(), 'collections', id, 'history');
+}
+
+export function getHistoryEntryPath(collectionId: string, entryId: string): string {
+  return path.join(_dataDir || getUserDataPath(), 'collections', collectionId, 'history', `${entryId}.json`);
+}
+
+export function getEnvironmentPath(id: string): string {
+  return path.join(_dataDir || getUserDataPath(), 'environments', `${id}.json`);
+}
+
+export function getGlobalsPath(): string {
+  return path.join(_dataDir || getUserDataPath(), 'globals.json');
+}
+
 export function ensureDirs(): void {
   const base = _dataDir || getUserDataPath();
   const dirs = [base, path.join(base, 'bin'), path.join(base, 'logs'),
