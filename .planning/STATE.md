@@ -4,14 +4,14 @@ milestone: v2.1
 milestone_name: milestone
 status: executing
 stopped_at: Phase 1 context gathered
-last_updated: "2026-06-03T22:29:33.627Z"
-last_activity: 2026-06-03 -- Phase 01 planning complete
+last_updated: "2026-06-04T23:03:00.000Z"
+last_activity: 2026-06-04 - Completed quick task 260605-133: I can't edit a saved request, also there needs to be an indicator that a saved request has been edited and the user need to press Ctrl + S or press the save button
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 0
-  percent: 0
+  completed_plans: 3
+  percent: 25
 ---
 
 # Project State
@@ -23,14 +23,14 @@ See: .planning/research/SUMMARY.md (researched 2026-06-03, HIGH confidence)
 See: .planning/REQUIREMENTS.md (34 v1 requirements across CORE / SPRING / BODY / DB / CHAIN / MAP)
 
 **Core value:** A Spring project becomes a live, executable API playground the moment you point this app at its root folder — endpoints detected, bodies generated, chains runnable, no manual spec authoring required.
-**Current focus:** Phase 1 — Foundation & Postman Parity
+**Current focus:** Phase 01 — foundation-postman-parity
 
 ## Current Position
 
-Phase: 1 of 4 (Foundation & Postman Parity)
-Plan: 0 of TBD in current phase
-Status: Ready to execute
-Last activity: 2026-06-03 -- Phase 01 planning complete
+Phase: 01 (foundation-postman-parity) — EXECUTING
+Plan: 1 of 3
+Status: Executing Phase 01
+Last activity: 2026-06-04 -- Phase 01 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase quick P260605-133 | 5 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,10 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - **Architecture (2026-06-03, from research)**: 3-process model — Renderer (Chromium+React, no Node access) ↔ Main (Node 24, IPC router, HTTP, chain runner, JVM supervisor) ↔ JVM Helper (Java 21, JavaParser/JDBC/JSON-RPC server, read-only on project). All IPC payloads Zod-validated.
 - **Body generation (2026-06-03)**: Two body modes (DTO schema / DB data) instead of one — DTO for "valid shape", DB for "real-looking data". User picks endpoint↔table mapping explicitly (no inference).
 - **Security (2026-06-03)**: DB credentials in Electron `safeStorage` (DPAPI/Keychain/libsecret) only — never plaintext, never logged, never egressed. App is read-only on the Spring project.
+- [Phase ?]: Dirty tracking via cross-store bridge: useRequest mutations call useTabs.getState().markDirty(tabId)
+- [Phase ?]: In-place save triggered when tab has sourceCollectionId + sourceItemIndex; otherwise SaveAsModal
+- [Phase ?]: specToCollectionItem helper extracted to avoid duplication between handleSave and SaveAsModal
+- [Phase ?]: updateTab no longer forces isDirty:true — dirty state managed exclusively by markDirty/markClean
 
 ### Pending Todos
 
@@ -82,6 +87,12 @@ None yet.
 
 [Phase 2 — critical pitfall C-1] Recursive DTOs without cycle detection = stack overflow / 50MB body / UI hang. Mitigation: cycle detection (Set<FQN> + `$ref` markers) is the FIRST task of the DTO body gen work, not the last. Plan accordingly when Phase 3 is planned.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260605-133 | I can't edit a saved request, also there needs to be an indicator that a saved request has been edited and the user need to press Ctrl + S or press the save button | 2026-06-04 | 6d788db | [260605-133-...](./quick/260605-133-i-can-t-edit-a-saved-request-also-there-/) |
+
 ## Deferred Items
 
 Items acknowledged and carried forward from previous milestone close:
@@ -92,6 +103,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-03T21:19:52.994Z
+Last session: 2026-06-04T23:02:12.132Z
 Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-foundation-postman-parity/01-CONTEXT.md
+Resume file: None
