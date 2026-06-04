@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Sidebar } from './components/Sidebar';
+import { TabBar } from './components/TabBar';
 import { RequestEditor } from './components/RequestEditor';
 import { ResponseViewer } from './components/ResponseViewer';
 import { StatusBar } from './components/StatusBar';
@@ -76,6 +77,7 @@ export function App() {
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <Sidebar />
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+          <TabBar />
           <RequestEditor />
           <ResponseViewer />
         </div>
