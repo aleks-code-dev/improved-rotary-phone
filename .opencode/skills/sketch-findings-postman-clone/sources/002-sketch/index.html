@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sketch 002: Request Section Grouping</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    padding: 60px 24px 60px;
+  }
+
+  #variant-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 9998;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: 8px 16px; display: flex; gap: 6px;
+  }
+  .variant-tab {
+    padding: 4px 12px; border: 1px solid var(--color-border);
+    border-radius: var(--radius-1); background: transparent;
+    color: var(--color-text-muted); cursor: pointer;
+    font-size: var(--text-xs); transition: all 0.15s ease;
+    font-family: var(--font-sans);
+  }
+  .variant-tab:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+  .variant-tab.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+  .variant { display: none; }
+  .variant.active { display: block; }
+
+  .page { max-width: 900px; margin: 0 auto; }
+  .section-label {
+    font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--color-text-dim); margin-bottom: var(--space-2); font-weight: 600;
+  }
+  .context-note {
+    font-size: var(--text-2xs); color: var(--color-text-dim);
+    margin-top: var(--space-3); font-style: italic;
+  }
+
+  /* Shared toolbar */
+  .toolbar {
+    display: flex; align-items: stretch;
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-2); overflow: hidden; margin-bottom: var(--space-3);
+  }
+  .toolbar-method {
+    display: flex; align-items: center; padding: 6px 14px;
+    font-weight: 700; font-size: var(--text-sm); color: #fff;
+    background: var(--color-method-get); min-width: 75px;
+  }
+  .toolbar-url {
+    flex: 1; background: transparent; border: none; outline: none;
+    padding: 6px 12px; color: var(--color-text);
+    font-family: var(--font-mono); font-size: 13px;
+  }
+  .toolbar-url::placeholder { color: var(--color-text-dim); }
+  .toolbar-send {
+    padding: 6px 18px; border: none; background: var(--color-accent);
+    color: #fff; font-weight: 700; font-size: var(--text-xs); cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .toolbar-send:hover { background: var(--color-accent-hover); }
+
+  /* Key/value table (shared) */
+  .kv-table { width: 100%; border-collapse: collapse; }
+  .kv-table th {
+    text-align: left; padding: 4px 8px; font-size: var(--text-2xs);
+    color: var(--color-text-dim); text-transform: uppercase; letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--color-border); font-weight: 600;
+  }
+  .kv-table td { padding: 2px 4px; border-bottom: 1px solid var(--color-border); }
+  .kv-table input {
+    width: 100%; background: transparent; border: 1px solid transparent;
+    color: var(--color-text); font-family: var(--font-mono); font-size: 12px;
+    padding: 4px 6px; border-radius: var(--radius-1); outline: none;
+  }
+  .kv-table input:focus { border-color: var(--color-border-focus); background: var(--color-surface-raised); }
+  .kv-table .enabled-col { width: 28px; text-align: center; }
+  .kv-table .enabled-col input[type="checkbox"] { width: auto; cursor: pointer; accent-color: var(--color-primary); }
+  .kv-table .action-col { width: 24px; text-align: center; }
+  .kv-row-btn {
+    background: none; border: none; color: var(--color-text-dim); cursor: pointer;
+    font-size: 14px; padding: 2px 4px; transition: color 0.1s;
+  }
+  .kv-row-btn:hover { color: var(--color-danger); }
+  .kv-add {
+    padding: 4px 12px; margin-top: var(--space-2); background: transparent;
+    border: 1px dashed var(--color-border); color: var(--color-text-muted);
+    border-radius: var(--radius-1); cursor: pointer; font-size: var(--text-2xs);
+    transition: all 0.15s ease; font-family: var(--font-sans);
+  }
+  .kv-add:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+
+  /* ========== VARIANT A: Horizontal Tabs ========== */
+  .va-tabs {
+    display: flex; gap: 0; border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-3);
+  }
+  .va-tab {
+    padding: 6px 16px; border: none; background: transparent;
+    color: var(--color-text-muted); cursor: pointer;
+    font-size: var(--text-xs); font-weight: 500;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s ease; font-family: var(--font-sans);
+  }
+  .va-tab:hover { color: var(--color-text); }
+  .va-tab.active {
+    color: var(--color-text); font-weight: 600;
+    border-bottom-color: var(--color-accent);
+  }
+  .va-content { min-height: 200px; }
+
+  .va-badge {
+    display: inline-block; background: var(--color-surface-raised);
+    color: var(--color-text-dim); font-size: 10px; padding: 1px 6px;
+    border-radius: var(--radius-full); margin-left: 4px;
+  }
+
+  /* ========== VARIANT B: Stacked Collapsible Sections ========== */
+  .vb-section {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
+    margin-bottom: var(--space-2);
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+  }
+  .vb-section.expanded { border-color: var(--color-border-focus); }
+  .vb-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; background: var(--color-surface);
+    cursor: pointer; user-select: none;
+    transition: background 0.1s;
+  }
+  .vb-header:hover { background: var(--color-surface-raised); }
+  .vb-header-left { display: flex; align-items: center; gap: var(--space-2); }
+  .vb-header-title { font-weight: 600; font-size: var(--text-sm); }
+  .vb-header-count { font-size: var(--text-2xs); color: var(--color-text-dim); }
+  .vb-chevron {
+    transition: transform 0.2s ease; color: var(--color-text-dim); font-size: 10px;
+  }
+  .vb-section.expanded .vb-chevron { transform: rotate(180deg); }
+  .vb-body { display: none; padding: 0 12px 12px; }
+  .vb-section.expanded .vb-body { display: block; }
+
+  /* ========== VARIANT C: Vertical Tab Strip ========== */
+  .vc-container { display: flex; gap: 0; border: 1px solid var(--color-border); border-radius: var(--radius-2); overflow: hidden; min-height: 240px; }
+  .vc-tab-strip {
+    display: flex; flex-direction: column;
+    background: var(--color-surface); min-width: 130px;
+    border-right: 1px solid var(--color-border);
+    padding: var(--space-1) 0;
+  }
+  .vc-tab {
+    display: flex; align-items: center; gap: var(--space-2);
+    padding: 8px 12px; border: none; border-left: 2px solid transparent;
+    background: transparent; color: var(--color-text-muted);
+    cursor: pointer; font-size: var(--text-xs); text-align: left;
+    transition: all 0.15s ease; font-family: var(--font-sans);
+  }
+  .vc-tab:hover { color: var(--color-text); background: var(--color-surface-raised); }
+  .vc-tab.active {
+    color: var(--color-text); font-weight: 600;
+    border-left-color: var(--color-accent);
+    background: var(--color-surface-raised);
+  }
+  .vc-tab-icon { font-size: 13px; width: 16px; text-align: center; flex-shrink: 0; }
+  .vc-tab-badge {
+    margin-left: auto; font-size: 10px; background: var(--color-primary);
+    color: #fff; padding: 1px 6px; border-radius: var(--radius-full);
+  }
+  .vc-content { flex: 1; padding: var(--space-3); overflow-y: auto; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
+    background: var(--color-success); color: #fff;
+    padding: 8px 20px; border-radius: var(--radius-1);
+    font-size: var(--text-xs); font-weight: 600;
+    opacity: 0; transition: opacity 0.25s ease; z-index: 10000; pointer-events: none;
+  }
+  #toast.show { opacity: 1; }
+
+  /* Body editor mock */
+  .mock-editor {
+    background: #0d1117; border: 1px solid var(--color-border);
+    border-radius: var(--radius-1); padding: var(--space-3);
+    font-family: var(--font-mono); font-size: 12px; line-height: 1.6;
+    color: var(--color-text); min-height: 120px;
+  }
+  .mock-editor .json-key { color: var(--color-primary); }
+  .mock-editor .json-string { color: var(--color-success); }
+  .mock-editor .json-number { color: var(--color-accent); }
+  .mock-editor .json-bool { color: var(--color-method-patch); }
+</style>
+</head>
+<body>
+
+<div id="variant-nav">
+  <button class="variant-tab active" onclick="showVariant('a')">A: Horizontal Tabs (Postman)</button>
+  <button class="variant-tab" onclick="showVariant('b')">B: Stacked Collapsible Sections</button>
+  <button class="variant-tab" onclick="showVariant('c')">C: Vertical Tab Strip ★ Selected</button>
+</div>
+
+<!-- ======== VARIANT A ======== -->
+<div id="variant-a" class="variant active">
+  <div class="page">
+    <div class="section-label">A: Horizontal Tabs — Postman-standard</div>
+    <p style="font-size:var(--text-xs);color:var(--color-text-dim);margin-bottom:var(--space-3)">
+      One row of tabs below the URL bar. Only one section visible at a time. Compact. Familiar.
+      Tabs: Params, Headers, Body, Auth, Settings. Active tab has accent underline.
+    </p>
+
+    <!-- URL toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-method">GET</div>
+      <input class="toolbar-url" type="text" value="https://jsonplaceholder.typicode.com/users/1" placeholder="https://api.example.com/path">
+      <button class="toolbar-send" onclick="toast('Request sent')">Send</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="va-tabs" id="va-tabs">
+      <button class="va-tab active" onclick="switchVa('params')">Params<span class="va-badge">2</span></button>
+      <button class="va-tab" onclick="switchVa('headers')">Headers<span class="va-badge">3</span></button>
+      <button class="va-tab" onclick="switchVa('body')">Body<span class="va-badge">●</span></button>
+      <button class="va-tab" onclick="switchVa('auth')">Auth</button>
+      <button class="va-tab" onclick="switchVa('settings')">Settings</button>
+    </div>
+
+    <!-- Content -->
+    <div class="va-content" id="va-content-params">
+      <table class="kv-table">
+        <thead><tr><th class="enabled-col"></th><th>Key</th><th>Value</th><th>Description</th><th class="action-col"></th></tr></thead>
+        <tbody id="va-params-body">
+          <tr><td class="enabled-col"><input type="checkbox" checked></td><td><input value="userId" placeholder="Key"></td><td><input value="1" placeholder="Value"></td><td><input value="User ID filter" placeholder="Description"></td><td class="action-col"><button class="kv-row-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+          <tr><td class="enabled-col"><input type="checkbox" checked></td><td><input value="format" placeholder="Key"></td><td><input value="json" placeholder="Value"></td><td><input value="Response format" placeholder="Description"></td><td class="action-col"><button class="kv-row-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+        </tbody>
+      </table>
+      <button class="kv-add" onclick="addKvRow('va-params-body')">+ Add query param</button>
+    </div>
+
+    <div class="va-content" id="va-content-headers" style="display:none">
+      <table class="kv-table">
+        <thead><tr><th class="enabled-col"></th><th>Header name</th><th>Header value</th><th class="action-col"></th></tr></thead>
+        <tbody id="va-headers-body">
+          <tr><td class="enabled-col"><input type="checkbox" checked></td><td><input value="Content-Type" placeholder="Header name"></td><td><input value="application/json" placeholder="Header value"></td><td class="action-col"><button class="kv-row-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+          <tr><td class="enabled-col"><input type="checkbox" checked></td><td><input value="Authorization" placeholder="Header name"></td><td><input value="Bearer {{token}}" placeholder="Header value"></td><td class="action-col"><button class="kv-row-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+          <tr><td class="enabled-col"><input type="checkbox"></td><td><input value="X-Request-Id" placeholder="Header name"></td><td><input value="{{requestId}}" placeholder="Header value"></td><td class="action-col"><button class="kv-row-btn" onclick="this.closest('tr').remove()">×</button></td></tr>
+        </tbody>
+      </table>
+      <button class="kv-add" onclick="addKvRow('va-headers-body')">+ Add header</button>
+    </div>
+
+    <div class="va-content" id="va-content-body" style="display:none">
+      <div style="display:flex;gap:var(--space-1);margin-bottom:var(--space-2);">
+        <button class="kv-add" style="margin-top:0;border-radius:var(--radius-1);border-style:solid;background:var(--color-surface-raised);color:var(--color-text);font-weight:600;">raw</button>
+        <button class="kv-add" style="margin-top:0;">form-data</button>
+        <button class="kv-add" style="margin-top:0;">urlencoded</button>
+        <button class="kv-add" style="margin-top:0;">binary</button>
+      </div>
+      <div class="mock-editor">
+        <span class="json-key">"id"</span>: <span class="json-number">1</span>,<br>
+        <span class="json-key">"name"</span>: <span class="json-string">"Leanne Graham"</span>,<br>
+        <span class="json-key">"email"</span>: <span class="json-string">"sincere@april.biz"</span>,<br>
+        <span class="json-key">"active"</span>: <span class="json-bool">true</span>
+      </div>
+    </div>
+
+    <div class="va-content" id="va-content-auth" style="display:none">
+      <div style="display:flex;gap:var(--space-1);margin-bottom:var(--space-3);">
+        <button class="kv-add" style="margin-top:0;border-radius:var(--radius-1);border-style:solid;background:var(--color-surface-raised);color:var(--color-text);font-weight:600;">Bearer Token</button>
+        <button class="kv-add" style="margin-top:0;">Basic Auth</button>
+        <button class="kv-add" style="margin-top:0;">API Key</button>
+        <button class="kv-add" style="margin-top:0;">No Auth</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:var(--space-2);max-width:400px;">
+        <label style="font-size:var(--text-xs);color:var(--color-text-muted);">Token</label>
+        <input style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-1);padding:6px 10px;color:var(--color-text);font-family:var(--font-mono);font-size:12px;outline:none;" value="{{jwtToken}}" placeholder="eyJhbGciOi...">
+      </div>
+    </div>
+
+    <div class="va-content" id="va-content-settings" style="display:none">
+      <div style="display:flex;flex-direction:column;gap:var(--space-3);max-width:400px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:var(--text-xs);">Timeout (ms)</span>
+          <input style="width:100px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-1);padding:4px 8px;color:var(--color-text);font-family:var(--font-mono);font-size:12px;outline:none;text-align:right;" value="30000">
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:var(--text-xs);">Follow redirects</span>
+          <input type="checkbox" checked style="accent-color:var(--color-primary);width:16px;height:16px;">
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:var(--text-xs);">SSL certificate verification</span>
+          <input type="checkbox" checked style="accent-color:var(--color-primary);width:16px;height:16px;">
+        </div>
+      </div>
+    </div>
+
+    <div class="context-note">Current app uses this pattern. Tabs: Params · Headers · Body · Auth · Settings. Only one visible.</div>
+  </div>
+</div>
+
+<!-- ======== VARIANT B ======== -->
+<div id="variant-b" class="variant">
+  <div class="page">
+    <div class="section-label">B: Stacked Collapsible Sections — Insomnia-style</div>
+    <p style="font-size:var(--text-xs);color:var(--color-text-dim);margin-bottom:var(--space-3)">
+      Every section visible simultaneously. Expand/collapse in place. See Params AND Headers at once.
+      Multiple sections open simultaneously. Good for cross-referencing headers with body content.
+    </p>
+
+    <div class="toolbar">
+      <div class="toolbar-method">POST</div>
+      <input class="toolbar-url" type="text" value="https://api.example.com/users" placeholder="https://api.example.com/path">
+      <button class="toolbar-send" onclick="toast('Request sent')">Send</button>
+    </div>
+
+    <div class="vb-section expanded" id="vb-params">
+      <div class="vb-header" onclick="toggleVb('vb-params')">
+        <div class="vb-header-left">
+          <span class="vb-header-title">Query Parameters</span>
+          <span class="vb-header-count">2 params</span>
+        </div>
+        <span class="vb-chevron">▾</span>
+      </div>
+      <div class="vb-body">
+        <table class="kv-table">
+          <tbody><tr><td class="enabled-col"><input type="checkbox" checked></td><td><input value="userId" placeholder="Key"></td><td><input value="1" placeholder="Value"></td><td class="action-col"><button class="kv-row-btn">×</button></td></tr>
+          <tr><td class="enabled-col"><input type="checkbox" checked></td><td><input value="limit" placeholder="Key"></td><td><input value="10" placeholder="Value"></td><td class="action-col"><button class="kv-row-btn">×</button></td></tr></tbody>
+        </table>
+        <button class="kv-add">+ Add query param</button>
+      </div>
+    </div>
+
+    <div class="vb-section expanded" id="vb-headers">
+      <div class="vb-header" onclick="toggleVb('vb-headers')">
+        <div class="vb-header-left">
+          <span class="vb-header-title">Headers</span>
+          <span class="vb-header-count">3 headers</span>
+        </div>
+        <span class="vb-chevron">▾</span>
+      </div>
+      <div class="vb-body">
+        <table class="kv-table">
+          <tbody><tr><td class="enabled-col"><input type="checkbox" checked></td><td><input value="Content-Type" placeholder="Header name"></td><td><input value="application/json" placeholder="Header value"></td><td class="action-col"><button class="kv-row-btn">×</button></td></tr>
+          <tr><td class="enabled-col"><input type="checkbox" checked></td><td><input value="Authorization" placeholder="Header name"></td><td><input value="Bearer {{token}}" placeholder="Header value"></td><td class="action-col"><button class="kv-row-btn">×</button></td></tr>
+          <tr><td class="enabled-col"><input type="checkbox"></td><td><input value="Accept" placeholder="Header name"></td><td><input value="*/*" placeholder="Header value"></td><td class="action-col"><button class="kv-row-btn">×</button></td></tr></tbody>
+        </table>
+        <button class="kv-add">+ Add header</button>
+      </div>
+    </div>
+
+    <div class="vb-section expanded" id="vb-body">
+      <div class="vb-header" onclick="toggleVb('vb-body')">
+        <div class="vb-header-left">
+          <span class="vb-header-title">Request Body</span>
+          <span class="vb-header-count">raw · JSON</span>
+        </div>
+        <span class="vb-chevron">▾</span>
+      </div>
+      <div class="vb-body">
+        <div style="display:flex;gap:var(--space-1);margin-bottom:var(--space-2);">
+          <button class="kv-add" style="margin-top:0;border-radius:var(--radius-1);border-style:solid;background:var(--color-surface-raised);color:var(--color-text);font-weight:600;">raw</button>
+          <button class="kv-add" style="margin-top:0;">form-data</button>
+          <button class="kv-add" style="margin-top:0;">urlencoded</button>
+        </div>
+        <div class="mock-editor">
+          <span class="json-key">"name"</span>: <span class="json-string">"New User"</span>,<br>
+          <span class="json-key">"email"</span>: <span class="json-string">"user@example.com"</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="vb-section" id="vb-auth">
+      <div class="vb-header" onclick="toggleVb('vb-auth')">
+        <div class="vb-header-left">
+          <span class="vb-header-title">Authorization</span>
+          <span class="vb-header-count">Bearer Token</span>
+        </div>
+        <span class="vb-chevron">▾</span>
+      </div>
+      <div class="vb-body">
+        <div style="display:flex;gap:var(--space-1);margin-bottom:var(--space-2);">
+          <button class="kv-add" style="margin-top:0;border-radius:var(--radius-1);border-style:solid;background:var(--color-surface-raised);color:var(--color-text);font-weight:600;">Bearer Token</button>
+          <button class="kv-add" style="margin-top:0;">Basic Auth</button>
+        </div>
+        <input style="width:100%;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-1);padding:6px 10px;color:var(--color-text);font-family:var(--font-mono);font-size:12px;outline:none;" value="{{jwtToken}}">
+      </div>
+    </div>
+
+    <div class="vb-section" id="vb-settings">
+      <div class="vb-header" onclick="toggleVb('vb-settings')">
+        <div class="vb-header-left">
+          <span class="vb-header-title">Settings</span>
+          <span class="vb-header-count">Timeout: 30s</span>
+        </div>
+        <span class="vb-chevron">▾</span>
+      </div>
+      <div class="vb-body">
+        <div style="display:flex;align-items:center;justify-content:space-between;max-width:300px;">
+          <span style="font-size:var(--text-xs);">Timeout (ms)</span>
+          <input style="width:100px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-1);padding:4px 8px;color:var(--color-text);font-family:var(--font-mono);font-size:12px;outline:none;text-align:right;" value="30000">
+        </div>
+      </div>
+    </div>
+
+    <div class="context-note">Multiple sections open at once. Good for cross-referencing. More vertical space consumed.</div>
+  </div>
+</div>
+
+<!-- ======== VARIANT C ======== -->
+<div id="variant-c" class="variant">
+  <div class="page">
+    <div class="section-label">C: Vertical Tab Strip</div>
+    <p style="font-size:var(--text-xs);color:var(--color-text-dim);margin-bottom:var(--space-3)">
+      Tabs on the left, content on the right. Icon + label per tab. Badge shows item count.
+      Vertical space is used for content depth rather than tab row. IDE-like navigation.
+    </p>
+
+    <div class="toolbar">
+      <div class="toolbar-method">PUT</div>
+      <input class="toolbar-url" type="text" value="https://api.example.com/users/{{id}}" placeholder="https://api.example.com/path">
+      <button class="toolbar-send" onclick="toast('Request sent')">Send</button>
+    </div>
+
+    <div class="vc-container">
+      <div class="vc-tab-strip" id="vc-strip">
+        <button class="vc-tab active" onclick="switchVc('params',this)">
+          <span class="vc-tab-icon">¶</span>Params
+          <span class="vc-tab-badge">2</span>
+        </button>
+        <button class="vc-tab" onclick="switchVc('headers',this)">
+          <span class="vc-tab-icon">H</span>Headers
+          <span class="vc-tab-badge">3</span>
+        </button>
+        <button class="vc-tab" onclick="switchVc('body',this)">
+          <span class="vc-tab-icon">{ }</span>Body
+        </button>
+        <button class="vc-tab" onclick="switchVc('auth',this)">
+          <span class="vc-tab-icon">🔑</span>Auth
+        </button>
+        <button class="vc-tab" onclick="switchVc('settings',this)">
+          <span class="vc-tab-icon">⚙</span>Settings
+        </button>
+      </div>
+
+      <div class="vc-content" id="vc-content-params">
+        <table class="kv-table">
+          <thead><tr><th class="enabled-col"></th><th>Key</th><th>Value</th><th class="action-col"></th></tr></thead>
+          <tbody>
+            <tr><td class="enabled-col"><input type="checkbox" checked></td><td><input value="id" placeholder="Key"></td><td><input value="{{id}}" placeholder="Value"></td><td class="action-col"><button class="kv-row-btn">×</button></td></tr>
+            <tr><td class="enabled-col"><input type="checkbox" checked></td><td><input value="filter" placeholder="Key"></td><td><input value="active" placeholder="Value"></td><td class="action-col"><button class="kv-row-btn">×</button></td></tr>
+          </tbody>
+        </table>
+        <button class="kv-add">+ Add param</button>
+      </div>
+
+      <div class="vc-content" id="vc-content-headers" style="display:none;">
+        <table class="kv-table">
+          <thead><tr><th class="enabled-col"></th><th>Header name</th><th>Header value</th><th class="action-col"></th></tr></thead>
+          <tbody>
+            <tr><td class="enabled-col"><input type="checkbox" checked></td><td><input value="Content-Type"></td><td><input value="application/json"></td><td class="action-col"><button class="kv-row-btn">×</button></td></tr>
+            <tr><td class="enabled-col"><input type="checkbox" checked></td><td><input value="Authorization"></td><td><input value="Bearer {{token}}"></td><td class="action-col"><button class="kv-row-btn">×</button></td></tr>
+          </tbody>
+        </table>
+        <button class="kv-add">+ Add header</button>
+      </div>
+
+      <div class="vc-content" id="vc-content-body" style="display:none;">
+        <div style="display:flex;gap:var(--space-1);margin-bottom:var(--space-2);">
+          <button class="kv-add" style="margin-top:0;border-radius:var(--radius-1);border-style:solid;background:var(--color-surface-raised);color:var(--color-text);font-weight:600;">raw</button>
+          <button class="kv-add" style="margin-top:0;">form-data</button>
+        </div>
+        <div class="mock-editor">
+          <span class="json-key">"id"</span>: <span class="json-number">42</span>,<br>
+          <span class="json-key">"name"</span>: <span class="json-string">"Updated Name"</span>
+        </div>
+      </div>
+
+      <div class="vc-content" id="vc-content-auth" style="display:none;">
+        <div style="display:flex;gap:var(--space-1);margin-bottom:var(--space-3);">
+          <button class="kv-add" style="margin-top:0;border-radius:var(--radius-1);border-style:solid;background:var(--color-surface-raised);color:var(--color-text);font-weight:600;">Bearer Token</button>
+          <button class="kv-add" style="margin-top:0;">Basic Auth</button>
+        </div>
+        <input style="width:60%;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-1);padding:6px 10px;color:var(--color-text);font-family:var(--font-mono);font-size:12px;outline:none;" value="{{jwtToken}}">
+      </div>
+
+      <div class="vc-content" id="vc-content-settings" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;max-width:300px;">
+          <span style="font-size:var(--text-xs);">Timeout (ms)</span>
+          <input style="width:100px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-1);padding:4px 8px;color:var(--color-text);font-family:var(--font-mono);font-size:12px;outline:none;text-align:right;" value="30000">
+        </div>
+      </div>
+    </div>
+
+    <div class="context-note">Tabs on the left + content on the right. Badges show item counts. IDE-style vertical navigation.</div>
+  </div>
+</div>
+
+<!-- Sketch toolbar -->
+<div id="sketch-tools" style="position:fixed;bottom:12px;right:12px;z-index:9999;font-family:system-ui;font-size:12px;background:rgba(0,0,0,0.85);color:white;padding:8px 12px;border-radius:8px;opacity:0.4;transition:opacity 0.2s;display:flex;gap:12px;align-items:center;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">
+  <select onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'" style="background:#333;color:#fff;border:1px solid #555;border-radius:3px;padding:2px 4px;font-size:11px;">
+    <option value="default">Default</option>
+  </select>
+  <button onclick="setViewport(375)" style="background:none;border:1px solid #555;color:#fff;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;">375</button>
+  <button onclick="setViewport(768)" style="background:none;border:1px solid #555;color:#fff;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;">768</button>
+  <button onclick="setViewport(0)" style="background:none;border:1px solid #555;color:#fff;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;">Full</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  function showVariant(id) {
+    document.querySelectorAll('.variant').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active'));
+    var el = document.getElementById('variant-' + id);
+    if (el) el.classList.add('active');
+    var idx = id === 'a' ? 0 : id === 'b' ? 1 : 2;
+    document.querySelectorAll('.variant-tab')[idx]?.classList.add('active');
+  }
+
+  // Variant A: tab switching
+  function switchVa(section) {
+    document.querySelectorAll('#va-tabs .va-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    ['params','headers','body','auth','settings'].forEach(function(s) {
+      var el = document.getElementById('va-content-' + s);
+      if (el) el.style.display = s === section ? 'block' : 'none';
+    });
+  }
+
+  // Variant B: toggle sections
+  function toggleVb(id) {
+    document.getElementById(id).classList.toggle('expanded');
+  }
+
+  // Variant C: vertical tabs
+  function switchVc(section, btn) {
+    document.querySelectorAll('#vc-strip .vc-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    ['params','headers','body','auth','settings'].forEach(function(s) {
+      var el = document.getElementById('vc-content-' + s);
+      if (el) el.style.display = s === section ? 'block' : 'none';
+    });
+  }
+
+  // Add key/value row
+  function addKvRow(tbodyId) {
+    var tbody = document.getElementById(tbodyId);
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td class="enabled-col"><input type="checkbox" checked></td><td><input value="" placeholder="Key"></td><td><input value="" placeholder="Value"></td>' +
+      '<td style="padding:2px 4px"><input value="" placeholder="Description"></td><td class="action-col"><button class="kv-row-btn" onclick="this.closest(\'tr\').remove()">×</button></td>';
+    tbody.appendChild(tr);
+    tr.querySelector('input').focus();
+  }
+
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 2000);
+  }
+
+  function setViewport(w) {
+    var p = document.querySelectorAll('.page');
+    p.forEach(function(el) { el.style.maxWidth = w > 0 ? w + 'px' : '900px'; });
+  }
+
+  // Keyboard: Ctrl+Enter sends from any variant
+  document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); toast('Request sent (200 OK)'); }
+  });
+</script>
+
+</body>
+</html>

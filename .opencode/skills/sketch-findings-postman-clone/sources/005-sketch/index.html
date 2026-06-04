@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sketch 005: Collection Management</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans); font-size: var(--text-sm);
+    background: var(--color-bg); color: var(--color-text);
+    padding: 60px 24px 60px;
+  }
+  #variant-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 9998;
+    background: var(--color-surface); border-bottom: 1px solid var(--color-border);
+    padding: 8px 16px; display: flex; gap: 6px;
+  }
+  .variant-tab {
+    padding: 4px 12px; border: 1px solid var(--color-border);
+    border-radius: var(--radius-1); background: transparent;
+    color: var(--color-text-muted); cursor: pointer;
+    font-size: var(--text-xs); transition: all 0.15s ease;
+    font-family: var(--font-sans);
+  }
+  .variant-tab:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+  .variant-tab.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+  .variant { display: none; }
+  .variant.active { display: block; }
+
+  .page { max-width: 900px; margin: 0 auto; }
+  .section-label {
+    font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--color-text-dim); margin-bottom: var(--space-2); font-weight: 600;
+  }
+  .context-note { font-size: var(--text-2xs); color: var(--color-text-dim); margin-top: var(--space-3); font-style: italic; }
+  p.desc { font-size: var(--text-xs); color: var(--color-text-dim); margin-bottom: var(--space-4); line-height: 1.5; }
+
+  .btn {
+    padding: 4px 12px; border: 1px solid var(--color-border);
+    border-radius: var(--radius-1); background: transparent;
+    color: var(--color-text-muted); cursor: pointer;
+    font-size: var(--text-xs); transition: all 0.15s ease;
+    font-family: var(--font-sans);
+  }
+  .btn:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+  .btn-primary { background: var(--color-accent); color: #fff; border: none; font-weight: 600; }
+  .btn-primary:hover { background: var(--color-accent-hover); }
+  .btn-danger { color: var(--color-danger); border-color: var(--color-danger); }
+  .btn-danger:hover { background: rgba(224,49,49,0.1); }
+
+  /* ========== VARIANT A: Tree Sidebar ========== */
+  .va-shell {
+    display: flex; gap: 0; border: 1px solid var(--color-border);
+    border-radius: var(--radius-2); overflow: hidden; min-height: 350px;
+  }
+  .va-sidebar {
+    width: 260px; min-width: 220px; background: var(--color-surface);
+    border-right: 1px solid var(--color-border); display: flex; flex-direction: column;
+  }
+  .va-sidebar-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border);
+    font-size: var(--text-2xs); font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--color-text-dim);
+  }
+  .va-plus { background: transparent; border: 1px solid var(--color-border); border-radius: var(--radius-1); color: var(--color-text-muted); cursor: pointer; font-size: 14px; padding: 0 6px; line-height: 18px; }
+  .va-plus:hover { color: var(--color-text); }
+
+  .va-search {
+    margin: var(--space-2); padding: 4px 8px;
+    background: var(--color-surface-raised); border: 1px solid var(--color-border);
+    border-radius: var(--radius-1); color: var(--color-text);
+    font-size: 11px; font-family: var(--font-sans); outline: none;
+  }
+  .va-search:focus { border-color: var(--color-border-focus); }
+  .va-search::placeholder { color: var(--color-text-dim); }
+
+  .va-tree { flex: 1; overflow-y: auto; padding: var(--space-1); }
+  .va-collection { margin-bottom: 1px; }
+  .va-col-header {
+    display: flex; align-items: center; gap: var(--space-1);
+    padding: 5px var(--space-2); cursor: pointer; border-radius: var(--radius-1);
+    font-size: 12px; transition: background 0.1s;
+  }
+  .va-col-header:hover { background: var(--color-surface-raised); }
+  .va-col-header.active { background: var(--color-surface-raised); color: var(--color-text); font-weight: 600; }
+  .va-col-chevron { font-size: 9px; color: var(--color-text-dim); width: 10px; }
+  .va-col-count { font-size: 10px; color: var(--color-text-dim); margin-left: auto; }
+  .va-col-items { display: none; padding-left: var(--space-4); }
+  .va-collection.expanded .va-col-items { display: block; }
+  .va-collection.expanded .va-col-chevron { transform: rotate(90deg); display: inline-block; }
+  .va-item {
+    display: flex; align-items: center; gap: var(--space-1);
+    padding: 4px var(--space-2); cursor: pointer; border-radius: var(--radius-1);
+    font-size: 11px; transition: background 0.1s;
+  }
+  .va-item:hover { background: var(--color-surface-raised); }
+  .va-item-method {
+    font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: var(--radius-1);
+    color: #fff; min-width: 36px; text-align: center; flex-shrink: 0;
+  }
+  .va-item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .va-new-input {
+    width: 100%; padding: 3px 8px; background: var(--color-surface-raised);
+    border: 1px solid var(--color-border-focus); border-radius: var(--radius-1);
+    color: var(--color-text); font-size: 11px; font-family: var(--font-sans); outline: none;
+  }
+  .va-detail {
+    flex: 1; padding: var(--space-4); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; color: var(--color-text-dim);
+    font-size: var(--text-sm);
+  }
+  .va-detail-title { font-size: var(--text-lg); color: var(--color-text); margin-bottom: var(--space-2); }
+  .va-detail-action { margin-top: var(--space-2); }
+
+  .va-context-menu {
+    position: absolute; background: var(--color-surface-raised);
+    border: 1px solid var(--color-border); border-radius: var(--radius-2);
+    box-shadow: var(--shadow-md); min-width: 160px; z-index: 100;
+    display: none; overflow: hidden;
+  }
+  .va-context-menu.open { display: block; }
+  .va-context-item {
+    padding: 6px 12px; cursor: pointer; font-size: var(--text-xs);
+    transition: background 0.1s;
+  }
+  .va-context-item:hover { background: var(--color-surface); }
+  .va-context-item.danger { color: var(--color-danger); }
+
+  /* ========== VARIANT B: Table List + Detail Panel ========== */
+  .vb-shell {
+    display: flex; flex-direction: column; gap: var(--space-3);
+    border: 1px solid var(--color-border); border-radius: var(--radius-2);
+    padding: var(--space-3); min-height: 350px;
+  }
+  .vb-toolbar {
+    display: flex; align-items: center; gap: var(--space-2);
+  }
+  .vb-table { width: 100%; border-collapse: collapse; }
+  .vb-table th {
+    text-align: left; padding: 6px 10px; font-size: var(--text-2xs);
+    color: var(--color-text-dim); text-transform: uppercase; letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--color-border); font-weight: 600;
+  }
+  .vb-table td { padding: 6px 10px; border-bottom: 1px solid var(--color-border); font-size: var(--text-xs); }
+  .vb-table tr:hover td { background: var(--color-surface-raised); cursor: pointer; }
+  .vb-table tr.active td { background: var(--color-surface-raised); }
+  .vb-col-name { font-weight: 600; color: var(--color-text); }
+  .vb-detail {
+    border: 1px solid var(--color-border); border-radius: var(--radius-2);
+    overflow: hidden;
+  }
+  .vb-detail-header {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: var(--space-3); background: var(--color-surface); border-bottom: 1px solid var(--color-border);
+    font-weight: 600; font-size: var(--text-sm);
+  }
+  .vb-detail-body { padding: var(--space-3); }
+  .vb-req-list { display: flex; flex-direction: column; gap: var(--space-1); }
+  .vb-req-row {
+    display: flex; align-items: center; gap: var(--space-2);
+    padding: 6px 10px; border-radius: var(--radius-1); cursor: pointer;
+    transition: background 0.1s;
+  }
+  .vb-req-row:hover { background: var(--color-surface-raised); }
+
+  /* ========== VARIANT C: Breadcrumb + Flat List ========== */
+  .vc-shell {
+    border: 1px solid var(--color-border); border-radius: var(--radius-2);
+    overflow: hidden; min-height: 350px;
+  }
+  .vc-breadcrumb {
+    display: flex; align-items: center; gap: var(--space-1);
+    padding: var(--space-2) var(--space-3); background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border); font-size: var(--text-xs);
+  }
+  .vc-breadcrumb span { color: var(--color-text-dim); }
+  .vc-breadcrumb a { color: var(--color-primary); cursor: pointer; text-decoration: none; }
+  .vc-breadcrumb a:hover { text-decoration: underline; }
+  .vc-toolbar {
+    display: flex; align-items: center; gap: var(--space-2);
+    padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border);
+  }
+  .vc-search {
+    flex: 1; padding: 5px 10px; background: var(--color-surface-raised);
+    border: 1px solid var(--color-border); border-radius: var(--radius-1);
+    color: var(--color-text); font-size: var(--text-xs); font-family: var(--font-sans); outline: none;
+  }
+  .vc-search:focus { border-color: var(--color-border-focus); }
+  .vc-list { padding: var(--space-1); }
+  .vc-item {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: 8px var(--space-3); border-radius: var(--radius-1); cursor: pointer;
+    transition: background 0.1s; border-bottom: 1px solid var(--color-border);
+  }
+  .vc-item:hover { background: var(--color-surface-raised); }
+  .vc-item-left { display: flex; align-items: center; gap: var(--space-2); min-width: 0; flex: 1; }
+  .vc-item-url {
+    font-family: var(--font-mono); font-size: 12px; color: var(--color-text-dim);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .vc-item-collection {
+    font-size: 10px; color: var(--color-accent);
+    padding: 1px 6px; border-radius: var(--radius-full);
+    background: rgba(240,140,0,0.1);
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
+    background: var(--color-success); color: #fff;
+    padding: 8px 20px; border-radius: var(--radius-1);
+    font-size: var(--text-xs); font-weight: 600;
+    opacity: 0; transition: opacity 0.25s ease; z-index: 10000; pointer-events: none;
+  }
+  #toast.show { opacity: 1; }
+
+  .spacer { flex: 1; }
+</style>
+</head>
+<body>
+
+<div id="variant-nav">
+  <button class="variant-tab active">A: Tree Sidebar (Postman-style) ★ Selected</button>
+  <button class="variant-tab" onclick="showVariant('b')">B: Table List + Detail Panel</button>
+  <button class="variant-tab" onclick="showVariant('c')">C: Breadcrumb + Flat List</button>
+</div>
+
+<!-- ======== VARIANT A: Tree Sidebar ======== -->
+<div id="variant-a" class="variant active">
+  <div class="page">
+    <div class="section-label">A: Tree Sidebar — Postman-standard</div>
+    <p class="desc">Collections as expandable tree nodes in a sidebar. Inline create with Enter. Requests as leaf items with method-color badges. Right-click for context menu (rename, delete, duplicate). Active collection highlighted.</p>
+
+    <div class="va-shell">
+      <div class="va-sidebar">
+        <div class="va-sidebar-header">
+          <span>Collections</span>
+          <button class="va-plus" onclick="showVaNewCollection()" title="New collection">+</button>
+        </div>
+
+        <div id="va-new-coll-wrap" style="display:none;padding:var(--space-2);">
+          <input class="va-new-input" id="va-new-coll-input" placeholder="Collection name" onkeydown="if(event.key==='Enter')createVaCollection();if(event.key==='Escape')hideVaNewCollection()">
+          <div style="display:flex;gap:var(--space-1);margin-top:var(--space-1);">
+            <button class="btn btn-primary" onclick="createVaCollection()" style="font-size:10px;">Create</button>
+            <button class="btn" onclick="hideVaNewCollection()" style="font-size:10px;">Cancel</button>
+          </div>
+        </div>
+
+        <input class="va-search" placeholder="Filter collections..." oninput="filterVaTree(this.value)">
+
+        <div class="va-tree" id="va-tree">
+          <!-- User API -->
+          <div class="va-collection expanded" data-name="user api">
+            <div class="va-col-header active" onclick="toggleVaColl(this)">
+              <span class="va-col-chevron">▶</span>
+              <span>📁 User API</span>
+              <span class="va-col-count">4</span>
+            </div>
+            <div class="va-col-items">
+              <div class="va-item" onclick="toast('Opened GET /users')"><span class="va-item-method" style="background:var(--color-method-get)">GET</span><span class="va-item-name">List Users</span></div>
+              <div class="va-item" onclick="toast('Opened GET /users/:id')"><span class="va-item-method" style="background:var(--color-method-get)">GET</span><span class="va-item-name">Get User</span></div>
+              <div class="va-item" onclick="toast('Opened POST /users')"><span class="va-item-method" style="background:var(--color-method-post)">POST</span><span class="va-item-name">Create User</span></div>
+              <div class="va-item" onclick="toast('Opened DELETE /users/:id')"><span class="va-item-method" style="background:var(--color-method-delete)">DEL</span><span class="va-item-name">Delete User</span></div>
+            </div>
+          </div>
+
+          <!-- Orders API -->
+          <div class="va-collection expanded" data-name="orders api">
+            <div class="va-col-header" onclick="toggleVaColl(this)">
+              <span class="va-col-chevron">▶</span>
+              <span>📁 Orders API</span>
+              <span class="va-col-count">2</span>
+            </div>
+            <div class="va-col-items">
+              <div class="va-item" onclick="toast('Opened GET /orders')"><span class="va-item-method" style="background:var(--color-method-get)">GET</span><span class="va-item-name">List Orders</span></div>
+              <div class="va-item" onclick="toast('Opened POST /orders')"><span class="va-item-method" style="background:var(--color-method-post)">POST</span><span class="va-item-name">Place Order</span></div>
+            </div>
+          </div>
+
+          <!-- Auth endpoints -->
+          <div class="va-collection" data-name="auth endpoints">
+            <div class="va-col-header" onclick="toggleVaColl(this)">
+              <span class="va-col-chevron">▶</span>
+              <span>📁 Auth Endpoints</span>
+              <span class="va-col-count">1</span>
+            </div>
+            <div class="va-col-items">
+              <div class="va-item" onclick="toast('Opened POST /auth/login')"><span class="va-item-method" style="background:var(--color-method-post)">POST</span><span class="va-item-name">Login</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="va-detail" id="va-detail">
+        <div class="va-detail-title">Select a collection</div>
+        <div>Click a collection to view its requests. Right-click for options.</div>
+        <button class="btn btn-primary va-detail-action" onclick="showVaNewCollection()">+ New Collection</button>
+      </div>
+    </div>
+    <div class="context-note">Real data: Collection {id, name, item[]}. Items have {id, name, request: {method, url}}. Expand fetches items lazily.</div>
+  </div>
+</div>
+
+<!-- ======== VARIANT B: Table List + Detail Panel ======== -->
+<div id="variant-b" class="variant">
+  <div class="page">
+    <div class="section-label">B: Table List + Detail Panel</div>
+    <p class="desc">Collections as a flat table. Click a row to see its requests in the detail panel below. Create button in toolbar. Good for managing many collections at a glance.</p>
+
+    <div class="vb-shell">
+      <div class="vb-toolbar">
+        <span style="font-weight:600;font-size:var(--text-sm);">Collections</span>
+        <span class="spacer"></span>
+        <button class="btn btn-primary" onclick="toast('Collection created')">+ New Collection</button>
+        <button class="btn" onclick="toast('Postman collection imported')">↑ Import</button>
+      </div>
+
+      <table class="vb-table">
+        <thead><tr><th>Name</th><th>Requests</th><th>Last modified</th><th></th></tr></thead>
+        <tbody>
+          <tr class="active" onclick="selectVbColl(this, 'User API')">
+            <td class="vb-col-name">User API</td><td>4</td><td>2 hours ago</td><td><button class="btn btn-danger" onclick="event.stopPropagation();toast('Collection deleted')">Delete</button></td>
+          </tr>
+          <tr onclick="selectVbColl(this, 'Orders API')">
+            <td class="vb-col-name">Orders API</td><td>2</td><td>Yesterday</td><td><button class="btn btn-danger" onclick="event.stopPropagation();toast('Collection deleted')">Delete</button></td>
+          </tr>
+          <tr onclick="selectVbColl(this, 'Auth Endpoints')">
+            <td class="vb-col-name">Auth Endpoints</td><td>1</td><td>3 days ago</td><td><button class="btn btn-danger" onclick="event.stopPropagation();toast('Collection deleted')">Delete</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="vb-detail" id="vb-detail">
+        <div class="vb-detail-header">
+          <span id="vb-detail-name">User API</span>
+          <span style="font-size:var(--text-xs);color:var(--color-text-dim);">4 requests</span>
+          <span class="spacer"></span>
+          <button class="btn" onclick="toast('Request added to collection')">+ Add Request</button>
+        </div>
+        <div class="vb-detail-body">
+          <div class="vb-req-list">
+            <div class="vb-req-row" onclick="toast('Opened GET /users')">
+              <span style="font-weight:700;font-size:10px;color:var(--color-method-get);min-width:30px;">GET</span>
+              <span style="font-family:var(--font-mono);font-size:12px;">https://api.example.com/users</span>
+            </div>
+            <div class="vb-req-row" onclick="toast('Opened GET /users/:id')">
+              <span style="font-weight:700;font-size:10px;color:var(--color-method-get);min-width:30px;">GET</span>
+              <span style="font-family:var(--font-mono);font-size:12px;">https://api.example.com/users/{{userId}}</span>
+            </div>
+            <div class="vb-req-row" onclick="toast('Opened POST /users')">
+              <span style="font-weight:700;font-size:10px;color:var(--color-method-post);min-width:30px;">POST</span>
+              <span style="font-family:var(--font-mono);font-size:12px;">https://api.example.com/users</span>
+            </div>
+            <div class="vb-req-row" onclick="toast('Opened DELETE /users/:id')">
+              <span style="font-weight:700;font-size:10px;color:var(--color-method-delete);min-width:30px;">DEL</span>
+              <span style="font-family:var(--font-mono);font-size:12px;">https://api.example.com/users/{{userId}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="context-note">Table + detail split. Good for managing many collections. Requests listed in detail pane below the table.</div>
+  </div>
+</div>
+
+<!-- ======== VARIANT C: Breadcrumb + Flat List ======== -->
+<div id="variant-c" class="variant">
+  <div class="page">
+    <div class="section-label">C: Breadcrumb + Flat List — Filter-first navigation</div>
+    <p class="desc">Breadcrumb shows current collection context. Flat searchable request list. Create new from toolbar. Fast for finding requests by name or URL across all collections.</p>
+
+    <div class="vc-shell">
+      <div class="vc-breadcrumb">
+        <a onclick="toast('All collections')">Collections</a>
+        <span>›</span>
+        <a onclick="toast('User API')" style="color:var(--color-text);font-weight:600;">User API</a>
+        <span class="spacer"></span>
+        <select style="background:var(--color-surface);color:var(--color-text);border:1px solid var(--color-border);border-radius:var(--radius-1);padding:2px 6px;font-size:var(--text-xs);font-family:var(--font-sans);outline:none;cursor:pointer;" onchange="toast('Switched to '+this.value)">
+          <option>User API</option>
+          <option>Orders API</option>
+          <option>Auth Endpoints</option>
+        </select>
+      </div>
+
+      <div class="vc-toolbar">
+        <input class="vc-search" placeholder="Search requests by name or URL..." oninput="filterVcList(this.value)">
+        <button class="btn btn-primary" onclick="toast('Request created')">+ New Request</button>
+        <button class="btn" onclick="toast('Saved to collection')">Save Current</button>
+      </div>
+
+      <div class="vc-list" id="vc-list">
+        <div class="vc-item" data-search="get list users /users">
+          <div class="vc-item-left">
+            <span style="font-weight:700;font-size:10px;color:var(--color-method-get);min-width:30px;">GET</span>
+            <strong>List Users</strong>
+          </div>
+          <span class="vc-item-url">/users</span>
+          <span class="vc-item-collection">User API</span>
+        </div>
+        <div class="vc-item" data-search="get get user /users/:id">
+          <div class="vc-item-left">
+            <span style="font-weight:700;font-size:10px;color:var(--color-method-get);min-width:30px;">GET</span>
+            <strong>Get User</strong>
+          </div>
+          <span class="vc-item-url">/users/{{userId}}</span>
+          <span class="vc-item-collection">User API</span>
+        </div>
+        <div class="vc-item" data-search="post create user /users">
+          <div class="vc-item-left">
+            <span style="font-weight:700;font-size:10px;color:var(--color-method-post);min-width:30px;">POST</span>
+            <strong>Create User</strong>
+          </div>
+          <span class="vc-item-url">/users</span>
+          <span class="vc-item-collection">User API</span>
+        </div>
+        <div class="vc-item" data-search="put update user /users/:id">
+          <div class="vc-item-left">
+            <span style="font-weight:700;font-size:10px;color:var(--color-method-put);min-width:30px;">PUT</span>
+            <strong>Update User</strong>
+          </div>
+          <span class="vc-item-url">/users/{{userId}}</span>
+          <span class="vc-item-collection">User API</span>
+        </div>
+        <div class="vc-item" data-search="delete delete user /users/:id">
+          <div class="vc-item-left">
+            <span style="font-weight:700;font-size:10px;color:var(--color-method-delete);min-width:30px;">DEL</span>
+            <strong>Delete User</strong>
+          </div>
+          <span class="vc-item-url">/users/{{userId}}</span>
+          <span class="vc-item-collection">User API</span>
+        </div>
+        <div class="vc-item" data-search="get list orders /orders">
+          <div class="vc-item-left">
+            <span style="font-weight:700;font-size:10px;color:var(--color-method-get);min-width:30px;">GET</span>
+            <strong>List Orders</strong>
+          </div>
+          <span class="vc-item-url">/orders</span>
+          <span class="vc-item-collection">Orders API</span>
+        </div>
+        <div class="vc-item" data-search="post place order /orders">
+          <div class="vc-item-left">
+            <span style="font-weight:700;font-size:10px;color:var(--color-method-post);min-width:30px;">POST</span>
+            <strong>Place Order</strong>
+          </div>
+          <span class="vc-item-url">/orders</span>
+          <span class="vc-item-collection">Orders API</span>
+        </div>
+      </div>
+    </div>
+    <div class="context-note">Flat searchable request list + breadcrumb nav. Fast for finding requests. Each row shows method, name, URL path, and collection.</div>
+  </div>
+</div>
+
+<!-- Sketch toolbar -->
+<div id="sketch-tools" style="position:fixed;bottom:12px;right:12px;z-index:9999;font-family:system-ui;font-size:12px;background:rgba(0,0,0,0.85);color:white;padding:8px 12px;border-radius:8px;opacity:0.4;transition:opacity 0.2s;display:flex;gap:12px;align-items:center;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">
+  <select onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'" style="background:#333;color:#fff;border:1px solid #555;border-radius:3px;padding:2px 4px;font-size:11px;">
+    <option value="default">Default</option>
+  </select>
+  <button onclick="setViewport(375)" style="background:none;border:1px solid #555;color:#fff;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;">375</button>
+  <button onclick="setViewport(768)" style="background:none;border:1px solid #555;color:#fff;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;">768</button>
+  <button onclick="setViewport(0)" style="background:none;border:1px solid #555;color:#fff;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;">Full</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  function showVariant(id) {
+    document.querySelectorAll('.variant').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active'));
+    var el = document.getElementById('variant-' + id);
+    if (el) el.classList.add('active');
+    var idx = id === 'a' ? 0 : id === 'b' ? 1 : 2;
+    document.querySelectorAll('.variant-tab')[idx]?.classList.add('active');
+  }
+
+  // Variant A
+  function showVaNewCollection() {
+    document.getElementById('va-new-coll-wrap').style.display = 'block';
+    document.getElementById('va-new-coll-input').focus();
+  }
+  function hideVaNewCollection() {
+    document.getElementById('va-new-coll-wrap').style.display = 'none';
+  }
+  function createVaCollection() {
+    var name = document.getElementById('va-new-coll-input').value.trim();
+    if (!name) return;
+    var tree = document.getElementById('va-tree');
+    var div = document.createElement('div');
+    div.className = 'va-collection';
+    div.setAttribute('data-name', name.toLowerCase());
+    div.innerHTML = '<div class="va-col-header" onclick="toggleVaColl(this)"><span class="va-col-chevron">▶</span><span>📁 ' + name + '</span><span class="va-col-count">0</span></div><div class="va-col-items"></div>';
+    tree.appendChild(div);
+    hideVaNewCollection();
+    document.getElementById('va-new-coll-input').value = '';
+    toast('Collection "' + name + '" created');
+  }
+  function toggleVaColl(header) {
+    header.parentElement.classList.toggle('expanded');
+  }
+  function filterVaTree(query) {
+    var q = query.toLowerCase();
+    document.querySelectorAll('#va-tree .va-collection').forEach(function(c) {
+      var name = c.getAttribute('data-name') || '';
+      c.style.display = q && !name.includes(q) ? 'none' : '';
+    });
+  }
+
+  // Variant B
+  function selectVbColl(row, name) {
+    document.querySelectorAll('#variant-b .vb-table tr').forEach(function(r) { r.classList.remove('active'); });
+    row.classList.add('active');
+    document.getElementById('vb-detail-name').textContent = name;
+  }
+
+  // Variant C
+  function filterVcList(query) {
+    var q = query.toLowerCase();
+    document.querySelectorAll('#vc-list .vc-item').forEach(function(item) {
+      var search = item.getAttribute('data-search') || '';
+      item.style.display = q && !search.includes(q) ? 'none' : '';
+    });
+  }
+
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 2000);
+  }
+
+  function setViewport(w) {
+    document.querySelectorAll('.page').forEach(function(p) { p.style.maxWidth = w > 0 ? w + 'px' : '900px'; });
+  }
+</script>
+
+</body>
+</html>
