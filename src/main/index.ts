@@ -4,32 +4,9 @@ import log from './logging/log.js';
 import { registerIpcRouter } from './ipc/router.js';
 import { supervisor } from './jvm/supervisor.js';
 import { ensureDirs } from './storage/paths.js';
+import { createMainWindow } from './window.js';
 
 let mainWindow: BrowserWindow | null = null;
-
-function createMainWindow(): BrowserWindow {
-  const win = new BrowserWindow({
-    width: 1280,
-    height: 800,
-    minWidth: 800,
-    minHeight: 500,
-    webPreferences: {
-      preload: path.join(__dirname, '../preload/index.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true,
-      webSecurity: true
-    }
-  });
-
-  if (process.env['ELECTRON_RENDERER_URL']) {
-    win.loadURL(process.env['ELECTRON_RENDERER_URL']);
-  } else {
-    win.loadFile(path.join(__dirname, '../renderer/index.html'));
-  }
-
-  return win;
-}
 
 app.whenReady().then(async () => {
   try {
@@ -41,6 +18,12 @@ app.whenReady().then(async () => {
 
   registerIpcRouter();
   mainWindow = createMainWindow();
+
+  if (process.env['ELECTRON_RENDERER_URL']) {
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
+  } else {
+    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+  }
 
   supervisor.on('status', (status) => {
     mainWindow?.webContents.send('helper:status', status);
