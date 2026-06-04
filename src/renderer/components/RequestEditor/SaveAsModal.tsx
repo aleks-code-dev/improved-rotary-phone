@@ -1,29 +1,47 @@
 import { useState } from 'react';
 import { useCollectionsList, useUpdateCollection } from '../../hooks/useCollections';
+import type { RequestSpec } from '../../state/useRequest';
+import { useTabs } from '../../state/useTabs';
+import { specToCollectionItem } from './specToItem';
 
 interface SaveAsModalProps {
   open: boolean;
   requestName: string;
+  spec?: RequestSpec | null;
+  savedTabId?: string;
   onClose: () => void;
   onSaved: () => void;
 }
 
-export function SaveAsModal({ open, requestName, onClose, onSaved }: SaveAsModalProps) {
+export function SaveAsModal({ open, requestName, spec, savedTabId, onClose, onSaved }: SaveAsModalProps) {
   const { data: collections } = useCollectionsList();
   const updateCollection = useUpdateCollection();
   const [selectedId, setSelectedId] = useState<string>('');
   const [name, setName] = useState(requestName || 'Untitled Request');
 
   const handleSave = async () => {
-    if (!selectedId) return;
+    if (!selectedId || !spec) return;
     try {
       const coll = await window.api.collections.read({ id: selectedId });
-      coll.item.push({ name: name || 'Untitled Request', request: {}, response: [], event: [] });
+      const item = specToCollectionItem(spec, name || requestName);
+      coll.item = coll.item || [];
+      coll.item.push(item);
       await updateCollection.mutateAsync({ id: selectedId, collection: coll });
+
+      // Mark the tab clean and set source info for future in-place saves
+      if (savedTabId) {
+        useTabs.getState().markClean(savedTabId);
+        useTabs.getState().updateTab(savedTabId, {
+          sourceCollectionId: selectedId,
+          sourceItemIndex: coll.item.length - 1,
+          sourceItemName: name || requestName,
+        });
+      }
+
       onSaved();
       onClose();
-    } catch {
-      // Error — keep modal open
+    } catch (err) {
+      console.error('Failed to save request:', err);
     }
   };
 

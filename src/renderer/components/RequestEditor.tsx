@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTabs } from '../state/useTabs';
 import { useRequest, type RequestSpec } from '../state/useRequest';
 import { useCollectionsStore } from '../store/collections';
@@ -12,6 +13,8 @@ import { HeadersTab } from './RequestEditor/HeadersTab';
 import { BodyTab } from './RequestEditor/BodyTab';
 import { AuthTab } from './RequestEditor/AuthTab';
 import { SettingsTab } from './RequestEditor/SettingsTab';
+import { SaveAsModal } from './RequestEditor/SaveAsModal';
+import { specToCollectionItem } from './RequestEditor/specToItem';
 
 export function RequestEditor() {
   const activeTabId = useTabs((s) => s.activeTabId);
@@ -27,18 +30,35 @@ export function RequestEditor() {
   const [diagnoseResult, setDiagnoseResult] = useState<any>(null);
   const [currentRequestId, setCurrentRequestId] = useState<string | null>(null);
   const [unresolvedWarning, setUnresolvedWarning] = useState<string[] | null>(null);
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
 
   const activeCollectionId = useCollectionsStore((s) => s.activeCollectionId);
   const activeEnvId = useEnvironmentsStore((s) => s.activeEnvId);
   const appendEntry = useHistoryStore((s) => s.appendEntry);
+  const queryClient = useQueryClient();
 
   const method = spec?.method ?? 'GET';
-  const url = spec?.url ?? '';
+  const baseUrl = spec?.url ?? '';
+
+  // Compute display URL with query params appended
+  const displayUrl = useMemo(() => {
+    const params = spec?.queryParams ?? [];
+    const active = params.filter((p) => p.enabled && p.key);
+    if (active.length === 0) return baseUrl;
+    try {
+      const u = new URL(baseUrl || 'http://localhost');
+      for (const p of active) u.searchParams.append(p.key, p.value);
+      // Preserve original base (include protocol) when baseUrl is empty
+      return baseUrl ? u.toString() : '';
+    } catch {
+      return baseUrl;
+    }
+  }, [baseUrl, spec?.queryParams]);
 
   const isValidUrl = useMemo(() => {
-    if (!url || url.length === 0) return false;
-    try { new URL(url); return true; } catch { return false; }
-  }, [url]);
+    if (!baseUrl || baseUrl.length === 0) return false;
+    try { new URL(baseUrl); return true; } catch { return false; }
+  }, [baseUrl]);
 
   const handleSend = useCallback(async () => {
     if (!isValidUrl || sending) return;
@@ -71,12 +91,28 @@ export function RequestEditor() {
       const result = await window.api.request.send({ ...resolvedSpec, requestId });
       window.dispatchEvent(new CustomEvent('response:received', { detail: { tabId, result } }));
 
-      // Append to history (D-19)
-      if (activeCollectionId) {
-        appendEntry(activeCollectionId, {
+      // Append to history (D-19) — persist via IPC
+      const collectionId = activeCollectionId ?? '__global__';
+      try {
+        await window.api.history.append({
+          collectionId,
+          timestamp: Date.now(),
+          request: {
+            method: resolvedSpec.method,
+            url: resolvedSpec.url,
+            headers: (resolvedSpec.headers || []).map((h: any) => ({ key: h.key, value: h.value })),
+          },
+          response: {
+            status: result.status,
+            statusText: result.statusText,
+            durationMs: result.timing?.total ?? 0,
+          },
+        });
+        // Also update local store for immediate UI feedback
+        appendEntry(collectionId, {
           id: requestId,
           timestamp: Date.now(),
-          collectionId: activeCollectionId,
+          collectionId,
           request: { method: resolvedSpec.method, url: resolvedSpec.url },
           response: {
             status: result.status,
@@ -84,7 +120,10 @@ export function RequestEditor() {
             durationMs: result.timing?.total ?? 0,
           },
         } as any);
-      }
+      } catch { /* history is non-critical */ }
+
+      // Invalidate history query so sidebar refreshes
+      queryClient.invalidateQueries({ queryKey: ['history'] });
     } catch (err: any) {
       window.dispatchEvent(new CustomEvent('response:error', { detail: { tabId, error: { code: 'UNKNOWN', message: err.message } } }));
     } finally {
@@ -133,7 +172,38 @@ export function RequestEditor() {
   }, []);
 
   const handleSave = useCallback(async () => {
-    // TODO: Save to collection flow (SaveAsModal integration in Task 10)
+    const tabs = useTabs.getState().openTabs;
+    const activeTab = tabs.find((t) => t.id === tabId);
+
+    if (activeTab?.sourceCollectionId != null && activeTab?.sourceItemIndex != null) {
+      // In-place save: update existing collection item
+      try {
+        const currentSpec = getSpec(tabId);
+        const itemName = activeTab.sourceItemName || (currentSpec.method + ' ' + currentSpec.url);
+        const item = specToCollectionItem(currentSpec, itemName);
+
+        const coll = await window.api.collections.read({ id: activeTab.sourceCollectionId });
+        coll.item = coll.item || [];
+        coll.item[activeTab.sourceItemIndex] = item;
+
+        await window.api.collections.update({ id: activeTab.sourceCollectionId, collection: coll });
+
+        useTabs.getState().markClean(tabId);
+        useTabs.getState().updateTab(tabId, { sourceItemName: currentSpec.method + ' ' + currentSpec.url });
+
+        queryClient.invalidateQueries({ queryKey: ['collections'] });
+        queryClient.invalidateQueries({ queryKey: ['collections', activeTab.sourceCollectionId] });
+      } catch (err) {
+        console.error('Failed to save request in-place:', err);
+      }
+    } else {
+      // New unsaved tab: open SaveAsModal
+      setSaveModalOpen(true);
+    }
+  }, [tabId, getSpec, queryClient]);
+
+  const handleSaveAs = useCallback(() => {
+    setSaveModalOpen(true);
   }, []);
 
   return (
@@ -144,8 +214,17 @@ export function RequestEditor() {
 
         <input
           type="text"
-          value={url}
-          onChange={(e) => setUrl(tabId, e.target.value)}
+          value={displayUrl}
+          onChange={(e) => {
+            // If URL has query string, parse it apart
+            const val = e.target.value;
+            const qIdx = val.indexOf('?');
+            if (qIdx >= 0) {
+              setUrl(tabId, val.slice(0, qIdx));
+            } else {
+              setUrl(tabId, val);
+            }
+          }}
           placeholder="https://example.com/path"
           style={{
             flex: 1,
@@ -250,6 +329,15 @@ export function RequestEditor() {
           )}
         </div>
       )}
+
+      <SaveAsModal
+        open={saveModalOpen}
+        requestName={method + ' ' + baseUrl}
+        spec={spec}
+        savedTabId={tabId}
+        onClose={() => setSaveModalOpen(false)}
+        onSaved={() => setSaveModalOpen(false)}
+      />
     </div>
   );
 }

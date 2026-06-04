@@ -71,7 +71,7 @@ export const useTabs = create<TabsState>((set, get) => ({
 
   updateTab: (id: string, partial: Partial<Tab>) => {
     set((state) => ({
-      openTabs: state.openTabs.map((t) => (t.id === id ? { ...t, ...partial, isDirty: true } : t)),
+      openTabs: state.openTabs.map((t) => (t.id === id ? { ...t, ...partial } : t)),
     }));
   },
 
