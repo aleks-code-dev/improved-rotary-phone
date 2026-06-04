@@ -20,4 +20,4 @@ The builder is a power tool, not a design showcase. Colors derive from HTTP meth
 | 005 | collection-management | How does creating collections and adding requests feel? | A | [collections, sidebar, tree] |
 | 006 | database-connection | What does the IntelliJ-style DB connection screen look like? | B | [database, connection, form] |
 | 007 | db-table-row-picker | How do users browse tables and pick a row from a connected DB? | D | [database, table, picker, body] |
-| 008 | db-body-preview | How is generated JSON from DB rows previewed and accepted into the request body? | null | [database, body, preview, json] |
+| 008 | db-body-preview | How is generated JSON from DB rows previewed and accepted into the request body? | skip — covered by 007-D | [database, body, preview, json] |
