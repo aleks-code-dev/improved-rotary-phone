@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sketch 010: Chain Link Builder</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans); font-size: var(--text-sm);
+    background: var(--color-bg); color: var(--color-text);
+    padding: 60px 24px 60px;
+  }
+  #variant-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 9998;
+    background: var(--color-surface); border-bottom: 1px solid var(--color-border);
+    padding: 8px 16px; display: flex; gap: 6px;
+  }
+  .variant-tab {
+    padding: 4px 12px; border: 1px solid var(--color-border);
+    border-radius: var(--radius-1); background: transparent;
+    color: var(--color-text-muted); cursor: pointer;
+    font-size: var(--text-xs); transition: .15s; font-family: var(--font-sans);
+  }
+  .variant-tab:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+  .variant-tab.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+  .variant { display: none; }
+  .variant.active { display: block; }
+
+  .page { max-width: 950px; margin: 0 auto; }
+  .section-label { font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: .08em; color: var(--color-text-dim); margin-bottom: var(--space-2); font-weight: 600; }
+  .context-note { font-size: var(--text-2xs); color: var(--color-text-dim); margin-top: var(--space-3); font-style: italic; }
+  p.desc { font-size: var(--text-xs); color: var(--color-text-dim); margin-bottom: var(--space-4); line-height: 1.5; }
+  .spacer { flex: 1; }
+  .btn {
+    padding: 4px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-1);
+    background: transparent; color: var(--color-text-muted); cursor: pointer;
+    font-size: var(--text-xs); transition: .15s; font-family: var(--font-sans);
+  }
+  .btn:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+  .btn-primary { background: var(--color-accent); color: #fff; border: none; font-weight: 600; }
+  .btn-primary:hover { background: var(--color-accent-hover); }
+
+  .json-key { color: var(--color-primary); }
+  .json-string { color: var(--color-success); }
+  .json-number { color: var(--color-accent); }
+  .json-bool { color: var(--color-method-patch); }
+
+  /* Chain context bar (shared) */
+  .chain-bar {
+    display: flex; align-items: center; gap: var(--space-2);
+    padding: var(--space-2) var(--space-3); background: rgba(156,60,224,0.08);
+    border: 1px solid var(--color-method-patch); border-radius: var(--radius-2);
+    margin-bottom: var(--space-3); font-size: var(--text-xs);
+  }
+  .chain-badge {
+    font-size: 10px; background: var(--color-method-patch); color: #fff;
+    padding: 2px 10px; border-radius: var(--radius-full); font-weight: 600;
+  }
+  .chain-step-indicator {
+    font-size: 10px; background: var(--color-primary); color: #fff;
+    padding: 2px 10px; border-radius: var(--radius-full); font-weight: 600;
+  }
+
+  /* Toolbar (shared) */
+  .toolbar {
+    display: flex; align-items: stretch;
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-2); overflow: hidden; margin-bottom: var(--space-3);
+  }
+  .toolbar-method {
+    display: flex; align-items: center; padding: 6px 14px;
+    font-weight: 700; font-size: var(--text-sm); color: #fff;
+    background: var(--color-method-put); min-width: 65px;
+  }
+  .toolbar-url {
+    flex: 1; background: transparent; border: none; outline: none;
+    padding: 6px 12px; color: var(--color-text);
+    font-family: var(--font-mono); font-size: 13px;
+  }
+  .toolbar-url::placeholder { color: var(--color-text-dim); }
+  .toolbar-send {
+    padding: 6px 18px; border: none; background: var(--color-accent);
+    color: #fff; font-weight: 700; font-size: var(--text-xs); cursor: pointer;
+  }
+
+  .section-tabs {
+    display: flex; gap: var(--space-1); border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-2); margin-bottom: var(--space-2);
+  }
+  .body-editor {
+    background: #0d1117; border: 1px solid var(--color-border);
+    border-radius: var(--radius-1); padding: var(--space-3);
+    font-family: var(--font-mono); font-size: 12px; line-height: 1.6;
+    color: var(--color-text); min-height: 100px;
+  }
+
+  /* Reference expression highlight */
+  .ref-expr {
+    background: rgba(156,60,224,0.2); color: var(--color-method-patch);
+    padding: 1px 4px; border-radius: 2px; font-weight: 600;
+  }
+
+  /* ========== VARIANT A: Right Data Panel ========== */
+  .va-shell {
+    display: flex; gap: 0; border: 1px solid var(--color-border);
+    border-radius: var(--radius-2); overflow: hidden; min-height: 320px;
+  }
+  .va-main {
+    flex: 1; display: flex; flex-direction: column; padding: var(--space-3);
+    background: var(--color-bg); min-width: 0;
+  }
+  .va-data-sidebar {
+    width: 300px; min-width: 260px; background: var(--color-surface);
+    border-left: 1px solid var(--color-border); display: flex; flex-direction: column;
+  }
+  .va-sidebar-header {
+    display: flex; align-items: center; gap: var(--space-2);
+    padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border);
+    font-size: var(--text-2xs); font-weight: 600; text-transform: uppercase;
+    letter-spacing: .05em; color: var(--color-text-dim);
+  }
+  .va-data-list { flex: 1; overflow-y: auto; padding: var(--space-1); }
+  .va-step-group { margin-bottom: var(--space-2); }
+  .va-step-group-header {
+    display: flex; align-items: center; gap: var(--space-1);
+    padding: 4px var(--space-2); font-size: 11px; font-weight: 600;
+    color: var(--color-text); border-bottom: 1px solid var(--color-border);
+    margin-bottom: 2px;
+  }
+  .va-data-item {
+    display: flex; align-items: center; gap: var(--space-1);
+    padding: 3px var(--space-2); cursor: pointer; border-radius: var(--radius-1);
+    font-size: 10px; font-family: var(--font-mono); transition: .1s;
+  }
+  .va-data-item:hover { background: var(--color-surface-raised); }
+  .va-data-path { color: var(--color-primary); }
+  .va-data-val { color: var(--color-text); margin-left: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; }
+  .va-data-copy {
+    font-size: 9px; color: var(--color-text-dim); padding: 1px 4px;
+    border: 1px solid var(--color-border); border-radius: var(--radius-1);
+    cursor: pointer; background: transparent; font-family: var(--font-sans);
+    display: none;
+  }
+  .va-data-item:hover .va-data-copy { display: inline; }
+  .va-data-copy:hover { color: var(--color-text); border-color: var(--color-primary); }
+
+  /* ========== VARIANT B: Bottom Data Panel ========== */
+  .vb-main {
+    background: var(--color-bg); padding: var(--space-3);
+    border: 1px solid var(--color-border); border-radius: var(--radius-2);
+  }
+  .vb-data-panel {
+    border: 1px solid var(--color-border); border-radius: var(--radius-2);
+    background: var(--color-surface); margin-top: var(--space-3);
+  }
+  .vb-data-header {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border);
+    cursor: pointer; font-size: var(--text-xs); font-weight: 600;
+  }
+  .vb-data-body { display: none; padding: var(--space-2) var(--space-3); }
+  .vb-data-panel.open .vb-data-body { display: block; }
+  .vb-data-chevron { font-size: 9px; color: var(--color-text-dim); transition: .15s; }
+  .vb-data-panel.open .vb-data-chevron { transform: rotate(90deg); }
+  .vb-step-columns { display: flex; gap: var(--space-3); overflow-x: auto; }
+  .vb-step-col {
+    flex: 1; min-width: 200px; background: var(--color-surface-raised);
+    border: 1px solid var(--color-border); border-radius: var(--radius-1);
+    padding: var(--space-2);
+  }
+  .vb-step-col-title {
+    font-size: var(--text-2xs); font-weight: 600; color: var(--color-success);
+    text-transform: uppercase; letter-spacing: .05em; margin-bottom: var(--space-1);
+    padding-bottom: var(--space-1); border-bottom: 1px solid var(--color-border);
+  }
+  .vb-data-row {
+    display: flex; align-items: center; gap: var(--space-1);
+    font-size: 10px; font-family: var(--font-mono); padding: 2px 0;
+  }
+
+  /* ========== VARIANT C: Inline Reference Picker ========== */
+  .vc-main {
+    padding: var(--space-3); background: var(--color-bg);
+    border: 1px solid var(--color-border); border-radius: var(--radius-2);
+  }
+  .vc-field-group { margin-bottom: var(--space-3); }
+  .vc-field-label { font-size: var(--text-2xs); color: var(--color-text-dim); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; font-weight: 600; }
+  .vc-field-row { display: flex; align-items: center; gap: var(--space-2); }
+  .vc-field-input {
+    flex: 1; background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-1); padding: 5px 10px; color: var(--color-text);
+    font-family: var(--font-mono); font-size: 13px; outline: none;
+    position: relative;
+  }
+  .vc-field-input:focus { border-color: var(--color-border-focus); }
+  .vc-pick-btn {
+    padding: 5px 10px; border: 1px solid var(--color-method-patch); border-radius: var(--radius-1);
+    background: rgba(156,60,224,0.08); color: var(--color-method-patch); cursor: pointer;
+    font-size: var(--text-xs); font-weight: 600; font-family: var(--font-sans);
+    white-space: nowrap; transition: .15s;
+  }
+  .vc-pick-btn:hover { background: rgba(156,60,224,0.18); }
+  .vc-picker-popup {
+    display: none; position: absolute; top: 100%; left: 0; z-index: 10;
+    background: var(--color-surface-raised); border: 1px solid var(--color-border);
+    border-radius: var(--radius-2); box-shadow: var(--shadow-md);
+    min-width: 280px; margin-top: 4px; overflow: hidden;
+  }
+  .vc-picker-popup.open { display: block; }
+  .vc-picker-section {
+    padding: var(--space-2); border-bottom: 1px solid var(--color-border);
+  }
+  .vc-picker-section-title { font-size: 10px; font-weight: 600; color: var(--color-success); text-transform: uppercase; letter-spacing: .05em; margin-bottom: var(--space-1); }
+  .vc-picker-item {
+    display: flex; align-items: center; gap: var(--space-1);
+    padding: 3px var(--space-1); cursor: pointer; border-radius: var(--radius-1);
+    font-family: var(--font-mono); font-size: 10px; transition: .1s;
+  }
+  .vc-picker-item:hover { background: var(--color-surface); }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
+    background: var(--color-success); color: #fff;
+    padding: 8px 20px; border-radius: var(--radius-1);
+    font-size: var(--text-xs); font-weight: 600;
+    opacity: 0; transition: opacity .25s; z-index: 10000; pointer-events: none;
+  }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div id="variant-nav">
+  <button class="variant-tab active" onclick="showVariant('a')">A: Right Data Panel</button>
+  <button class="variant-tab" onclick="showVariant('b')">B: Bottom Data Panel ★ Selected</button>
+  <button class="variant-tab" onclick="showVariant('c')">C: Inline Reference Picker</button>
+</div>
+
+<!-- ======== VARIANT A ======== -->
+<div id="variant-a" class="variant active">
+  <div class="page">
+    <div class="section-label">A: Right Data Panel — Builder + previous link data sidebar</div>
+    <p class="desc">Request builder on the left, previous-link data browser on the right. Data organized by step with response body/headers/status. Hover a data field to see reference path. Click to copy the expression (e.g., <span class="ref-expr">$step1.response.body.id</span>).</p>
+
+    <div class="chain-bar">
+      <span class="chain-badge">🔗 User Onboarding Flow</span>
+      <span class="chain-step-indicator">Step 3 of 4</span>
+      <span style="font-size:var(--text-xs);">PUT /users/{{userId}}</span>
+      <span class="spacer"></span>
+      <span style="font-size:10px;color:var(--color-text-dim);">Data available from steps 1–2</span>
+    </div>
+
+    <div class="va-shell">
+      <div class="va-main">
+        <div class="toolbar">
+          <div class="toolbar-method">PUT</div>
+          <input class="toolbar-url" type="text" value="https://api.example.com/users/{{$step1.response.body.id}}" placeholder="https://api.example.com/path">
+          <button class="toolbar-send" onclick="toast('Step 3 sent')">Send</button>
+        </div>
+
+        <div class="section-tabs">
+          <button class="btn" style="background:var(--color-surface-raised);color:var(--color-text);border-color:var(--color-primary);">Params</button>
+          <button class="btn">Headers</button>
+          <button class="btn" style="background:var(--color-surface-raised);color:var(--color-text);border-color:var(--color-primary);">Body</button>
+          <button class="btn">Auth</button>
+        </div>
+
+        <div class="body-editor">
+          <span class="json-key">"name"</span>: <span class="ref-expr">$step1.response.body.name</span>,<br>
+          <span class="json-key">"email"</span>: <span class="ref-expr">$step2.response.body.email</span>,<br>
+          <span class="json-key">"role"</span>: <span class="json-string">"editor"</span>,<br>
+          <span class="json-key">"token"</span>: <span class="ref-expr">$step1.response.headers.Authorization</span>
+        </div>
+      </div>
+
+      <div class="va-data-sidebar">
+        <div class="va-sidebar-header">
+          <span>📦 Previous Step Data</span>
+          <span style="font-size:9px;color:var(--color-primary);">Click to copy reference</span>
+        </div>
+        <div class="va-data-list">
+          <!-- Step 1 data -->
+          <div class="va-step-group">
+            <div class="va-step-group-header">Step 1 · POST /users · ✓ 201</div>
+            <div class="va-data-item" onclick="toast('Copied: $step1.response.body.id')">
+              <span class="va-data-path">body.id</span><span class="va-data-val">201</span>
+              <button class="va-data-copy">Copy</button>
+            </div>
+            <div class="va-data-item" onclick="toast('Copied: $step1.response.body.name')">
+              <span class="va-data-path">body.name</span><span class="va-data-val">"New User"</span>
+              <button class="va-data-copy">Copy</button>
+            </div>
+            <div class="va-data-item" onclick="toast('Copied: $step1.response.body.email')">
+              <span class="va-data-path">body.email</span><span class="va-data-val">"user@test.com"</span>
+              <button class="va-data-copy">Copy</button>
+            </div>
+            <div class="va-data-item" onclick="toast('Copied: $step1.response.headers.Authorization')">
+              <span class="va-data-path">headers.Authorization</span><span class="va-data-val">Bearer eyJ...</span>
+              <button class="va-data-copy">Copy</button>
+            </div>
+            <div class="va-data-item" onclick="toast('Copied: $step1.response.status')">
+              <span class="va-data-path">status</span><span class="va-data-val">201</span>
+              <button class="va-data-copy">Copy</button>
+            </div>
+          </div>
+          <!-- Step 2 data -->
+          <div class="va-step-group">
+            <div class="va-step-group-header">Step 2 · GET /users/201 · ✓ 200</div>
+            <div class="va-data-item" onclick="toast('Copied: $step2.response.body.id')">
+              <span class="va-data-path">body.id</span><span class="va-data-val">201</span>
+              <button class="va-data-copy">Copy</button>
+            </div>
+            <div class="va-data-item" onclick="toast('Copied: $step2.response.body.email')">
+              <span class="va-data-path">body.email</span><span class="va-data-val">"user@test.com"</span>
+              <button class="va-data-copy">Copy</button>
+            </div>
+            <div class="va-data-item" onclick="toast('Copied: $step2.response.body.role')">
+              <span class="va-data-path">body.role</span><span class="va-data-val">"user"</span>
+              <button class="va-data-copy">Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="context-note">Right panel shows all previous step responses. Click any field to copy its reference expression. Paste into URL, headers, or body.</div>
+  </div>
+</div>
+
+<!-- ======== VARIANT B ======== -->
+<div id="variant-b" class="variant">
+  <div class="page">
+    <div class="section-label">B: Bottom Data Panel — Collapsible previous step data</div>
+    <p class="desc">Request builder on top, collapsible data panel below showing previous step responses in columns. Each column is one step's response. Expand to browse. Good when you want the builder to have full width.</p>
+
+    <div class="chain-bar">
+      <span class="chain-badge">🔗 User Onboarding Flow</span>
+      <span class="chain-step-indicator">Step 3 of 4</span>
+      <span class="spacer"></span>
+      <button class="btn" onclick="toast('Run step only')">▶ Run This Step</button>
+    </div>
+
+    <div class="vb-main">
+      <div class="toolbar">
+        <div class="toolbar-method">PUT</div>
+        <input class="toolbar-url" type="text" value="https://api.example.com/users/{{$step1.body.id}}" placeholder="https://api.example.com/path">
+        <button class="toolbar-send" onclick="toast('Step 3 sent')">Send</button>
+      </div>
+
+      <div class="section-tabs">
+        <button class="btn">Params</button><button class="btn">Headers</button>
+        <button class="btn" style="background:var(--color-surface-raised);color:var(--color-text);border-color:var(--color-primary);">Body</button>
+        <button class="btn">Auth</button>
+      </div>
+
+      <div class="body-editor">
+        <span class="json-key">"name"</span>: <span class="ref-expr">$step1.body.name</span>,<br>
+        <span class="json-key">"email"</span>: <span class="ref-expr">$step2.body.email</span>,<br>
+        <span class="json-key">"role"</span>: <span class="json-string">"editor"</span>
+      </div>
+    </div>
+
+    <div class="vb-data-panel open">
+      <div class="vb-data-header" onclick="this.parentElement.classList.toggle('open')">
+        <span class="vb-data-chevron">▶</span>
+        <span>📦 Previous Step Responses</span>
+        <span style="font-size:10px;color:var(--color-text-dim);">2 steps available</span>
+      </div>
+      <div class="vb-data-body">
+        <div class="vb-step-columns">
+          <div class="vb-step-col">
+            <div class="vb-step-col-title">Step 1 · POST /users · 201</div>
+            <div class="vb-data-row"><span style="color:var(--color-primary);">id</span>: <span>201</span> <button class="btn" style="font-size:9px;padding:1px 4px;" onclick="toast('Copied: $step1.response.body.id')">Copy path</button></div>
+            <div class="vb-data-row"><span style="color:var(--color-primary);">name</span>: <span>"New User"</span></div>
+            <div class="vb-data-row"><span style="color:var(--color-primary);">email</span>: <span>"user@test.com"</span></div>
+            <div class="vb-data-row"><span style="color:var(--color-primary);">headers.Auth</span>: <span>Bearer eyJ...</span></div>
+          </div>
+          <div class="vb-step-col">
+            <div class="vb-step-col-title">Step 2 · GET /users/201 · 200</div>
+            <div class="vb-data-row"><span style="color:var(--color-primary);">id</span>: <span>201</span></div>
+            <div class="vb-data-row"><span style="color:var(--color-primary);">email</span>: <span>"user@test.com"</span></div>
+            <div class="vb-data-row"><span style="color:var(--color-primary);">role</span>: <span>"user"</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="context-note">Bottom panel keeps the builder full-width. Columns show each step's response. Click to copy reference paths.</div>
+  </div>
+</div>
+
+<!-- ======== VARIANT C ======== -->
+<div id="variant-c" class="variant">
+  <div class="page">
+    <div class="section-label">C: Inline Reference Picker — Pick data while editing</div>
+    <p class="desc">While editing any field (URL, header value, body), a <strong>Pick Data</strong> button opens a popup showing available previous-step data. Click a value → it inserts the reference expression inline. No separate panel needed.</p>
+
+    <div class="chain-bar">
+      <span class="chain-badge">🔗 User Onboarding Flow</span>
+      <span class="chain-step-indicator">Step 3 of 4</span>
+      <span class="spacer"></span>
+      <span style="font-size:10px;color:var(--color-text-dim);">Click "Pick Data" in any field to reference previous steps</span>
+    </div>
+
+    <div class="vc-main">
+      <div class="toolbar">
+        <div class="toolbar-method">PUT</div>
+        <div style="flex:1;position:relative;">
+          <input class="toolbar-url" type="text" value="https://api.example.com/users/{{$step1.response.body.id}}" placeholder="https://api.example.com/path" style="width:100%;border:none;border-radius:0;">
+        </div>
+        <button class="toolbar-send" onclick="toast('Step 3 sent')">Send</button>
+      </div>
+
+      <div style="padding:0;margin-bottom:var(--space-3);">
+        <div style="display:flex;align-items:center;gap:var(--space-2);">
+          <button class="vc-pick-btn" onclick="toggleVcPicker('picker-url')">📦 Pick Data</button>
+          <span style="font-size:10px;color:var(--color-text-dim);">URL currently uses data from Step 1</span>
+        </div>
+        <div class="vc-picker-popup" id="picker-url" style="position:relative;">
+          <div class="vc-picker-section">
+            <div class="vc-picker-section-title">Step 1 — POST /users ✓ 201</div>
+            <div class="vc-picker-item" onclick="toast('Inserted: $step1.response.body.id')"><span style="color:var(--color-primary);">body.id</span> <span>→ 201</span></div>
+            <div class="vc-picker-item" onclick="toast('Inserted: $step1.response.body.name')"><span style="color:var(--color-primary);">body.name</span> <span>→ "New User"</span></div>
+          </div>
+          <div class="vc-picker-section">
+            <div class="vc-picker-section-title">Step 2 — GET /users/201 ✓ 200</div>
+            <div class="vc-picker-item" onclick="toast('Inserted: $step2.response.body.email')"><span style="color:var(--color-primary);">body.email</span> <span>→ "user@test.com"</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-tabs">
+        <button class="btn">Params</button><button class="btn">Headers</button>
+        <button class="btn" style="background:var(--color-surface-raised);color:var(--color-text);border-color:var(--color-primary);">Body</button>
+        <button class="btn">Auth</button>
+      </div>
+
+      <div style="position:relative;">
+        <div class="body-editor" style="margin-bottom:var(--space-2);">
+          <span class="json-key">"name"</span>: <span class="ref-expr">$step1.response.body.name</span>,<br>
+          <span class="json-key">"email"</span>: <span class="ref-expr">$step2.response.body.email</span>,<br>
+          <span class="json-key">"role"</span>: <span class="json-string">"editor"</span>
+        </div>
+        <button class="vc-pick-btn" style="position:absolute;top:var(--space-2);right:var(--space-2);" onclick="toggleVcPicker('picker-body')">📦 Pick Data</button>
+        <div class="vc-picker-popup" id="picker-body" style="position:relative;margin-top:0;">
+          <div class="vc-picker-section">
+            <div class="vc-picker-section-title">Step 1 — Response Body</div>
+            <div class="vc-picker-item" onclick="toast('Inserted: $step1.response.body.id')"><span style="color:var(--color-primary);">body.id</span> <span>→ 201</span></div>
+            <div class="vc-picker-item" onclick="toast('Inserted: $step1.response.body.name')"><span style="color:var(--color-primary);">body.name</span> <span>→ "New User"</span></div>
+            <div class="vc-picker-item" onclick="toast('Inserted: $step1.response.body.email')"><span style="color:var(--color-primary);">body.email</span> <span>→ "user@test.com"</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="context-note">Pick Data buttons appear next to editable fields. Click to browse previous step data and insert reference expressions inline.</div>
+  </div>
+</div>
+
+<!-- Sketch toolbar -->
+<div id="sketch-tools" style="position:fixed;bottom:12px;right:12px;z-index:9999;font-family:system-ui;font-size:12px;background:rgba(0,0,0,0.85);color:white;padding:8px 12px;border-radius:8px;opacity:0.4;transition:opacity 0.2s;display:flex;gap:12px;align-items:center;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">
+  <select onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'" style="background:#333;color:#fff;border:1px solid #555;border-radius:3px;padding:2px 4px;font-size:11px;">
+    <option value="default">Default</option>
+  </select>
+  <button onclick="setViewport(375)" style="background:none;border:1px solid #555;color:#fff;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;">375</button>
+  <button onclick="setViewport(768)" style="background:none;border:1px solid #555;color:#fff;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;">768</button>
+  <button onclick="setViewport(0)" style="background:none;border:1px solid #555;color:#fff;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;">Full</button>
+</div>
+<div id="toast"></div>
+
+<script>
+  function showVariant(id) {
+    document.querySelectorAll('.variant').forEach(function(v) { v.classList.remove('active'); });
+    document.querySelectorAll('.variant-tab').forEach(function(t) { t.classList.remove('active'); });
+    var el = document.getElementById('variant-' + id);
+    if (el) el.classList.add('active');
+    var idx = id === 'a' ? 0 : id === 'b' ? 1 : 2;
+    document.querySelectorAll('.variant-tab')[idx]?.classList.add('active');
+  }
+  function toggleVcPicker(id) {
+    var el = document.getElementById(id);
+    el.classList.toggle('open');
+  }
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 2000);
+  }
+  function setViewport(w) {
+    document.querySelectorAll('.page').forEach(function(p) { p.style.maxWidth = w > 0 ? w + 'px' : '950px'; });
+  }
+
+  // Close pickers on outside click
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.vc-pick-btn') && !e.target.closest('.vc-picker-popup')) {
+      document.querySelectorAll('.vc-picker-popup').forEach(function(p) { p.classList.remove('open'); });
+    }
+  });
+</script>
+</body>
+</html>
