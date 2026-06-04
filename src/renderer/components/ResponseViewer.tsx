@@ -84,11 +84,18 @@ export function ResponseViewer() {
       window.dispatchEvent(new CustomEvent('curl:copy', { detail: { tabId } }));
     },
     onCancel: () => {
-      window.dispatchEvent(new CustomEvent('request:cancel-kb', { detail: { tabId } }));
+      window.api.request.cancel({ requestId: tabId });
     },
-    onFindInBody: () => setSearchVisible((v) => !v),
-    onToggleComment: () => {
-      // Monaco's comment toggle is handled by the editor itself
+    onFindInBody: () => {
+      setSearchVisible(!searchVisible);
+      searchRef.current?.focus();
+    },
+    onToggleComment: () => {},
+    onSave: () => {
+      window.dispatchEvent(new CustomEvent('menu:save'));
+    },
+    onSaveAs: () => {
+      window.dispatchEvent(new CustomEvent('menu:saveAs'));
     },
     isSending: sending,
   });

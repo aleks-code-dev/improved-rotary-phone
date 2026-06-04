@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useRequest, type AuthType, type RequestAuth } from '../../state/useRequest';
+import { useRequest, type AuthType } from '../../state/useRequest';
 
 interface AuthTabProps {
   tabId: string;
@@ -43,6 +43,7 @@ export function AuthTab({ tabId }: AuthTabProps) {
           label="Token"
           value={auth.token}
           onChange={(v) => setAuth(tabId, { ...auth, token: v })}
+          showEnvVar
         />
       )}
 
@@ -61,6 +62,7 @@ export function AuthTab({ tabId }: AuthTabProps) {
             label="Password"
             value={auth.password}
             onChange={(v) => setAuth(tabId, { ...auth, password: v })}
+            showEnvVar
           />
         </div>
       )}
@@ -81,6 +83,7 @@ export function AuthTab({ tabId }: AuthTabProps) {
             label="Value"
             value={auth.value}
             onChange={(v) => setAuth(tabId, { ...auth, value: v })}
+            showEnvVar
           />
           <div>
             <label style={labelStyle}>Add to</label>
@@ -111,7 +114,12 @@ export function AuthTab({ tabId }: AuthTabProps) {
   );
 }
 
-function SecretField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+function SecretField({ label, value, onChange, showEnvVar }: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  showEnvVar?: boolean;
+}) {
   const [revealed, setRevealed] = useState(false);
 
   return (
@@ -125,9 +133,22 @@ function SecretField({ label, value, onChange }: { label: string; value: string;
           placeholder={value ? '••••••' : label}
           style={{ ...inputStyle, flex: 1 }}
         />
-        <button onClick={() => setRevealed(!revealed)} style={revealBtnStyle} title={revealed ? 'Hide' : 'Show'}>
+        <button
+          onClick={() => setRevealed(!revealed)}
+          style={revealBtnStyle}
+          title={revealed ? 'Hide' : 'Show'}
+        >
           {revealed ? '🙈' : '👁'}
         </button>
+        {showEnvVar && value && !value.startsWith('{{') && (
+          <button
+            onClick={() => onChange(`{{${label.toLowerCase()}}}`)}
+            style={{ ...revealBtnStyle, fontSize: 10, padding: '4px 6px' }}
+            title="Use env var"
+          >
+            {'{{}}'}
+          </button>
+        )}
       </div>
     </div>
   );

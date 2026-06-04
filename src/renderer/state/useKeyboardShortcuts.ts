@@ -6,20 +6,20 @@ interface KeyboardShortcutsOptions {
   onCancel: () => void;
   onFindInBody: () => void;
   onToggleComment: () => void;
+  onSave: () => void;
+  onSaveAs: () => void;
   isSending: boolean;
 }
 
 /**
  * Register global keyboard shortcuts.
- * D-35: Ctrl+Enter (Send), Ctrl+Shift+C (Copy as cURL),
- * Ctrl+F (Find in response), Ctrl+/ (Toggle comment), Escape (Cancel).
+ * D-35: Full shortcut set for Phase 1.
  */
 export function useKeyboardShortcuts(opts: KeyboardShortcutsOptions) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const mod = e.ctrlKey || e.metaKey;
 
-      // Don't intercept when focused on an input (except Ctrl+Enter for Send, Ctrl+Shift+C for Copy)
       const target = e.target as HTMLElement;
       const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT';
 
@@ -34,6 +34,20 @@ export function useKeyboardShortcuts(opts: KeyboardShortcutsOptions) {
       if (mod && e.shiftKey && e.key === 'C') {
         e.preventDefault();
         opts.onCopyCurl();
+        return;
+      }
+
+      // Ctrl+S → Save (always)
+      if (mod && !e.shiftKey && e.key === 's') {
+        e.preventDefault();
+        opts.onSave();
+        return;
+      }
+
+      // Ctrl+Shift+S → Save As (always)
+      if (mod && e.shiftKey && e.key === 'S') {
+        e.preventDefault();
+        opts.onSaveAs();
         return;
       }
 
