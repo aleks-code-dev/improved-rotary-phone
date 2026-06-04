@@ -16,6 +16,7 @@
     "types": ["vite/client"]
   },
   "include": [
-    "src/renderer/**/*"
+    "src/renderer/**/*",
+    "src/shared/**/*"
   ]
 }

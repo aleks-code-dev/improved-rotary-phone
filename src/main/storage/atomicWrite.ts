@@ -1,6 +1,10 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
+export async function writeFileAtomic(targetPath: string, data: string | Uint8Array): Promise<void> {
+  return atomicWrite(targetPath, data);
+}
+
 export async function atomicWrite(targetPath: string, data: string | Uint8Array): Promise<void> {
   const isWindows = process.platform === 'win32';
   const normalizedTarget = isWindows && targetPath.length > 240
