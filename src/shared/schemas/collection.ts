@@ -3,7 +3,7 @@ import { z } from 'zod';
 // --- Variable Schema (shared across collection and environment) ---
 export const VariableSchema = z.object({
   key: z.string(),
-  value: z.union([z.string(), z.record(z.string(), z.unknown())]),
+  value: z.union([z.string(), z.number(), z.boolean(), z.record(z.string(), z.unknown())]),
   type: z.enum(['string', 'number', 'boolean', 'json', 'secret']).optional(),
 }).passthrough();
 
@@ -115,14 +115,41 @@ export const AuthSchema = z.discriminatedUnion('type', [
 export type Auth = z.infer<typeof AuthSchema>;
 
 // --- Item Schema (a single request item in a collection) ---
+// Uses raw Postman v2.1 format (not our internal RequestSpec).
+// Transform to internal RequestSpec happens at the import-export layer.
 export const ItemSchema = z.object({
   name: z.string(),
-  request: RequestSpecSchema,
+  request: z.object({
+    method: z.string().optional(),
+    url: z.union([z.string(), z.record(z.string(), z.unknown())]).optional(),
+    header: z.array(z.object({
+      key: z.string(),
+      value: z.string(),
+      type: z.string().optional(),
+    })).default([]),
+    body: z.object({
+      mode: z.string().optional(),
+      raw: z.string().optional(),
+      urlencoded: z.array(z.object({
+        key: z.string(),
+        value: z.string(),
+        type: z.string().optional(),
+      })).optional(),
+      formdata: z.array(z.object({
+        key: z.string(),
+        value: z.string().optional(),
+        type: z.string().optional(),
+        src: z.string().optional(),
+      })).optional(),
+    }).optional(),
+    auth: z.unknown().optional(),
+    description: z.string().optional(),
+  }).passthrough(),
   response: z.array(z.unknown()).default([]),
   event: z.array(z.object({
     listen: z.string(),
     script: z.object({
-      type: z.enum(['text/javascript']),
+      type: z.enum(['text/javascript']).optional().default('text/javascript'),
       exec: z.array(z.string()),
     }),
   })).default([]),
@@ -159,7 +186,7 @@ export type CollectionItemGroup = {
 export const CollectionSchema = z.object({
   info: z.object({
     name: z.string(),
-    _postman_id: z.string().uuid(),
+    _postman_id: z.string(),
     description: z.string().optional(),
     schema: z.literal('https://schema.getpostman.com/json/collection/v2.1.0/collection.json'),
   }),

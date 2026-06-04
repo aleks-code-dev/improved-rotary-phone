@@ -1,0 +1,1 @@
+{"info":{"name":"No Auth","_postman_id":"f09-0000-0000-000000000009","schema":"https://schema.getpostman.com/json/collection/v2.1.0/collection.json"},"item":[{"name":"Public Request","request":{"method":"GET","url":"https://httpbin.org/html","header":[]},"response":[]}],"auth":{"type":"noauth"}}

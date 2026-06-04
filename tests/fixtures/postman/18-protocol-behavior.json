@@ -1,0 +1,1 @@
+{"info":{"name":"Protocol Behavior","_postman_id":"f18-0000-0000-000000000018","schema":"https://schema.getpostman.com/json/collection/v2.1.0/collection.json"},"item":[{"name":"Disabled SSL","request":{"method":"GET","url":"https://expired.badssl.com/","header":[]},"response":[]}],"protocolProfileBehavior":{"disableBodyPruning":true}}

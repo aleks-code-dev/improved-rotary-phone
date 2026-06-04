@@ -111,19 +111,27 @@ function maskAuthInCollection(collection: Record<string, unknown>): void {
   const items = collection.item as Array<Record<string, unknown>> | undefined;
   if (!items || !Array.isArray(items)) return;
 
-  // Mask top-level auth
+  // Mask top-level auth (try both formats)
   if (collection.auth) {
-    collection.auth = maskAuthForStorage(collection.auth as AuthConfig);
+    try {
+      collection.auth = maskAuthForStorage(collection.auth as AuthConfig);
+    } catch { /* skip masking if format doesn't match */ }
   }
 
   // Walk items recursively
   function walk(items: Array<Record<string, unknown>>): void {
+    if (!items || !Array.isArray(items)) return;
     for (const it of items) {
+      if (!it) continue;
       if (it.request && (it.request as any).auth) {
-        (it.request as any).auth = maskAuthForStorage((it.request as any).auth);
+        try {
+          (it.request as any).auth = maskAuthForStorage((it.request as any).auth);
+        } catch { /* skip */ }
       }
       if (it.auth) {
-        it.auth = maskAuthForStorage(it.auth as AuthConfig);
+        try {
+          it.auth = maskAuthForStorage(it.auth as AuthConfig);
+        } catch { /* skip */ }
       }
       if (it.item && Array.isArray(it.item)) {
         walk(it.item as Array<Record<string, unknown>>);

@@ -1,0 +1,1 @@
+{"info":{"name":"Bearer Auth","_postman_id":"f05-0000-0000-000000000005","schema":"https://schema.getpostman.com/json/collection/v2.1.0/collection.json"},"item":[{"name":"Protected Request","request":{"method":"GET","url":"https://api.example.com/protected","header":[]},"response":[]}],"auth":{"type":"bearer","bearer":[{"key":"token","value":"__REDACTED__","type":"string"}]}}

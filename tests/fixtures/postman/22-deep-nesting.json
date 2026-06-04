@@ -1,0 +1,1 @@
+{"info":{"name":"Deep Nesting","_postman_id":"f22-0000-0000-000000000022","schema":"https://schema.getpostman.com/json/collection/v2.1.0/collection.json"},"item":[{"name":"L1","item":[{"name":"L2","item":[{"name":"L3","item":[{"name":"L4","item":[{"name":"Deepest Request","request":{"method":"GET","url":"https://httpbin.org/anything","header":[]},"response":[]}]}]}]}]}]}
