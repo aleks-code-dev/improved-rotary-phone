@@ -112,6 +112,20 @@ export function FirstRunDialog({ onConfirm }: Props) {
             Continue
           </button>
         </div>
+
+        <div style={{ marginTop: 'var(--space-4)', textAlign: 'center' }}>
+          <span
+            onClick={() => onConfirm(path)}
+            style={{
+              color: 'var(--color-accent)',
+              cursor: 'pointer',
+              fontSize: 12,
+              textDecoration: 'underline',
+            }}
+          >
+            Import a Postman collection to get started
+          </span>
+        </div>
       </div>
     </div>
   );
