@@ -1,6 +1,10 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useTabs } from '../state/useTabs';
-import { useRequest } from '../state/useRequest';
+import { useRequest, type RequestSpec } from '../state/useRequest';
+import { useCollectionsStore } from '../store/collections';
+import { useEnvironmentsStore } from '../store/environments';
+import { useResolveVariables } from '../hooks/useVariables';
+import { useHistoryStore } from '../store/history';
 import { MethodPicker } from './RequestEditor/MethodPicker';
 import { SubTabs, type SubTab } from './RequestEditor/SubTabs';
 import { ParamsTab } from './RequestEditor/ParamsTab';
@@ -22,6 +26,11 @@ export function RequestEditor() {
   const [diagnosing, setDiagnosing] = useState(false);
   const [diagnoseResult, setDiagnoseResult] = useState<any>(null);
   const [currentRequestId, setCurrentRequestId] = useState<string | null>(null);
+  const [unresolvedWarning, setUnresolvedWarning] = useState<string[] | null>(null);
+
+  const activeCollectionId = useCollectionsStore((s) => s.activeCollectionId);
+  const activeEnvId = useEnvironmentsStore((s) => s.activeEnvId);
+  const appendEntry = useHistoryStore((s) => s.appendEntry);
 
   const method = spec?.method ?? 'GET';
   const url = spec?.url ?? '';
@@ -35,21 +44,54 @@ export function RequestEditor() {
     if (!isValidUrl || sending) return;
     const currentSpec = getSpec(tabId);
     const requestId = crypto.randomUUID();
+    setUnresolvedWarning(null);
+
+    // D-08/D-09: Resolve variables before sending
+    let resolvedSpec = currentSpec;
+    try {
+      const varsResult = await window.api.variables.resolve({
+        spec: currentSpec as any,
+        activeEnvId,
+        activeCollectionId,
+        globals: [],
+      });
+      resolvedSpec = varsResult.resolved;
+      if (varsResult.unresolved && varsResult.unresolved.length > 0) {
+        setUnresolvedWarning(varsResult.unresolved);
+      }
+    } catch {
+      // Variable resolution failed — send without resolution
+    }
+
     setCurrentRequestId(requestId);
     setSending(true);
     setDiagnoseResult(null);
 
     try {
-      const result = await window.api.request.send({ ...currentSpec, requestId });
-      // Dispatch custom event for ResponseViewer to pick up
+      const result = await window.api.request.send({ ...resolvedSpec, requestId });
       window.dispatchEvent(new CustomEvent('response:received', { detail: { tabId, result } }));
+
+      // Append to history (D-19)
+      if (activeCollectionId) {
+        appendEntry(activeCollectionId, {
+          id: requestId,
+          timestamp: Date.now(),
+          collectionId: activeCollectionId,
+          request: { method: resolvedSpec.method, url: resolvedSpec.url },
+          response: {
+            status: result.status,
+            statusText: result.statusText,
+            durationMs: result.timing?.total ?? 0,
+          },
+        } as any);
+      }
     } catch (err: any) {
       window.dispatchEvent(new CustomEvent('response:error', { detail: { tabId, error: { code: 'UNKNOWN', message: err.message } } }));
     } finally {
       setSending(false);
       setCurrentRequestId(null);
     }
-  }, [isValidUrl, sending, tabId, getSpec]);
+  }, [isValidUrl, sending, tabId, getSpec, activeEnvId, activeCollectionId, appendEntry]);
 
   const handleCancel = useCallback(async () => {
     if (currentRequestId) {
@@ -63,21 +105,35 @@ export function RequestEditor() {
   const handleCopyCurl = useCallback(async () => {
     const currentSpec = getSpec(tabId);
     try {
-      const { curl } = await window.api.request.generateCurl(currentSpec);
+      // Resolve variables first for the cURL output (D-16)
+      let resolvedUrl = currentSpec.url;
+      try {
+        const varsResult = await window.api.variables.resolve({
+          spec: currentSpec as any,
+          activeEnvId,
+          activeCollectionId,
+          globals: [],
+        });
+        resolvedUrl = varsResult.resolved.url;
+      } catch { /* use original URL */ }
+
+      const { curl } = await window.api.curl.generate({ spec: currentSpec as any, resolvedUrl });
       await navigator.clipboard.writeText(curl);
-    } catch {
-      // Fallback: show in UI
-    }
-  }, [tabId, getSpec]);
+    } catch { /* fallback */ }
+  }, [tabId, getSpec, activeEnvId, activeCollectionId]);
 
   const handleDiagnose = useCallback(async () => {
     setDiagnosing(true);
     try {
-      const result = await window.api.request.diagnose();
+      const result = await window.api.network.diagnose();
       setDiagnoseResult(result);
     } finally {
       setDiagnosing(false);
     }
+  }, []);
+
+  const handleSave = useCallback(async () => {
+    // TODO: Save to collection flow (SaveAsModal integration in Task 10)
   }, []);
 
   return (
@@ -122,6 +178,10 @@ export function RequestEditor() {
           </button>
         )}
 
+        <button onClick={handleSave} style={toolbarBtnStyle} title="Save (Ctrl+S)">
+          Save
+        </button>
+
         <button onClick={handleCopyCurl} style={toolbarBtnStyle} title="Copy as cURL (Ctrl+Shift+C)">
           Copy as cURL
         </button>
@@ -134,6 +194,20 @@ export function RequestEditor() {
           {diagnosing ? 'Diagnosing…' : 'Diagnose Connection'}
         </button>
       </div>
+
+      {/* Unresolved variables warning (D-09) */}
+      {unresolvedWarning && unresolvedWarning.length > 0 && (
+        <div style={{
+          marginBottom: 'var(--space-3)',
+          padding: 'var(--space-2) var(--space-3)',
+          background: 'var(--color-warning, #fbbf24)',
+          color: '#000',
+          borderRadius: 'var(--radius-1)',
+          fontSize: 12,
+        }}>
+          <strong>Warning:</strong> unresolved variables: {unresolvedWarning.map(v => `{{${v}}}`).join(', ')}
+        </div>
+      )}
 
       {/* Row 2: Sub-tabs */}
       <SubTabs active={activeSubTab} onChange={setActiveSubTab} />
