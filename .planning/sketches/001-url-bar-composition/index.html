@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sketch 001: URL Bar Composition</title>
+<link rel="stylesheet" href="../themes/default.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    background: var(--color-bg);
+    color: var(--color-text);
+    padding: 60px 24px 60px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  /* Variant nav */
+  #variant-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 9998;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: 8px 16px; display: flex; gap: 6px;
+  }
+  .variant-tab {
+    padding: 4px 12px; border: 1px solid var(--color-border);
+    border-radius: var(--radius-1); background: transparent;
+    color: var(--color-text-muted); cursor: pointer;
+    font-size: var(--text-xs); transition: all 0.15s ease;
+    font-family: var(--font-sans);
+  }
+  .variant-tab:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+  .variant-tab.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+
+  .variant { display: none; }
+  .variant.active { display: block; }
+
+  /* Page layout */
+  .page {
+    width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: var(--space-8);
+  }
+  .section { }
+  .section-label {
+    font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--color-text-dim); margin-bottom: var(--space-2); font-weight: 600;
+  }
+
+  /* ========== VARIANT A: Postman-style attached badge ========== */
+  .va-toolbar {
+    display: flex; align-items: stretch;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2);
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+  }
+  .va-toolbar:focus-within { border-color: var(--color-border-focus); }
+  .va-method {
+    display: flex; align-items: center;
+    padding: 8px 14px; font-weight: 700; font-size: var(--text-sm);
+    color: #fff; cursor: pointer; user-select: none;
+    min-width: 80px; gap: 4px;
+    transition: background 0.15s ease;
+    position: relative;
+  }
+  .va-method:hover { filter: brightness(1.15); }
+  .va-method-chevron { font-size: 9px; opacity: 0.7; }
+
+  .va-method-dropdown {
+    position: absolute; top: 100%; left: 0; z-index: 10;
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2);
+    min-width: 100px; display: none;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+  .va-method-dropdown.open { display: block; }
+  .va-method-option {
+    padding: 6px 14px; cursor: pointer; font-size: var(--text-sm);
+    font-weight: 600; transition: background 0.1s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .va-method-option:hover { background: var(--color-surface); }
+  .va-method-dot {
+    width: 8px; height: 8px; border-radius: var(--radius-full); flex-shrink: 0;
+  }
+  .va-url {
+    flex: 1; background: transparent; border: none; outline: none;
+    padding: 8px 12px; color: var(--color-text);
+    font-family: var(--font-mono); font-size: 13px;
+  }
+  .va-url::placeholder { color: var(--color-text-dim); }
+  .va-send {
+    padding: 8px 20px; border: none; border-radius: 0;
+    background: var(--color-accent); color: #fff;
+    font-weight: 700; font-size: var(--text-sm); cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .va-send:hover { background: var(--color-accent-hover); }
+  .va-send:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ========== VARIANT B: Separated controls ========== */
+  .vb-toolbar { display: flex; gap: var(--space-2); align-items: center; }
+  .vb-method-select {
+    padding: 8px 12px; border: 1px solid var(--color-border);
+    border-radius: var(--radius-1); font-weight: 700; font-size: var(--text-sm);
+    background: var(--color-surface); color: #fff; cursor: pointer;
+    min-width: 110px; outline: none;
+    transition: border-color 0.15s ease;
+  }
+  .vb-method-select:focus { border-color: var(--color-border-focus); }
+  .vb-url-wrap {
+    flex: 1; display: flex; align-items: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
+    transition: border-color 0.15s ease;
+    overflow: hidden;
+  }
+  .vb-url-wrap:focus-within { border-color: var(--color-border-focus); }
+  .vb-url-prefix {
+    padding: 8px 0 8px 12px; color: var(--color-text-dim);
+    font-family: var(--font-mono); font-size: 13px; user-select: none;
+  }
+  .vb-url {
+    flex: 1; background: transparent; border: none; outline: none;
+    padding: 8px 12px; color: var(--color-text);
+    font-family: var(--font-mono); font-size: 13px;
+  }
+  .vb-url::placeholder { color: var(--color-text-dim); }
+  .vb-send {
+    padding: 8px 20px; border: none; border-radius: var(--radius-1);
+    background: var(--color-accent); color: #fff;
+    font-weight: 700; font-size: var(--text-sm); cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .vb-send:hover { background: var(--color-accent-hover); }
+  .vb-actions { display: flex; gap: var(--space-2); }
+
+  /* ========== VARIANT C: Terminal-style single line ========== */
+  .vc-shell {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: var(--radius-2);
+    padding: 12px 16px;
+    font-family: var(--font-mono); font-size: 13px;
+    position: relative;
+  }
+  .vc-prompt { color: var(--color-method-get); user-select: none; }
+  .vc-line {
+    display: flex; align-items: center;
+    background: transparent; border: none; outline: none;
+    width: 100%; color: var(--color-text);
+    font-family: var(--font-mono); font-size: 13px;
+    caret-color: var(--color-accent);
+  }
+  .vc-line:focus { outline: none; }
+  .vc-hint {
+    position: absolute; right: 16px; top: 12px;
+    color: var(--color-text-dim); font-size: var(--text-2xs);
+  }
+  .vc-send-row {
+    display: flex; gap: var(--space-2); margin-top: var(--space-3);
+  }
+  .vc-send {
+    padding: 6px 16px; border: 1px solid var(--color-border);
+    border-radius: var(--radius-1); background: var(--color-accent);
+    color: #fff; font-weight: 600; font-size: var(--text-xs); cursor: pointer;
+    font-family: var(--font-sans);
+    transition: background 0.15s ease;
+  }
+  .vc-send:hover { background: var(--color-accent-hover); }
+  .vc-shortcut { color: var(--color-text-dim); font-size: var(--text-2xs); align-self: center; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
+    background: var(--color-success); color: #fff;
+    padding: 8px 20px; border-radius: var(--radius-1);
+    font-size: var(--text-xs); font-weight: 600;
+    opacity: 0; transition: opacity 0.25s ease;
+    z-index: 10000; pointer-events: none;
+  }
+  #toast.show { opacity: 1; }
+
+  /* Annotation mode */
+  .annotation-tip {
+    position: absolute; background: rgba(0,0,0,0.9); color: #fff;
+    padding: 3px 8px; border-radius: 3px; font-size: 10px;
+    pointer-events: none; z-index: 10001; white-space: nowrap;
+    display: none;
+  }
+
+  /* Context label */
+  .context-note {
+    font-size: var(--text-2xs); color: var(--color-text-dim);
+    margin-top: var(--space-3); font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<div id="variant-nav">
+  <button class="variant-tab active">A: Attached Badge (Postman-style) ★ Selected</button>
+  <button class="variant-tab" onclick="showVariant('b')">B: Separated Controls</button>
+  <button class="variant-tab" onclick="showVariant('c')">C: Terminal-Style Single Line</button>
+</div>
+
+<div id="variant-a" class="variant active">
+  <div class="page">
+    <div class="section">
+      <div class="section-label">Method + URL Attached</div>
+      <p style="font-size:var(--text-xs);color:var(--color-text-dim);margin-bottom:var(--space-3)">
+        Method badge is fused to the URL input — the colored block is part of the same control.
+        Click the badge to change methods. Compact, iconic, Postman-standard.
+      </p>
+
+      <div class="va-toolbar">
+        <div class="va-method" id="va-method-btn" onclick="toggleVaDropdown()" style="background:var(--color-method-get)">
+          <span id="va-method-label">GET</span>
+          <span class="va-method-chevron">▾</span>
+          <div class="va-method-dropdown" id="va-dropdown">
+            <div class="va-method-option" onclick="pickVaMethod('GET','var(--color-method-get)')"><span class="va-method-dot" style="background:var(--color-method-get)"></span>GET</div>
+            <div class="va-method-option" onclick="pickVaMethod('POST','var(--color-method-post)')"><span class="va-method-dot" style="background:var(--color-method-post)"></span>POST</div>
+            <div class="va-method-option" onclick="pickVaMethod('PUT','var(--color-method-put)')"><span class="va-method-dot" style="background:var(--color-method-put)"></span>PUT</div>
+            <div class="va-method-option" onclick="pickVaMethod('PATCH','var(--color-method-patch)')"><span class="va-method-dot" style="background:var(--color-method-patch)"></span>PATCH</div>
+            <div class="va-method-option" onclick="pickVaMethod('DELETE','var(--color-method-delete)')"><span class="va-method-dot" style="background:var(--color-method-delete)"></span>DELETE</div>
+            <div class="va-method-option" onclick="pickVaMethod('HEAD','var(--color-method-head)')"><span class="va-method-dot" style="background:var(--color-method-head)"></span>HEAD</div>
+            <div class="va-method-option" onclick="pickVaMethod('OPTIONS','var(--color-method-options)')"><span class="va-method-dot" style="background:var(--color-method-options)"></span>OPTIONS</div>
+          </div>
+        </div>
+        <input class="va-url" id="va-url" type="text" placeholder="https://api.example.com/users/{{userId}}" value="https://jsonplaceholder.typicode.com/users/1">
+        <button class="va-send" id="va-send" onclick="sendRequest('A')">Send</button>
+      </div>
+      <div class="context-note">Real field: `spec.url` with `{{variable}}` interpolation. Compact at 900px width.</div>
+    </div>
+  </div>
+</div>
+
+<div id="variant-b" class="variant">
+  <div class="page">
+    <div class="section">
+      <div class="section-label">Separated Method + URL</div>
+      <p style="font-size:var(--text-xs);color:var(--color-text-dim);margin-bottom:var(--space-3)">
+        Method is a standalone dropdown with color-coded background. URL field has a protocol prefix.
+        More horizontal space, clearer separation. Better for wider screens.
+      </p>
+
+      <div class="vb-toolbar">
+        <select class="vb-method-select" id="vb-method">
+          <option value="GET">GET</option>
+          <option value="POST">POST</option>
+          <option value="PUT">PUT</option>
+          <option value="PATCH">PATCH</option>
+          <option value="DELETE">DELETE</option>
+          <option value="HEAD">HEAD</option>
+          <option value="OPTIONS">OPTIONS</option>
+        </select>
+        <div class="vb-url-wrap">
+          <span class="vb-url-prefix" id="vb-prefix">https://</span>
+          <input class="vb-url" id="vb-url" type="text" placeholder="jsonplaceholder.typicode.com/users/1" value="jsonplaceholder.typicode.com/users/1">
+        </div>
+        <div class="vb-actions">
+          <button class="vb-send" id="vb-send" onclick="sendRequest('B')">Send</button>
+        </div>
+      </div>
+      <div class="context-note">Method select uses parent's method color via inline style update. URL prefix adapts based on input.</div>
+    </div>
+  </div>
+</div>
+
+<div id="variant-c" class="variant">
+  <div class="page">
+    <div class="section">
+      <div class="section-label">Terminal-Style Single Line</div>
+      <p style="font-size:var(--text-xs);color:var(--color-text-dim);margin-bottom:var(--space-3)">
+        Freeform input: type <code style="color:var(--color-method-get)">GET</code> <code style="color:var(--color-text-dim)">https://...</code> on one line.
+        Parses method from the first word. Feels like curl or HTTPie. Keyboard-first.
+      </p>
+
+      <div class="vc-shell">
+        <div style="display:flex;align-items:center;gap:0;">
+          <span class="vc-prompt" id="vc-prompt">GET</span>
+          <input class="vc-line" id="vc-line" type="text" value="https://jsonplaceholder.typicode.com/users/1" placeholder="https://api.example.com/endpoint">
+        </div>
+        <span class="vc-hint" id="vc-hint">Ctrl+Enter to send</span>
+      </div>
+      <div class="vc-send-row">
+        <button class="vc-send" id="vc-send" onclick="sendRequest('C')">Send Request</button>
+        <span class="vc-shortcut">Ctrl+Enter</span>
+      </div>
+      <div class="context-note">Method detected from first token of input. Parser preview shown inline. No dropdown — just type.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Sketch toolbar -->
+<div id="sketch-tools" style="position:fixed;bottom:12px;right:12px;z-index:9999;font-family:system-ui;font-size:12px;background:rgba(0,0,0,0.85);color:white;padding:8px 12px;border-radius:8px;opacity:0.4;transition:opacity 0.2s;display:flex;gap:12px;align-items:center;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">
+  <select onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'" style="background:#333;color:#fff;border:1px solid #555;border-radius:3px;padding:2px 4px;font-size:11px;">
+    <option value="default">Default</option>
+  </select>
+  <button onclick="setViewport(375)" style="background:none;border:1px solid #555;color:#fff;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;">375</button>
+  <button onclick="setViewport(768)" style="background:none;border:1px solid #555;color:#fff;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;">768</button>
+  <button onclick="setViewport(0)" style="background:none;border:1px solid #555;color:#fff;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;">Full</button>
+  <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
+    <input type="checkbox" id="anno-toggle" onchange="toggleAnnotations()"> Anno
+  </label>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  // Variant switching
+  function showVariant(id) {
+    document.querySelectorAll('.variant').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active'));
+    var el = document.getElementById('variant-' + id);
+    if (el) el.classList.add('active');
+    var tab = document.querySelector('.variant-tab:nth-child(' + (id === 'a' ? 1 : id === 'b' ? 2 : 3) + ')');
+    if (tab) tab.classList.add('active');
+  }
+
+  // Variant A: method dropdown
+  var vaOpen = false;
+  function toggleVaDropdown() {
+    vaOpen = !vaOpen;
+    document.getElementById('va-dropdown').classList.toggle('open', vaOpen);
+  }
+  function pickVaMethod(method, colorRef) {
+    document.getElementById('va-method-label').textContent = method;
+    document.getElementById('va-method-btn').style.background = colorRef;
+    vaOpen = false;
+    document.getElementById('va-dropdown').classList.remove('open');
+  }
+  document.addEventListener('click', function(e) {
+    if (vaOpen && !e.target.closest('.va-method')) {
+      vaOpen = false;
+      document.getElementById('va-dropdown').classList.remove('open');
+    }
+  });
+
+  // Variant B: method color
+  document.getElementById('vb-method').addEventListener('change', function() {
+    var colors = {
+      'GET':'var(--color-method-get)','POST':'var(--color-method-post)',
+      'PUT':'var(--color-method-put)','PATCH':'var(--color-method-patch)',
+      'DELETE':'var(--color-method-delete)','HEAD':'var(--color-method-head)',
+      'OPTIONS':'var(--color-method-options)'
+    };
+    this.style.background = colors[this.value] || 'var(--color-surface)';
+  });
+  // init
+  document.getElementById('vb-method').style.background = 'var(--color-method-get)';
+
+  // Variant B: URL prefix
+  document.getElementById('vb-url').addEventListener('input', function() {
+    var v = this.value;
+    var proto = '';
+    if (v.startsWith('https://')) proto = 'https://';
+    else if (v.startsWith('http://')) proto = 'http://';
+    else proto = 'https://';
+    document.getElementById('vb-prefix').textContent = proto;
+  });
+
+  // Send simulation
+  function sendRequest(variant) {
+    var toast = document.getElementById('toast');
+    var btn = document.getElementById(variant === 'A' ? 'va-send' : variant === 'B' ? 'vb-send' : 'vc-send');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    setTimeout(function() {
+      btn.textContent = variant === 'C' ? 'Send Request' : 'Send';
+      btn.disabled = false;
+      toast.textContent = 'Request sent (200 OK) · ' + variant + ' variant';
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 2000);
+    }, 800);
+  }
+
+  // Viewport simulation
+  function setViewport(w) {
+    var page = document.querySelectorAll('.page');
+    page.forEach(function(p) {
+      p.style.maxWidth = w > 0 ? w + 'px' : '900px';
+    });
+  }
+
+  // Annotation toggle
+  var annoOn = false;
+  function toggleAnnotations() {
+    annoOn = document.getElementById('anno-toggle').checked;
+  }
+  document.addEventListener('mouseover', function(e) {
+    if (!annoOn) return;
+    var el = e.target.closest('.va-toolbar, .vb-toolbar, .vc-shell, .va-method');
+    if (!el) return;
+    var rect = el.getBoundingClientRect();
+    var tip = document.createElement('div');
+    tip.className = 'annotation-tip';
+    tip.style.display = 'block';
+    tip.style.left = rect.left + 'px';
+    tip.style.top = (rect.bottom + 4) + 'px';
+    var cs = getComputedStyle(el);
+    tip.textContent = 'border-color:' + cs.borderColor + ' | border-radius:' + cs.borderRadius + ' | bg:' + cs.backgroundColor;
+    document.body.appendChild(tip);
+    el.addEventListener('mouseleave', function() { tip.remove(); }, { once: true });
+  });
+</script>
+
+</body>
+</html>
