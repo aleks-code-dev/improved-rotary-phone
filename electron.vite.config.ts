@@ -6,9 +6,6 @@ export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin()],
     build: {
-      lib: {
-        entry: resolve(__dirname, 'src/main/index.ts')
-      },
       rollupOptions: {
         external: ['electron', 'undici', 'electron-store', 'electron-log']
       }
@@ -22,9 +19,6 @@ export default defineConfig({
   preload: {
     plugins: [externalizeDepsPlugin()],
     build: {
-      lib: {
-        entry: resolve(__dirname, 'src/preload/index.ts')
-      },
       rollupOptions: {
         external: ['electron']
       }

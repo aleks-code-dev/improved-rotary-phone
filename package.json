@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
-    "build:helper": "cd helper && gradle shadowJar",
+    "build:helper": "cd helper && ./gradlew shadowJar",
     "start": "electron-vite preview",
     "test": "echo no test runner configured in v1 && exit 0"
   },
