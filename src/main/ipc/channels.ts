@@ -8,8 +8,6 @@ export const HelperStatusSchema = z.discriminatedUnion('state', [
   z.object({ state: z.literal('crashed'), restartCount: z.number(), reason: z.string() }),
 ]);
 
-export type HelperStatus = z.infer<typeof HelperStatusSchema>;
-
 export const AppBootstrapResultSchema = z.object({
   firstRun: z.boolean(),
   userDataPath: z.string(),
@@ -111,3 +109,27 @@ export const ShowSaveDialogArgsSchema = z.object({
   filters: z.array(z.object({ name: z.string(), extensions: z.array(z.string()) })).optional()
 });
 export const ShowSaveDialogResultSchema = z.object({ path: z.string().nullable() });
+
+export const WriteFileArgsSchema = z.object({
+  path: z.string().min(1),
+  dataBase64: z.string(),
+});
+export const WriteFileResultSchema = z.object({ ok: z.boolean() });
+
+// Inferred types for all schemas
+export type HelperStatus = z.infer<typeof HelperStatusSchema>;
+export type AppBootstrapResult = z.infer<typeof AppBootstrapResultSchema>;
+export type SetDataDirArgs = z.infer<typeof SetDataDirArgsSchema>;
+export type SetDataDirResult = z.infer<typeof SetDataDirResultSchema>;
+export type ShowOpenDialogArgs = z.infer<typeof ShowOpenDialogArgsSchema>;
+export type ShowOpenDialogResult = z.infer<typeof ShowOpenDialogResultSchema>;
+export type RequestDiagnoseResult = z.infer<typeof RequestDiagnoseResultSchema>;
+export type RequestSpec = z.infer<typeof RequestSpecSchema>;
+export type ResponseResult = z.infer<typeof ResponseResultSchema>;
+export type CancelRequestArgs = z.infer<typeof CancelRequestArgsSchema>;
+export type ParseCurlArgs = z.infer<typeof ParseCurlArgsSchema>;
+export type ParseCurlResult = z.infer<typeof ParseCurlResultSchema>;
+export type ShowSaveDialogArgs = z.infer<typeof ShowSaveDialogArgsSchema>;
+export type ShowSaveDialogResult = z.infer<typeof ShowSaveDialogResultSchema>;
+export type WriteFileArgs = z.infer<typeof WriteFileArgsSchema>;
+export type WriteFileResult = z.infer<typeof WriteFileResultSchema>;

@@ -16,6 +16,10 @@ export interface WindowApi {
                 extensions: string[];
             }>;
         }) => Promise<any>;
+        writeFile: (args: {
+            path: string;
+            dataBase64: string;
+        }) => Promise<any>;
     };
     helper: {
         getStatus: () => Promise<any>;

@@ -6,6 +6,7 @@ export interface WindowApi {
     setDataDir: (args: { path: string }) => Promise<any>;
     showOpenDialog: (args: { kind: 'folder' | 'file'; title?: string }) => Promise<any>;
     showSaveDialog: (args: { title?: string; defaultPath?: string; filters?: Array<{name: string; extensions: string[]}> }) => Promise<any>;
+    writeFile: (args: { path: string; dataBase64: string }) => Promise<any>;
   };
   helper: {
     getStatus: () => Promise<any>;
@@ -27,6 +28,7 @@ const api: WindowApi = {
     setDataDir: (args) => ipcRenderer.invoke('app:setDataDir', args),
     showOpenDialog: (args) => ipcRenderer.invoke('app:showOpenDialog', args),
     showSaveDialog: (args) => ipcRenderer.invoke('app:showSaveDialog', args),
+    writeFile: (args) => ipcRenderer.invoke('app:writeFile', args),
   },
   helper: {
     getStatus: () => ipcRenderer.invoke('helper:getStatus'),
