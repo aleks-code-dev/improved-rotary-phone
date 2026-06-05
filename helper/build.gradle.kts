@@ -18,6 +18,12 @@ dependencies {
 
     // Bytecode (Lombok fallback)
     implementation("org.ow2.asm:asm:9.7")
+
+    // Database
+    implementation("com.zaxxer:HikariCP:6.2.1")
+    implementation("org.postgresql:postgresql:42.7.11")
+    implementation("com.mysql:mysql-connector-j:9.1.0")
+    implementation("com.h2database:h2:2.3.232")
 }
 
 java {

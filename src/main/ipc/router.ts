@@ -19,6 +19,7 @@ import { generateCurl as storageGenerateCurl, parseCurl as storageParseCurl } fr
 import { approveQuit } from './quitState.js';
 import { writeFileAtomic } from '../storage/atomicWrite.js';
 import { supervisor } from '../jvm/supervisor.js';
+import * as dbConnectionsService from '../storage/db-connections.js';
 import {
   AppBootstrapResultSchema, SetDataDirArgsSchema, SetDataDirResultSchema,
   ShowOpenDialogArgsSchema, ShowOpenDialogResultSchema,
@@ -45,6 +46,11 @@ import {
   GlobalsUpdateArgsSchema,
   ReadFileArgsSchema,
   DtoGenerateArgsSchema, DtoGenerateResultSchema,
+  DbConnectionCreateArgsSchema, DbConnectionDeleteArgsSchema, DbConnectionListResultSchema,
+  DbConnectArgsSchema, DbConnectResultSchema, DbDisconnectArgsSchema,
+  DbTestConnectionArgsSchema, DbTestConnectionResultSchema,
+  DbListTablesArgsSchema, DbListTablesResultSchema,
+  DbParseJdbcUrlArgsSchema, DbParseJdbcUrlResultSchema,
 } from './channels.js';
 
 const pendingRequests = new Map<string, AbortController>();
@@ -486,7 +492,6 @@ export function registerIpcRouter() {
     if (!client) return { ok: false, bodyJson: '', warnings: [{ code: 'HELPER_OFFLINE', message: 'Helper is offline' }], cycleRefs: [] };
     try {
       const bodyJson = await client.request('classpath:walkDto', { fqn: parsed.dtoFqn });
-      // Detect $ref markers in the response
       const cycleRefs: string[] = [];
       try {
         const parsed_ = JSON.parse(bodyJson);
@@ -503,6 +508,95 @@ export function registerIpcRouter() {
       return { ok: false, bodyJson: '', warnings: [{ code: 'DTO_WALK_FAILED', message: err.message }], cycleRefs: [] };
     }
   });
+
+  // --- 03-02: DB Connection management ---
+  ipcMain.handle('db:connections:list', async () => {
+    const list = await dbConnectionsService.listConnections();
+    return DbConnectionListResultSchema.parse(list);
+  });
+
+  ipcMain.handle('db:connections:create', async (_, args) => {
+    const parsed = DbConnectionCreateArgsSchema.parse(args);
+    const result = await dbConnectionsService.createConnection(
+      parsed.name, parsed.url, parsed.user, parsed.password, parsed.dbType
+    );
+    return result;
+  });
+
+  ipcMain.handle('db:connections:delete', async (_, args) => {
+    const parsed = DbConnectionDeleteArgsSchema.parse(args);
+    await dbConnectionsService.deleteConnection(parsed.id);
+    return { ok: true };
+  });
+
+  ipcMain.handle('db:connect', async (_, args) => {
+    const parsed = DbConnectArgsSchema.parse(args);
+    const client = supervisor.getClient();
+    if (!client) return DbConnectResultSchema.parse({ ok: false, status: 'error', error: 'Helper offline' });
+    try {
+      const connData = await dbConnectionsService.readConnectionDecrypted(parsed.connectionId);
+      const result = await client.request('db:connect', {
+        connId: connData.id,
+        url: connData.url,
+        user: connData.user,
+        password: connData.password,
+      });
+      return DbConnectResultSchema.parse({ ok: true, status: 'connected', tables: result.tables });
+    } catch (err: any) {
+      log.error('db:connect failed', { error: err.message });
+      return DbConnectResultSchema.parse({ ok: false, status: 'error', error: 'Connection failed' });
+    }
+  });
+
+  ipcMain.handle('db:disconnect', async (_, args) => {
+    const parsed = DbDisconnectArgsSchema.parse(args);
+    const client = supervisor.getClient();
+    if (!client) return { ok: false, error: 'Helper offline' };
+    try {
+      await client.request('db:disconnect', { connId: parsed.connectionId });
+      return { ok: true };
+    } catch (err: any) {
+      log.error('db:disconnect failed', { error: err.message });
+      return { ok: false, error: 'Disconnect failed' };
+    }
+  });
+
+  ipcMain.handle('db:testConnection', async (_, args) => {
+    const parsed = DbTestConnectionArgsSchema.parse(args);
+    const client = supervisor.getClient();
+    if (!client) return DbTestConnectionResultSchema.parse({ ok: false, connected: false, error: 'Helper offline' });
+    try {
+      const result = await client.request('db:testConnection', {
+        url: parsed.url,
+        user: parsed.user,
+        password: parsed.password,
+      });
+      return DbTestConnectionResultSchema.parse({ ok: true, connected: result.connected, latencyMs: result.latencyMs });
+    } catch (err: any) {
+      log.error('db:testConnection failed', { error: err.message });
+      return DbTestConnectionResultSchema.parse({ ok: true, connected: false, error: 'Connection test failed' });
+    }
+  });
+
+  ipcMain.handle('db:listTables', async (_, args) => {
+    const parsed = DbListTablesArgsSchema.parse(args);
+    const client = supervisor.getClient();
+    if (!client) return [];
+    try {
+      const result = await client.request('db:listTables', { connId: parsed.connectionId });
+      return DbListTablesResultSchema.parse(result);
+    } catch (err: any) {
+      log.error('db:listTables failed', { error: err.message });
+      return [];
+    }
+  });
+
+  ipcMain.handle('db:parseJdbcUrl', async (_, args) => {
+    const parsed = DbParseJdbcUrlArgsSchema.parse(args);
+    const url = parsed.url;
+    const result = parseJdbcUrl(url);
+    return DbParseJdbcUrlResultSchema.parse(result);
+  });
 }
 
 function findCycleRefs(obj: any, refs: string[]): void {
@@ -517,4 +611,30 @@ function findCycleRefs(obj: any, refs: string[]): void {
   for (const key of Object.keys(obj)) {
     findCycleRefs(obj[key], refs);
   }
+}
+
+function parseJdbcUrl(url: string): { driver: string | null; host: string | null; port: number | null; database: string | null; raw: string } {
+  const result = { driver: null as string | null, host: null as string | null, port: null as number | null, database: null as string | null, raw: url };
+
+  if (url.startsWith('jdbc:postgresql:')) {
+    result.driver = 'postgresql';
+    const match = url.match(/\/\/([^:]+):(\d+)\/(.+)/);
+    if (match) { result.host = match[1]; result.port = parseInt(match[2]); result.database = match[3]; }
+  } else if (url.startsWith('jdbc:mysql:')) {
+    result.driver = 'mysql';
+    const match = url.match(/\/\/([^:]+):(\d+)\/(.+)/);
+    if (match) { result.host = match[1]; result.port = parseInt(match[2]); result.database = match[3]; }
+  } else if (url.startsWith('jdbc:oracle:')) {
+    result.driver = 'oracle';
+    const match = url.match(/@\/\/([^:]+):(\d+)\//);
+    if (match) { result.host = match[1]; result.port = parseInt(match[2]); }
+    const dbMatch = url.match(/\/(\w+)\s*$/);
+    if (dbMatch) result.database = dbMatch[1];
+  } else if (url.startsWith('jdbc:h2:')) {
+    result.driver = 'h2';
+    const match = url.match(/jdbc:h2:(.+)/);
+    if (match) result.database = match[1];
+  }
+
+  return result;
 }

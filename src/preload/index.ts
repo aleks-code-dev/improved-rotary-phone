@@ -67,6 +67,18 @@ export interface WindowApi {
   body: {
     generateDto: (args: { requestId: string; dtoFqn: string; subtypeName?: string }) => Promise<any>;
   };
+  db: {
+    connections: {
+      list: () => Promise<any>;
+      create: (args: { name: string; url: string; user: string; password: string; dbType: string }) => Promise<any>;
+      delete: (args: { id: string }) => Promise<any>;
+    };
+    connect: (args: { connectionId: string }) => Promise<any>;
+    disconnect: (args: { connectionId: string }) => Promise<any>;
+    testConnection: (args: { url: string; user: string; password: string; dbType: string }) => Promise<any>;
+    listTables: (args: { connectionId: string }) => Promise<any>;
+    parseJdbcUrl: (args: { url: string }) => Promise<any>;
+  };
 }
 
 const api: WindowApi = {
@@ -144,6 +156,18 @@ const api: WindowApi = {
   },
   body: {
     generateDto: (args) => ipcRenderer.invoke('body:generateDto', args),
+  },
+  db: {
+    connections: {
+      list: () => ipcRenderer.invoke('db:connections:list'),
+      create: (args) => ipcRenderer.invoke('db:connections:create', args),
+      delete: (args) => ipcRenderer.invoke('db:connections:delete', args),
+    },
+    connect: (args) => ipcRenderer.invoke('db:connect', args),
+    disconnect: (args) => ipcRenderer.invoke('db:disconnect', args),
+    testConnection: (args) => ipcRenderer.invoke('db:testConnection', args),
+    listTables: (args) => ipcRenderer.invoke('db:listTables', args),
+    parseJdbcUrl: (args) => ipcRenderer.invoke('db:parseJdbcUrl', args),
   },
 };
 

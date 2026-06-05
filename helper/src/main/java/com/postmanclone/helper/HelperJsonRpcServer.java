@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.postmanclone.helper.config.ParserConfig;
 import com.postmanclone.helper.dto.DtoWalker;
+import com.postmanclone.helper.db.DbConnectionManager;
+import com.postmanclone.helper.db.TableEnumerator;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 
 import java.io.*;
@@ -16,12 +18,14 @@ import java.util.HashMap;
 
 public class HelperJsonRpcServer {
     private final ObjectMapper mapper = new ObjectMapper();
+    private final DbConnectionManager dbConnectionManager = new DbConnectionManager();
+    private final TableEnumerator tableEnumerator = new TableEnumerator();
     private final Map<String, Object> initializeResult = Map.of(
         "jsonrpc", "2.0",
         "id", 1,
         "result", Map.of(
             "version", "0.1.0",
-            "capabilities", new String[]{"initialize", "helper.ping", "classpath:walkDto"}
+            "capabilities", new String[]{"initialize", "helper.ping", "classpath:walkDto", "db:connect", "db:disconnect", "db:testConnection", "db:listTables"}
         )
     );
 
@@ -73,6 +77,81 @@ public class HelperJsonRpcServer {
                             response = mapper.writeValueAsString(Map.of(
                                 "jsonrpc", "2.0", "id", id,
                                 "error", Map.of("code", -32603, "message", "DTO walk failed: " + e.getMessage())
+                            ));
+                        }
+                    } else if ("db:connect".equals(method)) {
+                        try {
+                            JsonNode params = request.get("params");
+                            String connId = params.get("connId").asText();
+                            String url = params.get("url").asText();
+                            String user = params.get("user").asText();
+                            String password = params.get("password").asText();
+                            dbConnectionManager.connect(connId, url, user, password);
+                            response = mapper.writeValueAsString(Map.of(
+                                "jsonrpc", "2.0", "id", id,
+                                "result", Map.of("status", "connected")
+                            ));
+                        } catch (Exception e) {
+                            response = mapper.writeValueAsString(Map.of(
+                                "jsonrpc", "2.0", "id", id,
+                                "error", Map.of("code", -32603, "message", "DB connect failed: " + e.getMessage())
+                            ));
+                        }
+                    } else if ("db:disconnect".equals(method)) {
+                        try {
+                            JsonNode params = request.get("params");
+                            String connId = params.get("connId").asText();
+                            dbConnectionManager.disconnect(connId);
+                            response = mapper.writeValueAsString(Map.of(
+                                "jsonrpc", "2.0", "id", id,
+                                "result", Map.of("status", "disconnected")
+                            ));
+                        } catch (Exception e) {
+                            response = mapper.writeValueAsString(Map.of(
+                                "jsonrpc", "2.0", "id", id,
+                                "error", Map.of("code", -32603, "message", "DB disconnect failed: " + e.getMessage())
+                            ));
+                        }
+                    } else if ("db:testConnection".equals(method)) {
+                        try {
+                            JsonNode params = request.get("params");
+                            String url = params.get("url").asText();
+                            String user = params.get("user").asText();
+                            String password = params.get("password").asText();
+                            long start = System.currentTimeMillis();
+                            boolean connected = dbConnectionManager.testConnection(url, user, password);
+                            long latencyMs = System.currentTimeMillis() - start;
+                            response = mapper.writeValueAsString(Map.of(
+                                "jsonrpc", "2.0", "id", id,
+                                "result", Map.of("connected", connected, "latencyMs", latencyMs)
+                            ));
+                        } catch (Exception e) {
+                            response = mapper.writeValueAsString(Map.of(
+                                "jsonrpc", "2.0", "id", id,
+                                "error", Map.of("code", -32603, "message", "DB test failed: " + e.getMessage())
+                            ));
+                        }
+                    } else if ("db:listTables".equals(method)) {
+                        try {
+                            JsonNode params = request.get("params");
+                            String connId = params.get("connId").asText();
+                            var pool = dbConnectionManager.getPool(connId);
+                            if (pool == null) {
+                                response = mapper.writeValueAsString(Map.of(
+                                    "jsonrpc", "2.0", "id", id,
+                                    "error", Map.of("code", -32603, "message", "Not connected")
+                                ));
+                            } else {
+                                var tables = tableEnumerator.listTables(pool);
+                                response = mapper.writeValueAsString(Map.of(
+                                    "jsonrpc", "2.0", "id", id,
+                                    "result", tables
+                                ));
+                            }
+                        } catch (Exception e) {
+                            response = mapper.writeValueAsString(Map.of(
+                                "jsonrpc", "2.0", "id", id,
+                                "error", Map.of("code", -32603, "message", "List tables failed: " + e.getMessage())
                             ));
                         }
                     } else {

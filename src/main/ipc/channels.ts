@@ -252,6 +252,86 @@ export const DtoGenerateResultSchema = z.object({
 export type DtoGenerateArgs = z.infer<typeof DtoGenerateArgsSchema>;
 export type DtoGenerateResult = z.infer<typeof DtoGenerateResultSchema>;
 
+// --- 03-02: DB Connection schemas ---
+export const DbConnectionCreateArgsSchema = z.object({
+  name: z.string().min(1).max(200),
+  url: z.string().min(1),
+  user: z.string(),
+  password: z.string(),
+  dbType: z.enum(['postgresql', 'mysql', 'oracle', 'h2']),
+});
+export const DbConnectionDeleteArgsSchema = z.object({
+  id: z.string().uuid(),
+});
+export const DbConnectionListResultSchema = z.array(z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  dbType: z.string(),
+  connected: z.boolean().default(false),
+}));
+
+export const DbConnectArgsSchema = z.object({
+  connectionId: z.string().uuid(),
+});
+export const DbConnectResultSchema = z.object({
+  ok: z.boolean(),
+  status: z.enum(['connected', 'error']),
+  error: z.string().optional(),
+  tables: z.number().optional(),
+});
+
+export const DbDisconnectArgsSchema = z.object({
+  connectionId: z.string().uuid(),
+});
+
+export const DbTestConnectionArgsSchema = z.object({
+  url: z.string().min(1),
+  user: z.string(),
+  password: z.string(),
+  dbType: z.enum(['postgresql', 'mysql', 'oracle', 'h2']),
+});
+export const DbTestConnectionResultSchema = z.object({
+  ok: z.boolean(),
+  connected: z.boolean(),
+  latencyMs: z.number().optional(),
+  error: z.string().optional(),
+});
+
+export const DbListTablesArgsSchema = z.object({
+  connectionId: z.string().uuid(),
+});
+export const DbTableInfoSchema = z.object({
+  name: z.string(),
+  schema: z.string().nullable(),
+  columnCount: z.number(),
+  rowCountEstimate: z.number(),
+});
+export const DbListTablesResultSchema = z.array(DbTableInfoSchema);
+
+export const DbParseJdbcUrlArgsSchema = z.object({
+  url: z.string().min(1),
+});
+export const DbParseJdbcUrlResultSchema = z.object({
+  driver: z.string().nullable(),
+  host: z.string().nullable(),
+  port: z.number().nullable(),
+  database: z.string().nullable(),
+  raw: z.string(),
+});
+
+export type DbConnectionCreateArgs = z.infer<typeof DbConnectionCreateArgsSchema>;
+export type DbConnectionDeleteArgs = z.infer<typeof DbConnectionDeleteArgsSchema>;
+export type DbConnectionListResult = z.infer<typeof DbConnectionListResultSchema>;
+export type DbConnectArgs = z.infer<typeof DbConnectArgsSchema>;
+export type DbConnectResult = z.infer<typeof DbConnectResultSchema>;
+export type DbDisconnectArgs = z.infer<typeof DbDisconnectArgsSchema>;
+export type DbTestConnectionArgs = z.infer<typeof DbTestConnectionArgsSchema>;
+export type DbTestConnectionResult = z.infer<typeof DbTestConnectionResultSchema>;
+export type DbListTablesArgs = z.infer<typeof DbListTablesArgsSchema>;
+export type DbListTablesResult = z.infer<typeof DbListTablesResultSchema>;
+export type DbParseJdbcUrlArgs = z.infer<typeof DbParseJdbcUrlArgsSchema>;
+export type DbParseJdbcUrlResult = z.infer<typeof DbParseJdbcUrlResultSchema>;
+
 // Inferred types for all schemas
 export type HelperStatus = z.infer<typeof HelperStatusSchema>;
 export type AppBootstrapResult = z.infer<typeof AppBootstrapResultSchema>;
