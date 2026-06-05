@@ -29,6 +29,10 @@ export class Supervisor extends EventEmitter {
     return this.status;
   }
 
+  getClient(): JsonRpcClientImpl | null {
+    return this.client;
+  }
+
   async init(): Promise<void> {
     const jdk = findJava();
     if (!jdk) {

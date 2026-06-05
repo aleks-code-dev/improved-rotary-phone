@@ -11,6 +11,13 @@ repositories {
 dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.21.2")
     implementation("info.picocli:picocli:4.7.6")
+
+    // DTO parsing
+    implementation("com.github.javaparser:javaparser-core:3.28.1")
+    implementation("com.github.javaparser:javaparser-symbol-solver-core:3.28.1")
+
+    // Bytecode (Lombok fallback)
+    implementation("org.ow2.asm:asm:9.7")
 }
 
 java {
