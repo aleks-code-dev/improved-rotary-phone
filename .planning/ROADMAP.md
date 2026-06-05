@@ -90,7 +90,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 — needs supervisor.getClient())*
 
-- [ ] 03-02: DB connection management (DB-01, DB-02, DB-07) — safeStorage wrapper, db-connections CRUD, HikariCP pool (size 2), JDBC drivers, DbConnectionForm with JDBC URL auto-parse
+- [x] 03-02: DB connection management (DB-01, DB-02, DB-07) — safeStorage wrapper, db-connections CRUD, HikariCP pool (size 2), JDBC drivers, DbConnectionForm with JDBC URL auto-parse
 
 **Wave 3** *(blocked on Wave 2 — needs DB connection infrastructure)*
 
@@ -128,7 +128,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Foundation & Postman Parity | 3/3 | Complete   | 2026-06-04 |
 | 2. Spring Project Detection | 0/TBD | Not started | - |
-| 3. Body Generation (DTO + DB) | 1/3 | In Progress | - |
+| 3. Body Generation (DTO + DB) | 2/3 | In Progress | - |
 | 4. Workflow Chains & Response Mapping | 0/TBD | Not started | - |
 
 **Coverage:**
