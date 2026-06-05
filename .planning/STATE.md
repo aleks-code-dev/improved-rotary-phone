@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: milestone
 status: executing
-stopped_at: Phase 03 wave 2 complete
-last_updated: "2026-06-06T01:25:00.000Z"
-last_activity: 2026-06-06 -- Phase 03 plan 03-02 completed
+stopped_at: Phase 03 complete
+last_updated: "2026-06-06T02:05:00.000Z"
+last_activity: 2026-06-06 -- Phase 03 plan 03-03 completed
 progress:
   total_phases: 4
   completed_phases: 1
@@ -27,12 +27,12 @@ See: .planning/REQUIREMENTS.md (34 v1 requirements across CORE / SPRING / BODY /
 
 ## Current Position
 
-Phase: 03 (body-generation-dto-db) — EXECUTING
+Phase: 03 (body-generation-dto-db) — COMPLETE
 Plan: 3 of 3
-Status: Wave 2 complete, executing Wave 3
-Last activity: 2026-06-06 -- Phase 03 plan 03-02 completed
+Status: Phase complete
+Last activity: 2026-06-06 -- Phase 03 plan 03-03 completed
 
-Progress: [██████░░░░] 66%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -48,7 +48,7 @@ Progress: [██████░░░░] 66%
 |-------|-------|-------|----------|
 | 1. Foundation & Postman Parity | 3/3 | — | — |
 | 2. Spring Project Detection | 0/TBD | — | — |
-| 3. Body Generation (DTO + DB) | 1/3 | 25min | 25min |
+| 3. Body Generation (DTO + DB) | 3/3 | 90min | 30min |
 | 4. Workflow Chains & Response Mapping | 0/TBD | — | — |
 
 **Recent Trend:**
@@ -70,6 +70,7 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - **Architecture (2026-06-03, from research)**: 3-process model — Renderer (Chromium+React, no Node access) ↔ Main (Node 24, IPC router, HTTP, chain runner, JVM supervisor) ↔ JVM Helper (Java 21, JavaParser/JDBC/JSON-RPC server, read-only on project). All IPC payloads Zod-validated.
 - **Body generation (2026-06-03)**: Two body modes (DTO schema / DB data) instead of one — DTO for "valid shape", DB for "real-looking data". User picks endpoint↔table mapping explicitly (no inference).
 - **Security (2026-06-03)**: DB credentials in Electron `safeStorage` (DPAPI/Keychain/libsecret) only — never plaintext, never logged, never egressed. App is read-only on the Spring project.
+- **Body generation (2026-06-06)**: DTO walker uses JavaParser AST with Lombok field fallback. Cycle detection via Set<FQN> + depth cap 6. HikariCP pool size 2 for desktop. SQL injection protection via PreparedStatement + keyword blocklist.
 - [Phase ?]: Dirty tracking via cross-store bridge: useRequest mutations call useTabs.getState().markDirty(tabId)
 - [Phase ?]: In-place save triggered when tab has sourceCollectionId + sourceItemIndex; otherwise SaveAsModal
 - [Phase ?]: specToCollectionItem helper extracted to avoid duplication between handleSave and SaveAsModal
@@ -103,6 +104,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-06T00:50:00.000Z
-Stopped at: Completed 03-01-PLAN.md (Wave 1)
-Resume file: .planning/phases/03-body-generation-dto-db/03-02-PLAN.md
+Last session: 2026-06-06T02:05:00.000Z
+Stopped at: Completed 03-03-PLAN.md (Phase 03 complete)
+Resume file: .planning/phases/04-workflow-chains-response-mapping/

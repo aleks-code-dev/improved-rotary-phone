@@ -94,7 +94,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 — needs DB connection infrastructure)*
 
-- [ ] 03-03: Table→row selection + column→field mapping UI (DB-03..06) — RowToJsonMapper, ColumnFieldNameMatcher, DbTableTree sidebar, DbRowDetail, ColumnFieldMapping editor
+- [x] 03-03: Table→row selection + column→field mapping UI (DB-03..06) — RowToJsonMapper, ColumnFieldNameMatcher, DbTableTree sidebar, DbRowDetail, ColumnFieldMapping editor
 
 ### Phase 4: Workflow Chains & Response Mapping
 
@@ -128,7 +128,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Foundation & Postman Parity | 3/3 | Complete   | 2026-06-04 |
 | 2. Spring Project Detection | 0/TBD | Not started | - |
-| 3. Body Generation (DTO + DB) | 2/3 | In Progress | - |
+| 3. Body Generation (DTO + DB) | 3/3 | Complete | 2026-06-06 |
 | 4. Workflow Chains & Response Mapping | 0/TBD | Not started | - |
 
 **Coverage:**
