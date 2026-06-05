@@ -1,10 +1,11 @@
 ---
 phase: 3
 slug: body-generation-dto-db
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-06-05
+reviewed_at: 2026-06-05
 ---
 
 # Phase 3 — UI Design Contract
@@ -522,11 +523,11 @@ No shadcn initialization. No third-party component registries. All UI is hand-bu
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS (FLAG: focal point + a11y labels)
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS (FLAG: 12px outside standard set — justified)
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** 2026-06-05
