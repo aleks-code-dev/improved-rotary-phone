@@ -86,7 +86,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 03-01: DTO schema body generation + cycle detection (BODY-01..03) — JavaParser walker, CycleDetector, PlaceholderFactory, EnumCommentEmitter, IPC bridge, Generate button in BodyTab
+- [x] 03-01: DTO schema body generation + cycle detection (BODY-01..03) — JavaParser walker, CycleDetector, PlaceholderFactory, EnumCommentEmitter, IPC bridge, Generate button in BodyTab
 
 **Wave 2** *(blocked on Wave 1 — needs supervisor.getClient())*
 
@@ -128,7 +128,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Foundation & Postman Parity | 3/3 | Complete   | 2026-06-04 |
 | 2. Spring Project Detection | 0/TBD | Not started | - |
-| 3. Body Generation (DTO + DB) | 0/3 | Planned | - |
+| 3. Body Generation (DTO + DB) | 1/3 | In Progress | - |
 | 4. Workflow Chains & Response Mapping | 0/TBD | Not started | - |
 
 **Coverage:**
