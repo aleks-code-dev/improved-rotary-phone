@@ -1,7 +1,7 @@
 ---
 phase: 2
 slug: spring-project-detection
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-06-05
@@ -27,6 +27,21 @@ created: 2026-06-05
 
 ---
 
+## Visual Hierarchy & Focal Points
+
+**Primary focal point:** EndpointsTree sidebar (after scan) / "Select Spring Project" CTA button (empty state). The endpoint tree is the main new UI surface — users scan it to discover available endpoints.
+
+**Secondary:** DTO class panel (when endpoint selected) — provides context about the request body class below the endpoint tree.
+
+**Tertiary:** Status bar scanner indicator — ambient awareness of scan state without competing for attention.
+
+**Visual entry sequence:** 
+1. Sidebar toggle label "ENDPOINTS" draws the eye to the new section
+2. CTA button or endpoint tree content fills the section
+3. Status bar dot provides background reassurance about scanner health
+
+---
+
 ## Spacing Scale
 
 Declared values (multiples of 4, inherited from `tokens.css`):
@@ -35,14 +50,14 @@ Declared values (multiples of 4, inherited from `tokens.css`):
 |-------|-------|-------|
 | `--space-1` | 4px | Icon gaps, inline padding, tree item padding-y |
 | `--space-2` | 8px | Compact element spacing, tree indentation per nesting level |
-| `--space-3` | 12px | Sidebar section gap, status bar horizontal padding |
+| `--space-3` | 12px | Sidebar section gap, status bar horizontal padding **(exception: inherited from tokens.css Phase 1 — required for sidebar density and button inline padding)** |
 | `--space-4` | 16px | Default element spacing, card padding |
 | `--space-5` | 24px | Section padding, panel interior |
 | `--space-6` | 32px | Layout gaps |
 | `--space-7` | 48px | Major section breaks |
 | `--space-8` | 64px | Page-level spacing |
 
-Exceptions: none
+Exceptions: `--space-3` (12px) — inherited from Phase 1 `tokens.css`, used for sidebar section gaps and status bar/button inline padding where 8px is too tight and 16px wastes vertical space in developer-dense UI. **This is the only non-standard spacing value. No additional exceptions will be added in future phases.**
 
 ---
 
@@ -52,8 +67,7 @@ Exceptions: none
 |------|------|--------|-------------|--------|
 | Micro (badges) | 10px | 600 (semibold) | 1.2 | `system-ui` sans |
 | Label (section headers) | 11px | 600 (semibold) | 1.2 | `system-ui` sans |
-| Body (tree items, form text) | 12px | 400 (regular) | 1.5 | `system-ui` sans |
-| Body-em (editor pane labels) | 13px | 400 (regular) | 1.5 | `system-ui` sans |
+| Body (tree items, form text, panel labels) | 12px | 400 (regular) | 1.5 | `system-ui` sans |
 | Heading (panel titles, modals) | 16px | 600 (semibold) | 1.2 | `system-ui` sans |
 | Code (endpoint paths, DTO names) | 12px | 400 (regular) | 1.5 | `ui-monospace` |
 
@@ -127,8 +141,8 @@ These are used for: method badge text in sidebar trees, method badges in tab bar
 | Empty state — no project | Heading: **Select a Spring project** — Body: **Open a local Spring Boot project to auto-detect every @RestController endpoint. No manual spec authoring required.** |
 | Loading state — scanning | Heading: **Scanning project...** — Subtext: **Found N endpoints so far...** (live counter updating) |
 | Empty state — no endpoints | Heading: **No @RestController endpoints detected** — Body: **This project may not be a Spring Boot project, or controllers use non-standard annotations. Try a different folder or check your project structure.** |
-| Error state — scan failed | Heading: **Scan failed** — Body: **{error message}. Check that the project is a valid Spring Boot project with source code accessible on disk.** — Action: **Rescan** button |
-| Rescan button | **Rescan** |
+| Error state — scan failed | Heading: **Scan failed** — Body: **{error message}. Check that the project is a valid Spring Boot project with source code accessible on disk.** — Action: **Rescan Project** button |
+| Rescan button (icon-only) | **⟳** icon with `aria-label="Rescan Spring project"` |
 | Sidebar group label | **Endpoints** (uppercase, following existing pattern: "Collections", "Environments", "History") |
 | DTO panel heading | **Request Body Class** |
 | DTO panel — unresolved | **No DTO class resolved for this endpoint** |
@@ -309,7 +323,7 @@ Button style: `background: var(--color-accent)`, `color: white`, `border: none`,
 │ │  Select Spring Project         │ │
 │ └────────────────────────────────┘ │
 │                                    │
-│ Select a Spring project            │  ← Heading, 13px, weight 600, var(--color-fg)
+│ Select a Spring project            │  ← Heading, 12px, weight 600, var(--color-fg)
 │                                    │
 │ Open a local Spring Boot project   │  ← Body, 12px, weight 400, var(--color-fg-muted)
 │ to auto-detect every @RestController│
@@ -365,7 +379,7 @@ Status dot: `--color-status-3xx` (blue/info during scan).
 │ on disk.                           │
 │                                    │
 │ ┌────────────────────────────────┐ │
-│ │  Rescan                        │ │  ← Accent button
+│ │  Rescan Project                │ │  ← Accent button
 │ └────────────────────────────────┘ │
 └────────────────────────────────────┘
 ```
@@ -474,11 +488,11 @@ No shadcn initialized. No third-party registries. All components hand-rolled usi
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-06-05
