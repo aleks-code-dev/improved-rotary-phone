@@ -78,6 +78,8 @@ export interface WindowApi {
     testConnection: (args: { url: string; user: string; password: string; dbType: string }) => Promise<any>;
     listTables: (args: { connectionId: string }) => Promise<any>;
     parseJdbcUrl: (args: { url: string }) => Promise<any>;
+    fetchRows: (args: { connectionId: string; tableName: string; schema?: string | null; mode: string; idValue?: string; whereClause?: string; limit?: number }) => Promise<any>;
+    mapRowToDto: (args: { connectionId: string; tableName: string; rowId: Record<string, unknown>; dtoFqn: string; columnMapping?: Record<string, string> }) => Promise<any>;
   };
 }
 
@@ -168,6 +170,8 @@ const api: WindowApi = {
     testConnection: (args) => ipcRenderer.invoke('db:testConnection', args),
     listTables: (args) => ipcRenderer.invoke('db:listTables', args),
     parseJdbcUrl: (args) => ipcRenderer.invoke('db:parseJdbcUrl', args),
+    fetchRows: (args) => ipcRenderer.invoke('db:fetchRows', args),
+    mapRowToDto: (args) => ipcRenderer.invoke('db:mapRowToDto', args),
   },
 };
 

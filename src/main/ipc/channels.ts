@@ -332,6 +332,58 @@ export type DbListTablesResult = z.infer<typeof DbListTablesResultSchema>;
 export type DbParseJdbcUrlArgs = z.infer<typeof DbParseJdbcUrlArgsSchema>;
 export type DbParseJdbcUrlResult = z.infer<typeof DbParseJdbcUrlResultSchema>;
 
+// --- 03-03: DB fetch rows + map row to DTO schemas ---
+export const DbFetchRowsArgsSchema = z.object({
+  connectionId: z.string().uuid(),
+  tableName: z.string(),
+  schema: z.string().nullable(),
+  mode: z.enum(['firstN', 'byId', 'byWhere']),
+  idValue: z.string().optional(),
+  whereClause: z.string().optional(),
+  limit: z.number().int().min(1).max(100).default(100),
+});
+export const DbFetchRowsResultSchema = z.object({
+  rows: z.array(z.record(z.string(), z.unknown())),
+  columns: z.array(z.object({
+    name: z.string(),
+    typeName: z.string(),
+    nullable: z.boolean(),
+  })),
+  truncated: z.boolean(),
+  totalCount: z.number(),
+});
+
+export const DbMapRowToDtoArgsSchema = z.object({
+  connectionId: z.string().uuid(),
+  tableName: z.string(),
+  rowId: z.record(z.string(), z.unknown()),
+  dtoFqn: z.string(),
+  columnMapping: z.record(z.string(), z.string()).default({}),
+});
+export const DbMapRowToDtoResultSchema = z.object({
+  ok: z.boolean(),
+  bodyJson: z.string(),
+  mapping: z.array(z.object({
+    column: z.string(),
+    field: z.string(),
+    compatibility: z.enum(['exact', 'compatible', 'incompatible']),
+  })),
+  coverage: z.object({
+    mapped: z.number(),
+    required: z.number(),
+    total: z.number(),
+  }),
+  warnings: z.array(z.object({
+    code: z.string(),
+    message: z.string(),
+  })).default([]),
+});
+
+export type DbFetchRowsArgs = z.infer<typeof DbFetchRowsArgsSchema>;
+export type DbFetchRowsResult = z.infer<typeof DbFetchRowsResultSchema>;
+export type DbMapRowToDtoArgs = z.infer<typeof DbMapRowToDtoArgsSchema>;
+export type DbMapRowToDtoResult = z.infer<typeof DbMapRowToDtoResultSchema>;
+
 // Inferred types for all schemas
 export type HelperStatus = z.infer<typeof HelperStatusSchema>;
 export type AppBootstrapResult = z.infer<typeof AppBootstrapResultSchema>;

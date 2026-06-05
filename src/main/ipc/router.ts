@@ -51,6 +51,8 @@ import {
   DbTestConnectionArgsSchema, DbTestConnectionResultSchema,
   DbListTablesArgsSchema, DbListTablesResultSchema,
   DbParseJdbcUrlArgsSchema, DbParseJdbcUrlResultSchema,
+  DbFetchRowsArgsSchema, DbFetchRowsResultSchema,
+  DbMapRowToDtoArgsSchema, DbMapRowToDtoResultSchema,
 } from './channels.js';
 
 const pendingRequests = new Map<string, AbortController>();
@@ -596,6 +598,46 @@ export function registerIpcRouter() {
     const url = parsed.url;
     const result = parseJdbcUrl(url);
     return DbParseJdbcUrlResultSchema.parse(result);
+  });
+
+  ipcMain.handle('db:fetchRows', async (_, args) => {
+    const parsed = DbFetchRowsArgsSchema.parse(args);
+    const client = supervisor.getClient();
+    if (!client) return { rows: [], columns: [], truncated: false, totalCount: 0 };
+    try {
+      const result = await client.request('db:fetchRows', {
+        connId: parsed.connectionId,
+        tableName: parsed.tableName,
+        schema: parsed.schema,
+        mode: parsed.mode,
+        idValue: parsed.idValue,
+        whereClause: parsed.whereClause,
+        limit: parsed.limit,
+      });
+      return DbFetchRowsResultSchema.parse(result);
+    } catch (err: any) {
+      log.error('db:fetchRows failed', { error: err.message });
+      return { rows: [], columns: [], truncated: false, totalCount: 0 };
+    }
+  });
+
+  ipcMain.handle('db:mapRowToDto', async (_, args) => {
+    const parsed = DbMapRowToDtoArgsSchema.parse(args);
+    const client = supervisor.getClient();
+    if (!client) return { ok: false, bodyJson: '{}', mapping: [], coverage: { mapped: 0, required: 0, total: 0 }, warnings: [{ code: 'HELPER_OFFLINE', message: 'Helper offline' }] };
+    try {
+      const result = await client.request('db:mapRowToDto', {
+        connId: parsed.connectionId,
+        tableName: parsed.tableName,
+        rowId: parsed.rowId,
+        dtoFqn: parsed.dtoFqn,
+        columnMapping: parsed.columnMapping,
+      });
+      return DbMapRowToDtoResultSchema.parse(result);
+    } catch (err: any) {
+      log.error('db:mapRowToDto failed', { error: err.message });
+      return { ok: false, bodyJson: '{}', mapping: [], coverage: { mapped: 0, required: 0, total: 0 }, warnings: [{ code: 'MAP_FAILED', message: err.message }] };
+    }
   });
 }
 

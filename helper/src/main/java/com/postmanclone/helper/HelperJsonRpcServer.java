@@ -6,6 +6,9 @@ import com.postmanclone.helper.config.ParserConfig;
 import com.postmanclone.helper.dto.DtoWalker;
 import com.postmanclone.helper.db.DbConnectionManager;
 import com.postmanclone.helper.db.TableEnumerator;
+import com.postmanclone.helper.db.RowToJsonMapper;
+import com.postmanclone.helper.db.ColumnFieldNameMatcher;
+import com.postmanclone.helper.db.type.H2TypeNormalizer;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 
 import java.io.*;
@@ -20,6 +23,7 @@ public class HelperJsonRpcServer {
     private final ObjectMapper mapper = new ObjectMapper();
     private final DbConnectionManager dbConnectionManager = new DbConnectionManager();
     private final TableEnumerator tableEnumerator = new TableEnumerator();
+    private final RowToJsonMapper rowToJsonMapper = new RowToJsonMapper(new H2TypeNormalizer());
     private final Map<String, Object> initializeResult = Map.of(
         "jsonrpc", "2.0",
         "id", 1,
@@ -152,6 +156,64 @@ public class HelperJsonRpcServer {
                             response = mapper.writeValueAsString(Map.of(
                                 "jsonrpc", "2.0", "id", id,
                                 "error", Map.of("code", -32603, "message", "List tables failed: " + e.getMessage())
+                            ));
+                        }
+                    } else if ("db:fetchRows".equals(method)) {
+                        try {
+                            JsonNode params = request.get("params");
+                            String connId = params.get("connId").asText();
+                            String tableName = params.get("tableName").asText();
+                            String schema = params.has("schema") && !params.get("schema").isNull() ? params.get("schema").asText() : null;
+                            String mode = params.has("mode") ? params.get("mode").asText() : "firstN";
+                            String idValue = params.has("idValue") ? params.get("idValue").asText() : null;
+                            String whereClause = params.has("whereClause") ? params.get("whereClause").asText() : null;
+                            int limit = params.has("limit") ? params.get("limit").asInt() : 100;
+                            var pool = dbConnectionManager.getPool(connId);
+                            if (pool == null) {
+                                response = mapper.writeValueAsString(Map.of(
+                                    "jsonrpc", "2.0", "id", id,
+                                    "error", Map.of("code", -32603, "message", "Not connected")
+                                ));
+                            } else {
+                                var result = rowToJsonMapper.fetchRows(pool, tableName, schema, mode, idValue, whereClause, limit);
+                                response = mapper.writeValueAsString(Map.of(
+                                    "jsonrpc", "2.0", "id", id,
+                                    "result", result
+                                ));
+                            }
+                        } catch (Exception e) {
+                            response = mapper.writeValueAsString(Map.of(
+                                "jsonrpc", "2.0", "id", id,
+                                "error", Map.of("code", -32603, "message", "Fetch rows failed: " + e.getMessage())
+                            ));
+                        }
+                    } else if ("db:mapRowToDto".equals(method)) {
+                        try {
+                            JsonNode params = request.get("params");
+                            String connId = params.get("connId").asText();
+                            String tableName = params.get("tableName").asText();
+                            Map<String, Object> rowId = mapper.convertValue(params.get("rowId"), Map.class);
+                            String dtoFqn = params.get("dtoFqn").asText();
+                            Map<String, String> columnMapping = params.has("columnMapping")
+                                ? mapper.convertValue(params.get("columnMapping"), Map.class)
+                                : new HashMap<>();
+                            var pool = dbConnectionManager.getPool(connId);
+                            if (pool == null) {
+                                response = mapper.writeValueAsString(Map.of(
+                                    "jsonrpc", "2.0", "id", id,
+                                    "error", Map.of("code", -32603, "message", "Not connected")
+                                ));
+                            } else {
+                                var result = rowToJsonMapper.mapRow(pool, tableName, rowId, dtoFqn, columnMapping);
+                                response = mapper.writeValueAsString(Map.of(
+                                    "jsonrpc", "2.0", "id", id,
+                                    "result", result
+                                ));
+                            }
+                        } catch (Exception e) {
+                            response = mapper.writeValueAsString(Map.of(
+                                "jsonrpc", "2.0", "id", id,
+                                "error", Map.of("code", -32603, "message", "Map row failed: " + e.getMessage())
                             ));
                         }
                     } else {
