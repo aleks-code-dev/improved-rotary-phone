@@ -64,6 +64,9 @@ export interface WindowApi {
   state: {
     save: (args: { openTabs: Array<{id: string; method: string; url: string; isDirty?: boolean}>; activeTabId: string | null }) => Promise<any>;
   };
+  body: {
+    generateDto: (args: { requestId: string; dtoFqn: string; subtypeName?: string }) => Promise<any>;
+  };
 }
 
 const api: WindowApi = {
@@ -115,6 +118,7 @@ const api: WindowApi = {
   },
   history: {
     list: (args) => ipcRenderer.invoke('history:list', args),
+    append: (args) => ipcRenderer.invoke('history:append', args),
     delete: (args) => ipcRenderer.invoke('history:delete', args),
   },
   variables: {
@@ -137,6 +141,9 @@ const api: WindowApi = {
   },
   state: {
     save: (args) => ipcRenderer.invoke('state:save', args),
+  },
+  body: {
+    generateDto: (args) => ipcRenderer.invoke('body:generateDto', args),
   },
 };
 

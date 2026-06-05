@@ -16,7 +16,9 @@ import * as historyService from '../storage/history.js';
 import { resolveVariables } from '../storage/variable-resolver.js';
 import { importPostmanCollection, exportPostmanCollection } from '../storage/import-export.js';
 import { generateCurl as storageGenerateCurl, parseCurl as storageParseCurl } from '../storage/curl.js';
+import { approveQuit } from './quitState.js';
 import { writeFileAtomic } from '../storage/atomicWrite.js';
+import { supervisor } from '../jvm/supervisor.js';
 import {
   AppBootstrapResultSchema, SetDataDirArgsSchema, SetDataDirResultSchema,
   ShowOpenDialogArgsSchema, ShowOpenDialogResultSchema,
@@ -32,7 +34,7 @@ import {
   EnvironmentsListResultSchema,
   EnvironmentReadArgsSchema, EnvironmentCreateArgsSchema, EnvironmentCreateResultSchema,
   EnvironmentUpdateArgsSchema, EnvironmentDeleteArgsSchema, EnvironmentSetActiveArgsSchema,
-  HistoryListArgsSchema, HistoryDeleteArgsSchema,
+  HistoryListArgsSchema, HistoryAppendArgsSchema, HistoryDeleteArgsSchema,
   VariablesResolveArgsSchema, VariablesResolveResultSchema,
   ImportPostmanArgsSchema, ImportPostmanResultSchema,
   ExportPostmanArgsSchema, ExportPostmanResultSchema,
@@ -42,6 +44,7 @@ import {
   StateSaveArgsSchema, ConfirmQuitArgsSchema,
   GlobalsUpdateArgsSchema,
   ReadFileArgsSchema,
+  DtoGenerateArgsSchema, DtoGenerateResultSchema,
 } from './channels.js';
 
 const pendingRequests = new Map<string, AbortController>();
@@ -298,6 +301,16 @@ export function registerIpcRouter() {
     return historyService.listHistory(parsed.collectionId, parsed.search);
   });
 
+  ipcMain.handle('history:append', async (_, args) => {
+    const parsed = HistoryAppendArgsSchema.parse(args);
+    return historyService.appendHistoryEntry(parsed.collectionId, {
+      timestamp: parsed.timestamp,
+      collectionId: parsed.collectionId,
+      request: parsed.request as any,
+      response: parsed.response as any,
+    });
+  });
+
   ipcMain.handle('history:delete', async (_, args) => {
     const parsed = HistoryDeleteArgsSchema.parse(args);
     await historyService.deleteHistoryEntry(parsed.collectionId, parsed.entryId);
@@ -440,6 +453,7 @@ export function registerIpcRouter() {
   ipcMain.handle('app:confirmQuit', async (_, args) => {
     const parsed = ConfirmQuitArgsSchema.parse(args);
     if (parsed.canQuit) {
+      approveQuit();
       app.quit();
     }
     return { ok: true };
@@ -464,4 +478,43 @@ export function registerIpcRouter() {
       return { values: [] };
     }
   });
+
+  // --- 03-01: Body generation ---
+  ipcMain.handle('body:generateDto', async (_, args) => {
+    const parsed = DtoGenerateArgsSchema.parse(args);
+    const client = supervisor.getClient();
+    if (!client) return { ok: false, bodyJson: '', warnings: [{ code: 'HELPER_OFFLINE', message: 'Helper is offline' }], cycleRefs: [] };
+    try {
+      const bodyJson = await client.request('classpath:walkDto', { fqn: parsed.dtoFqn });
+      // Detect $ref markers in the response
+      const cycleRefs: string[] = [];
+      try {
+        const parsed_ = JSON.parse(bodyJson);
+        findCycleRefs(parsed_, cycleRefs);
+      } catch { /* not valid JSON — skip cycle detection */ }
+      return DtoGenerateResultSchema.parse({
+        ok: true,
+        bodyJson,
+        warnings: [],
+        cycleRefs,
+      });
+    } catch (err: any) {
+      log.error('body:generateDto failed', { error: err.message });
+      return { ok: false, bodyJson: '', warnings: [{ code: 'DTO_WALK_FAILED', message: err.message }], cycleRefs: [] };
+    }
+  });
+}
+
+function findCycleRefs(obj: any, refs: string[]): void {
+  if (!obj || typeof obj !== 'object') return;
+  if (Array.isArray(obj)) {
+    for (const item of obj) findCycleRefs(item, refs);
+    return;
+  }
+  if (obj['$ref'] && typeof obj['$ref'] === 'string') {
+    if (!refs.includes(obj['$ref'])) refs.push(obj['$ref']);
+  }
+  for (const key of Object.keys(obj)) {
+    findCycleRefs(obj[key], refs);
+  }
 }

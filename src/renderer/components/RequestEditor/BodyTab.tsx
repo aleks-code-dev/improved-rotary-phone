@@ -1,7 +1,8 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import Editor from '@monaco-editor/react';
 import { useRequest, type BodyMode, type RawContentType, type RequestBody } from '../../state/useRequest';
 import { formatText } from '../../lib/monaco';
+import { CycleWarningBanner } from '../BodyEditor/CycleWarningBanner';
 
 interface BodyTabProps {
   tabId: string;
@@ -36,6 +37,53 @@ export function BodyTab({ tabId }: BodyTabProps) {
     }
   }, [body, tabId, setBody]);
 
+  // DTO body generation state
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [cycleRefs, setCycleRefs] = useState<string[]>([]);
+  const [selectedSubtype, setSelectedSubtype] = useState<string | null>(null);
+  const [helperOnline, setHelperOnline] = useState(false);
+
+  useEffect(() => {
+    window.api.helper.getStatus().then((s: any) => setHelperOnline(s.state === 'healthy'));
+    const unsub = window.api.helper.onStatus((s: any) => setHelperOnline(s.state === 'healthy'));
+    return unsub;
+  }, []);
+
+  // Ctrl/Cmd+G keyboard shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
+        e.preventDefault();
+        handleGenerateDto();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  });
+
+  const handleGenerateDto = useCallback(async () => {
+    if (!spec?.detectedDto || isGenerating) return;
+    setIsGenerating(true);
+    setCycleRefs([]);
+    try {
+      const result = await window.api.body.generateDto({
+        requestId: tabId,
+        dtoFqn: spec.detectedDto.fqn,
+        subtypeName: selectedSubtype ?? undefined,
+      });
+      if (result.ok) {
+        setBody(tabId, { mode: 'raw', contentType: 'application/json', text: result.bodyJson });
+        if (result.cycleRefs?.length > 0) {
+          setCycleRefs(result.cycleRefs);
+        }
+      }
+    } catch {
+      // Error handled silently — button re-enables
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [spec, tabId, selectedSubtype, isGenerating, setBody]);
+
   return (
     <div style={{ padding: 'var(--space-3)', overflow: 'auto', fontSize: 12 }}>
       {/* Mode switcher (D-14) */}
@@ -67,7 +115,43 @@ export function BodyTab({ tabId }: BodyTabProps) {
             ))}
           </select>
           <button onClick={handleFormat} style={formatBtnStyle}>Format</button>
+
+          {/* DTO Generate button — visible when DTO detected */}
+          {spec?.detectedDto && body.contentType === 'application/json' && (
+            <>
+              {/* D-03: Subtype dropdown for polymorphic DTOs */}
+              {(spec?.detectedSubtypes?.length ?? 0) > 1 && (
+                <select
+                  value={selectedSubtype ?? spec.detectedSubtypes![0]}
+                  onChange={(e) => setSelectedSubtype(e.target.value)}
+                  style={selectStyle}
+                >
+                  {spec.detectedSubtypes!.map((st: string) => (
+                    <option key={st} value={st}>{st}</option>
+                  ))}
+                </select>
+              )}
+              <button
+                onClick={handleGenerateDto}
+                disabled={!helperOnline || isGenerating}
+                title={!helperOnline ? 'Helper is offline — body generation unavailable' : 'Generate JSON body from DTO schema (Ctrl+G)'}
+                style={{
+                  ...formatBtnStyle,
+                  color: 'var(--color-accent)',
+                  borderColor: 'var(--color-accent)',
+                  fontWeight: 600,
+                }}
+              >
+                {isGenerating ? 'Generating...' : 'Generate from DTO'}
+              </button>
+            </>
+          )}
         </div>
+      )}
+
+      {/* Cycle warning banner */}
+      {cycleRefs.length > 0 && (
+        <CycleWarningBanner cycleRefs={cycleRefs} onDismiss={() => setCycleRefs([])} />
       )}
 
       {/* Mode-specific content */}

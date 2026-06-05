@@ -47,7 +47,7 @@ export const RequestDiagnoseResultSchema = z.object({
 export const RequestSpecSchema = z.object({
   requestId: z.string().uuid(),
   method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']),
-  url: z.string().url(),
+  url: z.string(),
   headers: z.array(z.object({ key: z.string(), value: z.string(), enabled: z.boolean().default(true) })),
   queryParams: z.array(z.object({ key: z.string(), value: z.string(), enabled: z.boolean().default(true) })),
   pathParams: z.array(z.object({ key: z.string(), value: z.string() })),
@@ -120,6 +120,7 @@ export const WriteFileResultSchema = z.object({ ok: z.boolean() });
 export const CollectionsListResultSchema = z.array(z.object({
   id: z.string().uuid(),
   name: z.string(),
+  itemCount: z.number().default(0),
   info: z.object({ name: z.string(), _postman_id: z.string() }),
 }));
 
@@ -152,10 +153,23 @@ export const EnvironmentSetActiveArgsSchema = z.object({ id: z.string().uuid().n
 
 // --- 01-03: History schemas ---
 export const HistoryListArgsSchema = z.object({
-  collectionId: z.string().uuid(),
+  collectionId: z.string(),
   search: z.string().optional(),
 });
 export const HistoryListResultSchema = z.array(z.any());
+export const HistoryAppendArgsSchema = z.object({
+  collectionId: z.string(),
+  timestamp: z.number(),
+  request: z.object({
+    method: z.string(),
+    url: z.string(),
+  }).passthrough(),
+  response: z.object({
+    status: z.number(),
+    statusText: z.string(),
+    durationMs: z.number(),
+  }).passthrough().nullable().optional(),
+});
 export const HistoryDeleteArgsSchema = z.object({
   collectionId: z.string().uuid(),
   entryId: z.string().uuid(),
@@ -219,6 +233,24 @@ export const GlobalsUpdateArgsSchema = z.object({
 
 // --- 01-03: Read file schemas ---
 export const ReadFileArgsSchema = z.object({ path: z.string().min(1) });
+
+// --- 03-01: Body generation schemas ---
+export const DtoGenerateArgsSchema = z.object({
+  requestId: z.string().uuid(),
+  dtoFqn: z.string().min(1),
+  subtypeName: z.string().optional(),
+});
+export const DtoGenerateResultSchema = z.object({
+  ok: z.boolean(),
+  bodyJson: z.string(),
+  warnings: z.array(z.object({
+    code: z.string(),
+    message: z.string(),
+  })).default([]),
+  cycleRefs: z.array(z.string()).default([]),
+});
+export type DtoGenerateArgs = z.infer<typeof DtoGenerateArgsSchema>;
+export type DtoGenerateResult = z.infer<typeof DtoGenerateResultSchema>;
 
 // Inferred types for all schemas
 export type HelperStatus = z.infer<typeof HelperStatusSchema>;
