@@ -6,7 +6,7 @@ PostmanClone is a desktop API client built for Java Spring developers. The journ
 
 ## Phases
 
-- [ ] **Phase 1: Foundation & Postman Parity** - Establish 3-process architecture + ship a full Postman alternative (CORE-01..10)
+- [x] **Phase 1: Foundation & Postman Parity** - Establish 3-process architecture + ship a full Postman alternative (CORE-01..10) (completed 2026-06-04)
 - [ ] **Phase 2: Spring Project Detection** - Point at a Spring project, detect all `@RestController` endpoints, click to get a prefilled request (SPRING-01..05)
 - [ ] **Phase 3: Body Generation (DTO + DB)** - Generate request bodies from DTO schemas or real database rows (BODY-01..03 + DB-01..07)
 - [ ] **Phase 4: Workflow Chains & Response Mapping** - Build multi-step chains where later steps pull fields from earlier responses (CHAIN-01..05 + MAP-01..04)
@@ -33,15 +33,15 @@ PostmanClone is a desktop API client built for Java Spring developers. The journ
 Plans:
 **Wave 1**
 
-- [ ] 01-01: Scaffold 3-process architecture (Electron 42 + Vite 8 + React 19 + TS, preload `contextBridge`, JSON-RPC 2.0 stdio wire, JVM helper supervisor with restart policy)
+- [x] 01-01: Scaffold 3-process architecture (Electron 42 + Vite 8 + React 19 + TS, preload `contextBridge`, JSON-RPC 2.0 stdio wire, JVM helper supervisor with restart policy)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-02: HTTP client + request/response editor (CORE-01, CORE-05, CORE-06, CORE-08, CORE-02) — main-process undici 7 client, Monaco body editor, response viewer
+- [x] 01-02: HTTP client + request/response editor (CORE-01, CORE-05, CORE-06, CORE-08, CORE-02) — main-process undici 7 client, Monaco body editor, response viewer
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 01-03: Collections, variables, auth, history, import/export (CORE-03, CORE-04, CORE-07, CORE-09, CORE-10) — Postman v2.1 storage layout, 4-scope resolver, electron-store + safeStorage
+- [x] 01-03: Collections, variables, auth, history, import/export (CORE-03, CORE-04, CORE-07, CORE-09, CORE-10) — Postman v2.1 storage layout, 4-scope resolver, electron-store + safeStorage
 
 ### Phase 2: Spring Project Detection
 
@@ -80,14 +80,21 @@ Plans:
   4. User can pick a table and a row (by id, by custom WHERE query, or "first N rows") and the app produces a JSON body from that row, shaped to match the endpoint's DTO schema.
   5. User can override column→field mappings when column names don't match DTO field names, with color-coded type-compatibility indicators (green / yellow / red) and a required-field coverage badge.
 
-**Plans**: TBD (1-3 plans for coarse granularity)
+**Plans**: 3 plans in 3 waves
 **UI hint**: yes
 
 Plans:
+**Wave 1**
 
-- [ ] 03-01: DTO schema body generation + cycle detection (BODY-01..03) — schema walker, hybrid field+getter walk for Lombok, `$ref` markers, depth cap 6
-- [ ] 03-02: DB connection management (DB-01, DB-02, DB-07) — HikariCP pool (size 2 for desktop), JDBC drivers bundled in helper fat-jar, `safeStorage` encryption, per-driver type normalizer for `jsonb` / `JSON` / `CLOB`
-- [ ] 03-03: Table→row selection + column→field mapping UI (DB-03..06) — row picker, LIMIT cap 100, color-coded mapping editor, required-field coverage
+- [ ] 03-01: DTO schema body generation + cycle detection (BODY-01..03) — JavaParser walker, CycleDetector, PlaceholderFactory, EnumCommentEmitter, IPC bridge, Generate button in BodyTab
+
+**Wave 2** *(blocked on Wave 1 — needs supervisor.getClient())*
+
+- [ ] 03-02: DB connection management (DB-01, DB-02, DB-07) — safeStorage wrapper, db-connections CRUD, HikariCP pool (size 2), JDBC drivers, DbConnectionForm with JDBC URL auto-parse
+
+**Wave 3** *(blocked on Wave 2 — needs DB connection infrastructure)*
+
+- [ ] 03-03: Table→row selection + column→field mapping UI (DB-03..06) — RowToJsonMapper, ColumnFieldNameMatcher, DbTableTree sidebar, DbRowDetail, ColumnFieldMapping editor
 
 ### Phase 4: Workflow Chains & Response Mapping
 
@@ -119,9 +126,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Postman Parity | 0/TBD | Not started | - |
+| 1. Foundation & Postman Parity | 3/3 | Complete   | 2026-06-04 |
 | 2. Spring Project Detection | 0/TBD | Not started | - |
-| 3. Body Generation (DTO + DB) | 0/TBD | Not started | - |
+| 3. Body Generation (DTO + DB) | 0/3 | Planned | - |
 | 4. Workflow Chains & Response Mapping | 0/TBD | Not started | - |
 
 **Coverage:**
