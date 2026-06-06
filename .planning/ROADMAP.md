@@ -57,14 +57,21 @@ Plans:
   4. The scanner hits 100% endpoint coverage on a 10+ real Spring project test corpus (petclinic, realworld, mall, etc.), surviving Lombok, records, sealed types, multi-module Maven, and inner-class scope.
   5. Scan completes in under 10 seconds for a typical Spring project (~100 controllers / ~500 endpoints), with a denylist for `.git/` / `target/` / `node_modules/` / `build/` and a 1MB per-file size cap.
 
-**Plans**: TBD (1-3 plans for coarse granularity)
+**Plans:** 3 plans
 **UI hint**: yes
 
 Plans:
+**Wave 1**
 
-- [ ] 02-01: JVM helper scanner module + 10+ project test corpus as day-one deliverable (JavaParser 3.28.1 + `CombinedTypeSolver`, Annotation FQN matching, denylist, mtime-based cache)
-- [ ] 02-02: Sidebar with controller-grouped endpoints, endpoint metadata extraction, DTO class resolution for body-bearing methods
-- [ ] 02-03: Click-to-prefill request (URL, method, headers, body schema placeholder) + open-time rescan and explicit rescan button
+- [ ] 02-01: JVM helper scanner module + IPC pipeline (SPRING-01, SPRING-02, SPRING-03) — EndpointScanner, ClasspathResolver, MavenModuleDetector, GradleModuleDetector, Denylist, Zod schemas, router handlers, project-cache, preload bridge
+
+**Wave 2** *(blocked on Wave 1 — needs IPC contracts)*
+
+- [ ] 02-02: Sidebar EndpointsTree + Scan Progress UI (SPRING-04) — controller-grouped endpoint tree, SpringProjectPicker, ScanProgress, StatusBar scanner section, Zustand store, TanStack Query hooks
+
+**Wave 3** *(blocked on Wave 2 — needs EndpointsTree)*
+
+- [ ] 02-03: Click-to-prefill + DtoClassPanel + Rescan (SPRING-05) — endpoint click handler, prefilled request tab, DTO class info panel, open-time rescan, lastSpringProjectPath persistence
 
 ### Phase 3: Body Generation (DTO + DB)
 
