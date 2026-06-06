@@ -2,6 +2,7 @@ package com.postmanclone.helper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.postmanclone.helper.config.ParserConfig;
 import com.postmanclone.helper.dto.DtoWalker;
 import com.postmanclone.helper.db.DbConnectionManager;
@@ -9,6 +10,10 @@ import com.postmanclone.helper.db.TableEnumerator;
 import com.postmanclone.helper.db.RowToJsonMapper;
 import com.postmanclone.helper.db.ColumnFieldNameMatcher;
 import com.postmanclone.helper.db.type.H2TypeNormalizer;
+import com.postmanclone.helper.scanner.EndpointScanner;
+import com.postmanclone.helper.scanner.ClasspathResolver;
+import com.postmanclone.helper.scanner.MavenModuleDetector;
+import com.postmanclone.helper.scanner.GradleModuleDetector;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 
 import java.io.*;
@@ -29,7 +34,7 @@ public class HelperJsonRpcServer {
         "id", 1,
         "result", Map.of(
             "version", "0.1.0",
-            "capabilities", new String[]{"initialize", "helper.ping", "classpath:walkDto", "db:connect", "db:disconnect", "db:testConnection", "db:listTables"}
+            "capabilities", new String[]{"initialize", "helper.ping", "classpath:walkDto", "scanner:scan", "scanner:rescan", "scanner:endpoints", "db:connect", "db:disconnect", "db:testConnection", "db:listTables"}
         )
     );
 
@@ -60,6 +65,49 @@ public class HelperJsonRpcServer {
                         writer.println(response);
                         writer.flush();
                         break;
+                    } else if ("scanner:scan".equals(method) || "scanner:rescan".equals(method)) {
+                        try {
+                            JsonNode params = request.get("params");
+                            String projectRoot = params.get("projectRoot").asText();
+                            java.nio.file.Path projectPath = java.nio.file.Paths.get(projectRoot);
+
+                            // Detect source roots
+                            java.util.List<java.nio.file.Path> sourceRoots = new java.util.ArrayList<>();
+                            sourceRoots.addAll(MavenModuleDetector.findModuleRoots(projectPath));
+                            if (sourceRoots.isEmpty()) {
+                                sourceRoots.addAll(GradleModuleDetector.findModuleRoots(projectPath));
+                            }
+
+                            // Create solver and scanner
+                            CombinedTypeSolver solver = ClasspathResolver.createSolver(sourceRoots, projectPath);
+                            EndpointScanner scanner = new EndpointScanner(solver);
+                            ObjectNode result = scanner.scan(projectPath);
+
+                            response = mapper.writeValueAsString(Map.of(
+                                "jsonrpc", "2.0", "id", id,
+                                "result", result
+                            ));
+                        } catch (Exception e) {
+                            response = mapper.writeValueAsString(Map.of(
+                                "jsonrpc", "2.0", "id", id,
+                                "error", Map.of("code", -32603, "message", "Scan failed: " + e.getMessage())
+                            ));
+                        }
+                    } else if ("scanner:endpoints".equals(method)) {
+                        // Return empty endpoints - main process handles caching
+                        try {
+                            JsonNode params = request.get("params");
+                            String projectId = params.has("projectId") ? params.get("projectId").asText() : "";
+                            response = mapper.writeValueAsString(Map.of(
+                                "jsonrpc", "2.0", "id", id,
+                                "result", Map.of("ok", true, "controllers", new Object[0], "projectId", projectId)
+                            ));
+                        } catch (Exception e) {
+                            response = mapper.writeValueAsString(Map.of(
+                                "jsonrpc", "2.0", "id", id,
+                                "error", Map.of("code", -32603, "message", "Endpoints fetch failed: " + e.getMessage())
+                            ));
+                        }
                     } else if ("classpath:walkDto".equals(method)) {
                         try {
                             JsonNode params = request.get("params");
