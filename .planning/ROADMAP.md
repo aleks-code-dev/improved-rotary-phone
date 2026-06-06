@@ -110,14 +110,21 @@ Plans:
   4. User can drag a field from any earlier step's response tree onto a field in a later step's body / header / URL — the mapping is explicit, editable, and shows in a clear source→target view.
   5. Mappings resolve at chain-run time (not edit time) and the user can preview the resolved body for any step before running the chain, so a changed earlier response automatically flows downstream.
 
-**Plans**: TBD (1-3 plans for coarse granularity)
+**Plans**: 3 plans in 3 waves
 **UI hint**: yes
 
 Plans:
+**Wave 1**
 
-- [ ] 04-01: Chain model + run-all + single-step re-run (CHAIN-01, CHAIN-03, CHAIN-04, CHAIN-05) — chain orchestrator in main process, per-step timeout/retry, persistence in collection JSON
-- [ ] 04-02: Variable reference syntax `{{stepN.response.body.path}}` (CHAIN-02) — JSONata 1.8 path expressions, resolution logging, circular-reference detection
-- [ ] 04-03: Response→body mapping editor + preview resolved body (MAP-01..04) — drag from response tree, explicit mapping table, run-time resolution, preview button
+- [ ] 04-01: Chain data model + orchestrator + IPC (CHAIN-01, CHAIN-03, CHAIN-04, CHAIN-05) — ChainSchema/ChainStepSchema, chain orchestrator (sequential undici, timeout/retry), reference resolver (JSONata 1.8.7), validator (circular refs), chain CRUD, IPC channels, preload bridge
+
+**Wave 2** *(blocked on Wave 1 — needs chain schemas + IPC)*
+
+- [ ] 04-02: Chain editor UI + sidebar integration (CHAIN-01, CHAIN-02, CHAIN-03, CHAIN-04) — sidebar "New Chain" button + chain items, ChainEditor, ChainHeader, StepSequence (horizontal cards), StepCard, ChainRequestBuilder, useChain Zustand store, Monaco reference highlighting
+
+**Wave 3** *(blocked on Wave 2 — needs chain editor)*
+
+- [ ] 04-03: Data panel + preview resolved body (MAP-01..04) — ChainDataPanel (collapsible bottom panel), ChainStepColumn (JSON tree + copy-path), PreviewResolvedModal, ChainValidationBanner, UnresolvedRefWarning, keyboard shortcuts
 
 ## Progress
 
@@ -129,7 +136,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Foundation & Postman Parity | 3/3 | Complete   | 2026-06-04 |
 | 2. Spring Project Detection | 0/TBD | Not started | - |
 | 3. Body Generation (DTO + DB) | 3/3 | Complete | 2026-06-06 |
-| 4. Workflow Chains & Response Mapping | 0/TBD | Not started | - |
+| 4. Workflow Chains & Response Mapping | 0/3 | Planning complete | - |
 
 **Coverage:**
 
