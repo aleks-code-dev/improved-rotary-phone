@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useEndpointsStore } from '../store/endpoints';
 
 export function StatusBar() {
   const [status, setStatus] = useState<any>({ state: 'starting' });
+  const scanStatus = useEndpointsStore((s) => s.scanStatus);
+  const lastScanResult = useEndpointsStore((s) => s.lastScanResult);
+  const lastScanError = useEndpointsStore((s) => s.lastScanError);
+  const activeProjectId = useEndpointsStore((s) => s.activeProjectId);
 
   useEffect(() => {
     window.api.helper.getStatus().then(setStatus);
@@ -23,6 +28,25 @@ export function StatusBar() {
     }
   };
 
+  const scannerLabel = () => {
+    if (!activeProjectId && scanStatus === 'idle') {
+      return { icon: '○', color: 'var(--color-fg-muted)', text: 'Spring: not scanned' };
+    }
+    if (scanStatus === 'scanning') {
+      const count = lastScanResult?.totalEndpoints ?? 0;
+      return { icon: '○', color: 'var(--color-status-3xx)', text: `Spring: scanning... (${count})` };
+    }
+    if (scanStatus === 'error') {
+      return { icon: '✗', color: 'var(--color-status-5xx)', text: 'Spring: scan failed' };
+    }
+    if (lastScanResult) {
+      return { icon: '●', color: 'var(--color-status-2xx)', text: `Spring: ${lastScanResult.totalEndpoints} endpoints` };
+    }
+    return { icon: '○', color: 'var(--color-fg-muted)', text: 'Spring: not scanned' };
+  };
+
+  const scanner = scannerLabel();
+
   return (
     <div style={{
       height: 24,
@@ -35,6 +59,10 @@ export function StatusBar() {
       background: 'var(--color-bg-elevated)',
     }}>
       <span style={{ color: stateColor, cursor: 'pointer' }} title="Helper status">{stateLabel()}</span>
+      <span style={{ color: 'var(--color-fg-muted)' }}>·</span>
+      <span style={{ color: scanner.color }} aria-live="polite" title="Scanner status">
+        {scanner.icon} {scanner.text}
+      </span>
       <span style={{ color: 'var(--color-fg-muted)' }}>·</span>
       <span style={{ color: 'var(--color-fg-muted)' }}>Env: No env</span>
       <div style={{ flex: 1 }} />

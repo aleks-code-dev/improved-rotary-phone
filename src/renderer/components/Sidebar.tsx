@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { CollectionsTree } from './Sidebar/CollectionsTree';
+import { EndpointsTree } from './Sidebar/EndpointsTree';
 import { EnvironmentsList } from './Sidebar/EnvironmentsList';
 import { HistoryList } from './Sidebar/HistoryList';
 import { VariablesTab } from './Sidebar/VariablesTab';
 
-type SidebarGroup = 'collections' | 'environments' | 'history' | 'variables';
+type SidebarGroup = 'endpoints' | 'collections' | 'environments' | 'history' | 'variables';
 
 export function Sidebar() {
   const [status, setStatus] = useState<any>({ state: 'starting' });
   const [visibleGroups, setVisibleGroups] = useState<Set<SidebarGroup>>(
-    new Set(['collections', 'environments', 'history', 'variables'])
+    new Set(['endpoints', 'collections', 'environments', 'history', 'variables'])
   );
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export function Sidebar() {
     <div style={{ width: 240, borderRight: '1px solid var(--color-border)', padding: 'var(--space-2)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', overflow: 'auto' }}>
       {/* Sidebar toolbar */}
       <div style={{ display: 'flex', gap: 'var(--space-1)', flexWrap: 'wrap' }}>
-        {(['collections', 'environments', 'history', 'variables'] as SidebarGroup[]).map((g) => (
+        {(['endpoints', 'collections', 'environments', 'history', 'variables'] as SidebarGroup[]).map((g) => (
           <button
             key={g}
             onClick={() => toggleGroup(g)}
@@ -51,6 +52,7 @@ export function Sidebar() {
         ))}
       </div>
 
+      {visibleGroups.has('endpoints') && <EndpointsTree />}
       {visibleGroups.has('collections') && <CollectionsTree />}
       {visibleGroups.has('environments') && <EnvironmentsList />}
       {visibleGroups.has('history') && <HistoryList />}
