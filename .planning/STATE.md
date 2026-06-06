@@ -89,6 +89,12 @@ Items acknowledged and carried forward from previous milestone close:
 |----------|------|--------|-------------|
 | *(none)* | | | |
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260606-134 | Fix scanner:scan method not found — initialize response missing capabilities | 2026-06-06 | 8f0354c | [260606-134-scanner-method-not-found](./quick/260606-134-scanner-method-not-found/) |
+
 ## Session Continuity
 
 Last session: 2026-06-06T21:00:00Z
