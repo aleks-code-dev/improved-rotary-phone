@@ -53,6 +53,12 @@ import {
   DbParseJdbcUrlArgsSchema, DbParseJdbcUrlResultSchema,
   DbFetchRowsArgsSchema, DbFetchRowsResultSchema,
   DbMapRowToDtoArgsSchema, DbMapRowToDtoResultSchema,
+  ChainCreateArgsSchema, ChainCreateResultSchema,
+  ChainUpdateArgsSchema, ChainDeleteArgsSchema,
+  ChainRunArgsSchema, ChainRunResultSchema,
+  ChainStopArgsSchema,
+  ChainValidateArgsSchema, ChainValidateResultSchema,
+  ChainPreviewResolvedArgsSchema, ChainPreviewResolvedResultSchema,
 } from './channels.js';
 
 const pendingRequests = new Map<string, AbortController>();
@@ -637,6 +643,168 @@ export function registerIpcRouter() {
     } catch (err: any) {
       log.error('db:mapRowToDto failed', { error: err.message });
       return { ok: false, bodyJson: '{}', mapping: [], coverage: { mapped: 0, required: 0, total: 0 }, warnings: [{ code: 'MAP_FAILED', message: err.message }] };
+    }
+  });
+
+  // --- 04-01: Chain handlers ---
+  ipcMain.handle('chains:create', async (_, args) => {
+    const parsed = ChainCreateArgsSchema.parse(args);
+    try {
+      const result = await collectionsService.addChain(parsed.collectionId, parsed.name);
+      return ChainCreateResultSchema.parse(result);
+    } catch (err: any) {
+      log.error('chains:create failed', { error: err.message });
+      return { chainId: '' };
+    }
+  });
+
+  ipcMain.handle('chains:update', async (_, args) => {
+    const parsed = ChainUpdateArgsSchema.parse(args);
+    try {
+      await collectionsService.updateChain(parsed.collectionId, parsed.chainId, parsed.chain);
+      return { ok: true };
+    } catch (err: any) {
+      log.error('chains:update failed', { error: err.message });
+      return { ok: false, error: err.message };
+    }
+  });
+
+  ipcMain.handle('chains:delete', async (_, args) => {
+    const parsed = ChainDeleteArgsSchema.parse(args);
+    try {
+      await collectionsService.deleteChain(parsed.collectionId, parsed.chainId);
+      return { ok: true };
+    } catch (err: any) {
+      log.error('chains:delete failed', { error: err.message });
+      return { ok: false, error: err.message };
+    }
+  });
+
+  ipcMain.handle('chains:run', async (_, args) => {
+    const parsed = ChainRunArgsSchema.parse(args);
+    try {
+      const chain = await collectionsService.getChain(parsed.collectionId, parsed.chainId);
+      if (!chain) return { chainId: parsed.chainId, status: 'failed', steps: [] };
+
+      const { BrowserWindow } = await import('electron');
+      const mainWindow = BrowserWindow.getAllWindows()[0];
+      if (!mainWindow) return { chainId: parsed.chainId, status: 'failed', steps: [] };
+
+      const { runChain } = await import('../chains/orchestrator.js');
+      const result = await runChain(chain, mainWindow, parsed.startFromStep);
+
+      // Persist step results (D-05)
+      const stepResultsToSave = result.steps
+        .filter(s => s.response)
+        .map(s => ({
+          stepIndex: s.stepIndex,
+          result: {
+            status: s.response!.status,
+            statusText: s.response!.statusText,
+            headers: s.response!.headers,
+            bodyBase64: s.response!.bodyBase64,
+            bodyTruncated: s.response!.bodyTruncated,
+            bodySizeBytes: s.response!.bodySizeBytes,
+            timing: { total: s.response!.timing.total },
+            completedAt: s.response!.completedAt,
+            unresolvedRefs: s.unresolvedRefs,
+            retryAttempts: s.retryAttempts,
+          },
+        }));
+
+      if (stepResultsToSave.length > 0) {
+        await collectionsService.saveStepResults(parsed.collectionId, parsed.chainId, stepResultsToSave);
+      }
+
+      return ChainRunResultSchema.parse(result);
+    } catch (err: any) {
+      log.error('chains:run failed', { error: err.message });
+      return { chainId: parsed.chainId, status: 'failed', steps: [] };
+    }
+  });
+
+  ipcMain.handle('chains:stop', async (_, args) => {
+    const parsed = ChainStopArgsSchema.parse(args);
+    try {
+      const { stopChain } = await import('../chains/orchestrator.js');
+      stopChain(parsed.chainId);
+      return { ok: true };
+    } catch (err: any) {
+      log.error('chains:stop failed', { error: err.message });
+      return { ok: false, error: err.message };
+    }
+  });
+
+  ipcMain.handle('chains:validate', async (_, args) => {
+    const parsed = ChainValidateArgsSchema.parse(args);
+    try {
+      const chain = await collectionsService.getChain(parsed.collectionId, parsed.chainId);
+      if (!chain) return { valid: false, issues: [{ type: 'invalid-step', message: 'Chain not found' }] };
+
+      const { validateChain } = await import('../chains/validator.js');
+      return ChainValidateResultSchema.parse(validateChain(chain));
+    } catch (err: any) {
+      log.error('chains:validate failed', { error: err.message });
+      return { valid: false, issues: [{ type: 'invalid-step', message: err.message }] };
+    }
+  });
+
+  ipcMain.handle('chains:previewResolved', async (_, args) => {
+    const parsed = ChainPreviewResolvedArgsSchema.parse(args);
+    try {
+      const chain = await collectionsService.getChain(parsed.collectionId, parsed.chainId);
+      if (!chain) {
+        return ChainPreviewResolvedResultSchema.parse({
+          resolvedUrl: '',
+          resolvedHeaders: [],
+          resolvedBody: '',
+          warnings: [{ reference: '', reason: 'Chain not found' }],
+        });
+      }
+
+      const step = chain.steps.find(s => s.stepIndex === parsed.stepIndex);
+      if (!step) {
+        return ChainPreviewResolvedResultSchema.parse({
+          resolvedUrl: '',
+          resolvedHeaders: [],
+          resolvedBody: '',
+          warnings: [{ reference: '', reason: `Step ${parsed.stepIndex} not found` }],
+        });
+      }
+
+      // Build prior results from cached step results
+      const priorResults = chain.steps
+        .filter(s => s.stepIndex < parsed.stepIndex && s.lastResult)
+        .map(s => ({
+          stepIndex: s.stepIndex,
+          status: 'success' as const,
+          response: {
+            status: s.lastResult!.status,
+            statusText: s.lastResult!.statusText,
+            headers: s.lastResult!.headers,
+            bodyBase64: s.lastResult!.bodyBase64,
+          },
+          unresolvedRefs: s.lastResult!.unresolvedRefs,
+          retryAttempts: s.lastResult!.retryAttempts,
+        }));
+
+      const { resolveReferences } = await import('../chains/resolver.js');
+      const resolved = resolveReferences(step.request, priorResults);
+
+      return ChainPreviewResolvedResultSchema.parse({
+        resolvedUrl: resolved.request.url,
+        resolvedHeaders: resolved.request.headers.map(h => ({ key: h.key, value: h.value })),
+        resolvedBody: resolved.request.body.mode === 'raw' ? resolved.request.body.text : '',
+        warnings: resolved.warnings,
+      });
+    } catch (err: any) {
+      log.error('chains:previewResolved failed', { error: err.message });
+      return ChainPreviewResolvedResultSchema.parse({
+        resolvedUrl: '',
+        resolvedHeaders: [],
+        resolvedBody: '',
+        warnings: [{ reference: '', reason: err.message }],
+      });
     }
   });
 }

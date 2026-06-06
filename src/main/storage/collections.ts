@@ -8,10 +8,11 @@ import { CollectionSchema, type Collection } from '../../shared/schemas/collecti
 export interface CollectionMeta {
   id: string;
   name: string;
+  itemCount: number;
   info: { name: string; _postman_id: string };
 }
 
-/** List all collections (metadata only — lazy loading). */
+/** List all collections (metadata + item count — lazy loading, no full items). */
 export async function listCollections(): Promise<CollectionMeta[]> {
   const dir = getCollectionsDir();
   const results: CollectionMeta[] = [];
@@ -26,6 +27,7 @@ export async function listCollections(): Promise<CollectionMeta[]> {
         results.push({
           id: entry.name,
           name: minimal.info?.name ?? entry.name,
+          itemCount: Array.isArray(minimal.item) ? minimal.item.length : 0,
           info: { name: minimal.info?.name ?? entry.name, _postman_id: minimal.info?._postman_id ?? entry.name },
         });
       } catch {
@@ -108,5 +110,66 @@ export async function addFolderToCollection(
     name: folder.name,
     item: folder.item ?? [],
   } as any);
+  await updateCollection(collectionId, coll);
+}
+
+// --- Chain CRUD (Phase 4) ---
+
+import type { Chain, ChainStep, StepResult } from '../../shared/schemas/collection.js';
+
+/** Create a new chain in a collection. */
+export async function addChain(collectionId: string, name: string): Promise<{ chainId: string }> {
+  const chainId = randomUUID();
+  const coll = await readCollection(collectionId);
+  const chain: Chain = {
+    id: chainId,
+    name,
+    steps: [],
+    createdAt: Date.now(),
+  };
+  coll.chains.push(chain);
+  await updateCollection(collectionId, coll);
+  return { chainId };
+}
+
+/** Update a chain in a collection. */
+export async function updateChain(collectionId: string, chainId: string, chain: Chain): Promise<void> {
+  const coll = await readCollection(collectionId);
+  const idx = coll.chains.findIndex(c => c.id === chainId);
+  if (idx === -1) throw new Error(`Chain ${chainId} not found in collection ${collectionId}`);
+  coll.chains[idx] = chain;
+  await updateCollection(collectionId, coll);
+}
+
+/** Delete a chain from a collection. */
+export async function deleteChain(collectionId: string, chainId: string): Promise<void> {
+  const coll = await readCollection(collectionId);
+  coll.chains = coll.chains.filter(c => c.id !== chainId);
+  await updateCollection(collectionId, coll);
+}
+
+/** Get a chain from a collection. */
+export async function getChain(collectionId: string, chainId: string): Promise<Chain | null> {
+  const coll = await readCollection(collectionId);
+  return coll.chains.find(c => c.id === chainId) ?? null;
+}
+
+/** Save step results for a chain (D-05). */
+export async function saveStepResults(
+  collectionId: string,
+  chainId: string,
+  stepResults: Array<{ stepIndex: number; result: StepResult }>
+): Promise<void> {
+  const coll = await readCollection(collectionId);
+  const chain = coll.chains.find(c => c.id === chainId);
+  if (!chain) throw new Error(`Chain ${chainId} not found in collection ${collectionId}`);
+
+  for (const { stepIndex, result } of stepResults) {
+    const step = chain.steps.find(s => s.stepIndex === stepIndex);
+    if (step) {
+      step.lastResult = result;
+    }
+  }
+
   await updateCollection(collectionId, coll);
 }

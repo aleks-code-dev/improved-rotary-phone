@@ -372,10 +372,10 @@ interface TreeNode {
 **Warning signs:** Electron main process memory spikes during long chain runs.
 
 ### Pitfall 4: Reference Resolution Order Dependencies
-**What goes wrong:** Step 3 references `{{step1.response.body.id}}` but step 1 hasn't run yet (chain starts from step 3 in a re-run scenario). D-04 says re-run always starts from step 1, but this must be enforced.
-**Why it happens:** If the orchestrator allows starting from a mid-chain step, earlier steps have no results.
-**How to avoid:** D-04 is clear: re-run from step 1 to N always. The orchestrator must enforce this — never allow starting from step N > 1.
-**Warning signs:** References resolve to empty strings unexpectedly.
+**What goes wrong:** Step 3 references `{{step1.response.body.id}}` but step 1 hasn't run yet (chain starts from step 3 in a re-run scenario).
+**Why it happens:** When re-running from step N, steps 1..N-1 must have persisted results available for reference resolution.
+**How to avoid:** D-04 (revised): re-run from step N uses cached results for steps 1..N-1. The orchestrator loads persisted `lastResult` for earlier steps before executing from step N onward. If no persisted result exists for a referenced step, produce empty string + warning.
+**Warning signs:** References resolve to empty strings unexpectedly when re-running from mid-chain.
 
 ### Pitfall 5: Monaco Decorations Lost on Model Change
 **What goes wrong:** User edits the body, decorations disappear because the model content changed and decorations aren't re-applied.
@@ -849,32 +849,22 @@ export const ChainPreviewResolvedResultSchema = z.object({
 | A5 | Postman v2.1 round-trip preserves unknown top-level fields (like `chains`) | Collection Schema | If Postman import strips unknown fields, chain definitions would be lost on re-import |
 | A6 | Step results stored as JSON strings (not parsed objects) keep memory bounded | Memory Management | If the orchestrator holds all parsed results in memory, long chains could cause pressure |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Chain results storage location**
-   - What we know: Step results can be up to 1MB each, chains can have 20+ steps
-   - What's unclear: Whether to store results inline in the collection JSON or in a separate file
-   - Recommendation: Store chain definition (steps + request specs) in collection.json. Store step results in a separate `collections/<id>/chains/<chainId>/results.json` file. Load on-demand when opening a chain editor. This keeps `collections:list` fast.
+1. **Chain results storage location** — RESOLVED
+   - Decision: Store chain definition (steps + request specs) in collection.json. Store step results in a separate `collections/<id>/chains/<chainId>/results.json` file. Load on-demand when opening a chain editor. This keeps `collections:list` fast.
 
-2. **Step reorder and reference updates**
-   - What we know: D-15 says steps are identified by position number. If step order changes, references like `{{step2.response.body.id}}` become stale.
-   - What's unclear: Whether references should auto-update when steps are reordered
-   - Recommendation: For v1, warn the user that reordering will break references. Don't auto-update — it's error-prone with JSONata expressions. Add a "References will break" confirmation dialog.
+2. **Step reorder and reference updates** — RESOLVED
+   - Decision: For v1, warn the user that reordering will break references. Don't auto-update — it's error-prone with JSONata expressions. Add a "References will break" confirmation dialog.
 
-3. **Chain naming defaults**
-   - What we know: D-19 says "New Chain" button creates a chain
-   - What's unclear: Default name for new chains
-   - Recommendation: Default to "New Chain" (matches the button label). User renames inline. No uniqueness constraint within a collection (matches Postman's behavior for requests).
+3. **Chain naming defaults** — RESOLVED
+   - Decision: Default to "New Chain" (matches the button label). User renames inline. No uniqueness constraint within a collection (matches Postman's behavior for requests).
 
-4. **Chain history integration**
-   - What we know: CORE-09 has per-collection request history. Chain runs have their own result persistence.
-   - What's unclear: Whether chain runs should appear in the regular request history
-   - Recommendation: Don't add chain runs to per-collection history. Chain results have their own persistence model. The history tab shows individual requests, not chain runs.
+4. **Chain history integration** — RESOLVED
+   - Decision: Don't add chain runs to per-collection history. Chain results have their own persistence model. The history tab shows individual requests, not chain runs.
 
-5. **JSONata syntax error handling**
-   - What we know: D-10 says use JSONata 1.8.x for path expressions
-   - What's unclear: What happens when a user types an invalid JSONata expression
-   - Recommendation: Validate at two points: (1) when the user leaves the field (inline validation with yellow warning), (2) at chain-run time (skip invalid expressions with warning). Never crash on JSONata parse errors.
+5. **JSONata syntax error handling** — RESOLVED
+   - Decision: Validate at two points: (1) when the user leaves the field (inline validation with yellow warning), (2) at chain-run time (skip invalid expressions with warning). Never crash on JSONata parse errors.
 
 ## Environment Availability
 

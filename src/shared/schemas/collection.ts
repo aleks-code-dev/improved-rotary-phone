@@ -180,6 +180,44 @@ export type CollectionItemGroup = {
   [key: string]: unknown;
 };
 
+// --- Chain Schemas (Phase 4) ---
+// D-05: Step results persist to disk (response body up to 1MB, status, timing)
+// D-06: Each step has its own inline request spec (self-contained)
+// D-15: Auto-numbered steps, names are display-only
+export const StepResultSchema = z.object({
+  status: z.number(),
+  statusText: z.string(),
+  headers: z.array(z.object({ key: z.string(), value: z.string() })),
+  bodyBase64: z.string(),
+  bodyTruncated: z.boolean(),
+  bodySizeBytes: z.number(),
+  timing: z.object({ total: z.number() }),
+  completedAt: z.number(),
+  unresolvedRefs: z.array(z.string()).default([]),
+  retryAttempts: z.number().default(0),
+}).passthrough();
+
+export const ChainStepSchema = z.object({
+  stepIndex: z.number().int().min(1),
+  name: z.string().default(''),
+  request: RequestSpecSchema,
+  timeoutMs: z.number().int().min(1000).max(600_000).default(30_000),
+  retryCount: z.number().int().min(0).max(5).default(0),
+  retryDelayMs: z.number().int().min(0).max(30_000).default(1000),
+  lastResult: StepResultSchema.optional(),
+}).passthrough();
+
+export const ChainSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(200),
+  steps: z.array(ChainStepSchema),
+  createdAt: z.number(),
+}).passthrough();
+
+export type StepResult = z.infer<typeof StepResultSchema>;
+export type ChainStep = z.infer<typeof ChainStepSchema>;
+export type Chain = z.infer<typeof ChainSchema>;
+
 // --- Collection Schema (Postman v2.1) ---
 // D-36: Validates against Postman v2.1 schema discriminator
 // D-37: Top-level 'chains' extension for Phase 4
@@ -201,8 +239,8 @@ export const CollectionSchema = z.object({
     }),
   })).default([]),
   protocolProfileBehavior: z.record(z.string(), z.unknown()).optional(),
-  // Postman v2.1 extension (postmanclone): chains always empty in v1
-  chains: z.array(z.unknown()).default([]),
+  // Postman v2.1 extension (postmanclone): chains
+  chains: z.array(ChainSchema).default([]),
 }).passthrough();
 
 export type Collection = z.infer<typeof CollectionSchema>;

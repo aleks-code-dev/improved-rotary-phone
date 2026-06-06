@@ -384,6 +384,79 @@ export type DbFetchRowsResult = z.infer<typeof DbFetchRowsResultSchema>;
 export type DbMapRowToDtoArgs = z.infer<typeof DbMapRowToDtoArgsSchema>;
 export type DbMapRowToDtoResult = z.infer<typeof DbMapRowToDtoResultSchema>;
 
+// --- 04-01: Chain CRUD schemas ---
+export const ChainCreateArgsSchema = z.object({
+  collectionId: z.string().uuid(),
+  name: z.string().min(1).max(200).default('New Chain'),
+});
+export const ChainCreateResultSchema = z.object({
+  chainId: z.string().uuid(),
+});
+
+export const ChainUpdateArgsSchema = z.object({
+  collectionId: z.string().uuid(),
+  chainId: z.string().uuid(),
+  chain: z.any(),
+});
+
+export const ChainDeleteArgsSchema = z.object({
+  collectionId: z.string().uuid(),
+  chainId: z.string().uuid(),
+});
+
+// --- 04-01: Chain execution schemas ---
+export const ChainRunArgsSchema = z.object({
+  collectionId: z.string().uuid(),
+  chainId: z.string().uuid(),
+  startFromStep: z.number().int().min(1).optional(),
+});
+export const ChainRunResultSchema = z.object({
+  chainId: z.string().uuid(),
+  status: z.enum(['completed', 'failed', 'stopped']),
+  steps: z.array(z.object({
+    stepIndex: z.number(),
+    status: z.enum(['success', 'failed', 'stopped', 'skipped']),
+    response: z.any().optional(),
+    error: z.string().optional(),
+    unresolvedRefs: z.array(z.string()),
+    retryAttempts: z.number(),
+  })),
+});
+
+export const ChainStopArgsSchema = z.object({
+  chainId: z.string().uuid(),
+});
+
+// --- 04-01: Chain validation schema ---
+export const ChainValidateArgsSchema = z.object({
+  collectionId: z.string().uuid(),
+  chainId: z.string().uuid(),
+});
+export const ChainValidateResultSchema = z.object({
+  valid: z.boolean(),
+  issues: z.array(z.object({
+    type: z.string(),
+    message: z.string(),
+    stepIndex: z.number().optional(),
+  })),
+});
+
+// --- 04-01: Preview resolved schema ---
+export const ChainPreviewResolvedArgsSchema = z.object({
+  collectionId: z.string().uuid(),
+  chainId: z.string().uuid(),
+  stepIndex: z.number().int().min(1),
+});
+export const ChainPreviewResolvedResultSchema = z.object({
+  resolvedUrl: z.string(),
+  resolvedHeaders: z.array(z.object({ key: z.string(), value: z.string() })),
+  resolvedBody: z.string(),
+  warnings: z.array(z.object({
+    reference: z.string(),
+    reason: z.string(),
+  })),
+});
+
 // Inferred types for all schemas
 export type HelperStatus = z.infer<typeof HelperStatusSchema>;
 export type AppBootstrapResult = z.infer<typeof AppBootstrapResultSchema>;
@@ -432,3 +505,16 @@ export type StateSaveArgs = z.infer<typeof StateSaveArgsSchema>;
 export type ConfirmQuitArgs = z.infer<typeof ConfirmQuitArgsSchema>;
 export type GlobalsUpdateArgs = z.infer<typeof GlobalsUpdateArgsSchema>;
 export type ReadFileArgs = z.infer<typeof ReadFileArgsSchema>;
+
+// 04-01 types
+export type ChainCreateArgs = z.infer<typeof ChainCreateArgsSchema>;
+export type ChainCreateResult = z.infer<typeof ChainCreateResultSchema>;
+export type ChainUpdateArgs = z.infer<typeof ChainUpdateArgsSchema>;
+export type ChainDeleteArgs = z.infer<typeof ChainDeleteArgsSchema>;
+export type ChainRunArgs = z.infer<typeof ChainRunArgsSchema>;
+export type ChainRunResult = z.infer<typeof ChainRunResultSchema>;
+export type ChainStopArgs = z.infer<typeof ChainStopArgsSchema>;
+export type ChainValidateArgs = z.infer<typeof ChainValidateArgsSchema>;
+export type ChainValidateResult = z.infer<typeof ChainValidateResultSchema>;
+export type ChainPreviewResolvedArgs = z.infer<typeof ChainPreviewResolvedArgsSchema>;
+export type ChainPreviewResolvedResult = z.infer<typeof ChainPreviewResolvedResultSchema>;

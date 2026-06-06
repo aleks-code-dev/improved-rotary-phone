@@ -81,6 +81,19 @@ export interface WindowApi {
     fetchRows: (args: { connectionId: string; tableName: string; schema?: string | null; mode: string; idValue?: string; whereClause?: string; limit?: number }) => Promise<any>;
     mapRowToDto: (args: { connectionId: string; tableName: string; rowId: Record<string, unknown>; dtoFqn: string; columnMapping?: Record<string, string> }) => Promise<any>;
   };
+  chains: {
+    create: (args: { collectionId: string; name?: string }) => Promise<any>;
+    update: (args: { collectionId: string; chainId: string; chain: any }) => Promise<any>;
+    delete: (args: { collectionId: string; chainId: string }) => Promise<any>;
+    run: (args: { collectionId: string; chainId: string; startFromStep?: number }) => Promise<any>;
+    stop: (args: { chainId: string }) => Promise<any>;
+    validate: (args: { collectionId: string; chainId: string }) => Promise<any>;
+    previewResolved: (args: { collectionId: string; chainId: string; stepIndex: number }) => Promise<any>;
+    onProgress: (cb: (data: any) => void) => () => void;
+    onStepResult: (cb: (data: any) => void) => () => void;
+    onComplete: (cb: (data: any) => void) => () => void;
+    onValidationFailed: (cb: (data: any) => void) => () => void;
+  };
 }
 
 const api: WindowApi = {
@@ -172,6 +185,35 @@ const api: WindowApi = {
     parseJdbcUrl: (args) => ipcRenderer.invoke('db:parseJdbcUrl', args),
     fetchRows: (args) => ipcRenderer.invoke('db:fetchRows', args),
     mapRowToDto: (args) => ipcRenderer.invoke('db:mapRowToDto', args),
+  },
+  chains: {
+    create: (args) => ipcRenderer.invoke('chains:create', args),
+    update: (args) => ipcRenderer.invoke('chains:update', args),
+    delete: (args) => ipcRenderer.invoke('chains:delete', args),
+    run: (args) => ipcRenderer.invoke('chains:run', args),
+    stop: (args) => ipcRenderer.invoke('chains:stop', args),
+    validate: (args) => ipcRenderer.invoke('chains:validate', args),
+    previewResolved: (args) => ipcRenderer.invoke('chains:previewResolved', args),
+    onProgress: (cb) => {
+      const listener = (_: any, data: any) => cb(data);
+      ipcRenderer.on('chains:progress', listener);
+      return () => ipcRenderer.off('chains:progress', listener);
+    },
+    onStepResult: (cb) => {
+      const listener = (_: any, data: any) => cb(data);
+      ipcRenderer.on('chains:stepResult', listener);
+      return () => ipcRenderer.off('chains:stepResult', listener);
+    },
+    onComplete: (cb) => {
+      const listener = (_: any, data: any) => cb(data);
+      ipcRenderer.on('chains:complete', listener);
+      return () => ipcRenderer.off('chains:complete', listener);
+    },
+    onValidationFailed: (cb) => {
+      const listener = (_: any, data: any) => cb(data);
+      ipcRenderer.on('chains:validationFailed', listener);
+      return () => ipcRenderer.off('chains:validationFailed', listener);
+    },
   },
 };
 
