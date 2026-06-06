@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { useRequest } from '../../state/useRequest';
 import { MethodPicker } from '../RequestEditor/MethodPicker';
 import { SubTabs, type SubTab } from '../RequestEditor/SubTabs';
@@ -70,6 +70,41 @@ export function ChainRequestBuilder({ chainId, step, totalSteps, priorStepsWithR
   const method = spec?.method ?? step.request?.method ?? 'GET';
   const url = spec?.url ?? step.request?.url ?? '';
 
+  // Monaco reference highlighting for chain {{stepN.response.body.path}} patterns
+  const decorationIds = useRef<string[]>([]);
+
+  const handleEditorMount = useCallback((editor: any, monaco: any) => {
+    const applyDecorations = () => {
+      const model = editor.getModel();
+      if (!model) return;
+      const text = model.getValue();
+      const regex = /\{\{step\d+\.response\.(?:body|headers|status)[^}]*\}\}/g;
+      const newDecorations: any[] = [];
+      let match;
+      while ((match = regex.exec(text)) !== null) {
+        const start = model.getPositionAt(match.index);
+        const end = model.getPositionAt(match.index + match[0].length);
+        newDecorations.push({
+          range: new monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column),
+          options: {
+            inlineClassName: 'chain-ref-highlight',
+            hover: { value: `Chain reference: ${match[0]}` },
+          },
+        });
+      }
+      decorationIds.current = editor.deltaDecorations(decorationIds.current, newDecorations);
+    };
+
+    // Apply on mount
+    applyDecorations();
+    // Re-apply on content change (debounced)
+    let timeout: ReturnType<typeof setTimeout>;
+    editor.getModel()?.onDidChangeContent(() => {
+      clearTimeout(timeout);
+      timeout = setTimeout(applyDecorations, 150);
+    });
+  }, []);
+
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Chain context info bar */}
@@ -126,7 +161,7 @@ export function ChainRequestBuilder({ chainId, step, totalSteps, priorStepsWithR
       <div style={{ flex: 1, overflow: 'auto', padding: 'var(--space-3)' }}>
         {activeSubTab === 'Params' && <ParamsTab tabId={tabId} />}
         {activeSubTab === 'Headers' && <HeadersTab tabId={tabId} />}
-        {activeSubTab === 'Body' && <BodyTab tabId={tabId} />}
+        {activeSubTab === 'Body' && <BodyTab tabId={tabId} onEditorMount={handleEditorMount} />}
         {activeSubTab === 'Auth' && <AuthTab tabId={tabId} />}
         {activeSubTab === 'Settings' && <SettingsTab tabId={tabId} />}
       </div>

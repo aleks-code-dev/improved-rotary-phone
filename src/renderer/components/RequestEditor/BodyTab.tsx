@@ -6,11 +6,12 @@ import { CycleWarningBanner } from '../BodyEditor/CycleWarningBanner';
 
 interface BodyTabProps {
   tabId: string;
+  onEditorMount?: (editor: any, monaco: any) => void;
 }
 
 const CONTENT_TYPES: RawContentType[] = ['application/json', 'application/xml', 'text/plain', 'application/graphql'];
 
-export function BodyTab({ tabId }: BodyTabProps) {
+export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
   const spec = useRequest((s) => s.specs[tabId]);
   const setBody = useRequest((s) => s.setBody);
   const body = spec?.body ?? { mode: 'none' as const };
@@ -168,6 +169,9 @@ export function BodyTab({ tabId }: BodyTabProps) {
             language={body.contentType === 'application/json' ? 'json' : body.contentType === 'application/xml' ? 'xml' : body.contentType === 'application/graphql' ? 'graphql' : 'plaintext'}
             value={body.text}
             onChange={(value) => setBody(tabId, { ...body, text: value ?? '' })}
+            onMount={(editor, monaco) => {
+              onEditorMount?.(editor, monaco);
+            }}
             theme="vs-dark"
             options={{
               minimap: { enabled: false },

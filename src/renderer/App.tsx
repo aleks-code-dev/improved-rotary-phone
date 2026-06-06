@@ -6,12 +6,14 @@ import { ResponseViewer } from './components/ResponseViewer';
 import { StatusBar } from './components/StatusBar';
 import { FirstRunDialog } from './components/FirstRunDialog';
 import { ConfirmQuitModal } from './components/ConfirmQuitModal';
+import { ChainEditor } from './components/Chain/ChainEditor';
 import { useTabs } from './state/useTabs';
 
 export function App() {
   const [bootstrap, setBootstrap] = useState<any>(null);
   const [theme, setTheme] = useState<'system' | 'dark' | 'light'>('system');
   const [showQuitModal, setShowQuitModal] = useState(false);
+  const [activeChain, setActiveChain] = useState<{ collectionId: string; chainId: string } | null>(null);
 
   useEffect(() => {
     window.api.app.bootstrap().then((result) => {
@@ -34,7 +36,18 @@ export function App() {
         window.api.app.confirmQuit({ canQuit: true });
       }
     });
-    return unsub;
+
+    // Listen for chain:open events from sidebar
+    const handleChainOpen = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      setActiveChain({ collectionId: detail.collectionId, chainId: detail.chainId });
+    };
+    window.addEventListener('chain:open', handleChainOpen);
+
+    return () => {
+      unsub();
+      window.removeEventListener('chain:open', handleChainOpen);
+    };
   }, []);
 
   const handleQuitConfirm = useCallback(() => {
@@ -46,6 +59,9 @@ export function App() {
     setShowQuitModal(false);
     window.api.app.confirmQuit({ canQuit: false });
   }, []);
+
+  // HOOKS MUST COME BEFORE ALL CONDITIONAL RETURNS
+  const dirtyCount = useTabs((s) => s.openTabs.filter((t) => t.isDirty).length);
 
   function applyTheme(t: 'system' | 'dark' | 'light') {
     if (t === 'system') {
@@ -66,11 +82,9 @@ export function App() {
 
   if (bootstrap.firstRun) {
     return <FirstRunDialog onConfirm={(path) => {
-      window.api.app.setDataDir({ path }).then(() => window.location.reload());
+      window.api.app.bootstrap().then(() => window.location.reload());
     }} />;
   }
-
-  const dirtyCount = useTabs((s) => s.openTabs.filter((t) => t.isDirty).length);
 
   return (
     <div className="app-shell" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -78,8 +92,17 @@ export function App() {
         <Sidebar />
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
           <TabBar />
-          <RequestEditor />
-          <ResponseViewer />
+          {activeChain ? (
+            <ChainEditor
+              collectionId={activeChain.collectionId}
+              chainId={activeChain.chainId}
+            />
+          ) : (
+            <>
+              <RequestEditor />
+              <ResponseViewer />
+            </>
+          )}
         </div>
       </div>
       <StatusBar />
