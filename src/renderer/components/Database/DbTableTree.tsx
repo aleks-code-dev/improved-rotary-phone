@@ -4,6 +4,7 @@ import { PillBar, type PillItem } from '../ui/PillBar';
 interface DbTableTreeProps {
   connectionId: string | null;
   onRowSelect: (row: Record<string, unknown>, tableName: string, schema: string | null) => void;
+  onUseRowAsBody?: (row: Record<string, unknown>, tableName: string, schema: string | null) => void;
 }
 
 type RowFetchMode = 'firstN' | 'byId' | 'byWhere';
@@ -47,7 +48,7 @@ const chevronStyle: React.CSSProperties = {
   display: 'inline-block',
 };
 
-export function DbTableTree({ connectionId, onRowSelect }: DbTableTreeProps) {
+export function DbTableTree({ connectionId, onRowSelect, onUseRowAsBody }: DbTableTreeProps) {
   const [tables, setTables] = useState<Array<{ name: string; schema: string | null; columnCount: number; rowCountEstimate: number }>>([]);
   const [expandedTable, setExpandedTable] = useState<string | null>(null);
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
@@ -207,12 +208,44 @@ export function DbTableTree({ connectionId, onRowSelect }: DbTableTreeProps) {
                 {rows.map((row, i) => (
                   <div
                     key={i}
-                    onClick={() => onRowSelect(row, table.name, table.schema)}
-                    style={inlineRowStyle}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--ds-space-1)',
+                      padding: '3px var(--ds-space-2) 3px var(--ds-space-5)',
+                      borderRadius: 'var(--ds-radius-1)',
+                      marginBottom: 1,
+                    }}
                     onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--ds-surface)')}
                     onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                   >
-                    {Object.entries(row).slice(0, 3).map(([k, v]) => `${k}=${String(v).substring(0, 20)}`).join(' | ')}
+                    <div
+                      onClick={() => onRowSelect(row, table.name, table.schema)}
+                      style={{ ...inlineRowStyle, padding: 0, marginBottom: 0, flex: 1, minWidth: 0 }}
+                    >
+                      {Object.entries(row).slice(0, 3).map(([k, v]) => `${k}=${String(v).substring(0, 20)}`).join(' | ')}
+                    </div>
+                    {onUseRowAsBody && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onUseRowAsBody(row, table.name, table.schema); }}
+                        title="Use this row as request body (raw JSON)"
+                        style={{
+                          flexShrink: 0,
+                          background: 'transparent',
+                          color: 'var(--ds-primary)',
+                          border: '1px solid var(--ds-border)',
+                          borderRadius: 'var(--ds-radius-1)',
+                          padding: '0 6px',
+                          cursor: 'pointer',
+                          fontSize: 'var(--ds-text-2xs)',
+                          fontFamily: 'var(--ds-font-mono)',
+                          lineHeight: '16px',
+                          height: 16,
+                        }}
+                      >
+                        → body
+                      </button>
+                    )}
                   </div>
                 ))}
                 {!loading && rows.length === 0 && (

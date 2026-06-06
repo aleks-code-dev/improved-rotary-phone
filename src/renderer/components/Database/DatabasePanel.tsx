@@ -108,6 +108,24 @@ export function DatabasePanel({ width }: { width: number }) {
     window.dispatchEvent(new CustomEvent('body:auto-filled', { detail: { tabId } }));
   }, [tabId, setBody]);
 
+  // "→ body" button on each row in DbTableTree: fill the request body with the
+  // row's raw JSON. Does NOT require a detected DTO — the user can manually
+  // adjust the body afterwards. Always switches to the Body tab so the change
+  // is visible.
+  const handleUseRowAsBody = useCallback((row: Record<string, unknown>) => {
+    const text = JSON.stringify(
+      row,
+      (_k, v) => (typeof v === 'bigint' ? v.toString() : v instanceof Date ? v.toISOString() : v),
+      2,
+    );
+    setBody(tabId, {
+      mode: 'raw',
+      contentType: 'application/json',
+      text,
+    });
+    window.dispatchEvent(new CustomEvent('body:auto-filled', { detail: { tabId } }));
+  }, [tabId, setBody]);
+
   const selectedConnection = connections.find((c) => c.id === selectedConnectionId);
 
   return (
@@ -236,6 +254,7 @@ export function DatabasePanel({ width }: { width: number }) {
               <DbTableTree
                 connectionId={selectedConnection.id}
                 onRowSelect={handleRowSelect}
+                onUseRowAsBody={handleUseRowAsBody}
               />
               {selectedRow && (
                 <DbRowDetail
