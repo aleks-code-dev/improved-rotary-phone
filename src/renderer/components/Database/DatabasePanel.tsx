@@ -78,10 +78,10 @@ export function DatabasePanel({ width }: { width: number }) {
     // in the request builder. This makes "click a row → use as body" a
     // one-click workflow — no need to then click the button in BodyTab.
     // Silently no-op on IPC failure (the DbRowDetail button remains a fallback).
-    if (!detectedDtoFqn || !selectedConnection) return;
+    if (!detectedDtoFqn || !selectedConnectionId) return;
     try {
       const result = await window.api.db.mapRowToDto({
-        connectionId: selectedConnection.id,
+        connectionId: selectedConnectionId,
         tableName,
         rowId: row,
         dtoFqn: detectedDtoFqn,
@@ -95,7 +95,7 @@ export function DatabasePanel({ width }: { width: number }) {
         window.dispatchEvent(new CustomEvent('body:auto-filled', { detail: { tabId } }));
       }
     } catch { /* silent — fallback button still works */ }
-  }, [detectedDtoFqn, selectedConnection, tabId, setBody]);
+  }, [detectedDtoFqn, selectedConnectionId, tabId, setBody]);
 
   const handleUseRow = useCallback((bodyJson: string) => {
     // Auto-fill the body editor with the row's JSON (007-D)
