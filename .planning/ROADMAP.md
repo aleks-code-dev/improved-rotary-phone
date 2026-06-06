@@ -8,7 +8,7 @@ PostmanClone is a desktop API client built for Java Spring developers. The journ
 
 - [x] **Phase 1: Foundation & Postman Parity** - Establish 3-process architecture + ship a full Postman alternative (CORE-01..10) (completed 2026-06-04)
 - [x] **Phase 2: Spring Project Detection** - Point at a Spring project, detect all `@RestController` endpoints, click to get a prefilled request (SPRING-01..05) (completed 2026-06-06)
-- [ ] **Phase 3: Body Generation (DTO + DB)** - Generate request bodies from DTO schemas or real database rows (BODY-01..03 + DB-01..07)
+- [x] **Phase 3: Body Generation (DTO + DB)** - Generate request bodies from DTO schemas or real database rows (BODY-01..03 + DB-01..07) (completed 2026-06-06)
 - [x] **Phase 4: Workflow Chains & Response Mapping** - Build multi-step chains where later steps pull fields from earlier responses (CHAIN-01..05 + MAP-01..04) (completed 2026-06-06)
 
 ## Phase Details

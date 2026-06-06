@@ -16,63 +16,63 @@ A Spring project becomes a live, executable API playground the moment you point 
 
 <!-- Shipped and confirmed valuable. -->
 
-(None yet — ship to validate)
+**Standard Postman parity (table stakes):**
+
+- [x] **CORE-01**: User can build and send HTTP requests (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS)
+- [x] **CORE-02**: User can view the equivalent cURL command for any request
+- [x] **CORE-03**: User can define and reuse variables (environment, collection, global scopes)
+- [x] **CORE-04**: User can save requests into named collections
+- [x] **CORE-05**: User can set headers, query params, path params, and request body
+- [x] **CORE-06**: User can view formatted response (status, headers, body, timing)
+- [x] **CORE-07**: User can set authentication (Bearer, Basic, API key, none)
+- [x] **CORE-08**: User can switch between request body modes (none, form-data, url-encoded, raw JSON/XML/text, binary)
+- [x] **CORE-09**: User can persist a request history per collection
+- [x] **CORE-10**: User can import/export collections (Postman v2.1 JSON format)
+
+**Spring project integration (differentiator):**
+
+- [x] **SPRING-01**: User can point the app at a local Spring project root and the app scans it
+- [x] **SPRING-02**: App detects all `@RestController` / `@Controller` endpoints (method, path, HTTP verb, path/query params, consumes/produces)
+- [x] **SPRING-03**: App resolves the request body DTO class for endpoints that accept a body (POST, PUT, PATCH)
+- [x] **SPRING-04**: Detected endpoints appear in the sidebar organized by controller
+- [x] **SPRING-05**: User can open a detected endpoint and have a prefilled request built automatically (path, method, body schema)
+
+**Body generation — DTO schema mode:**
+
+- [x] **BODY-01**: User can generate a JSON request body whose shape matches the DTO/class schema (field names, types, nesting, enums, collections, optionals)
+- [x] **BODY-02**: Generated DTO-schema JSON includes sensible placeholder values (e.g., `"string"`, `0`, `true`) that the user can edit
+- [x] **BODY-03**: App handles recursive types without infinite loops (cycle detection / `$ref` style markers)
+
+**Body generation — DB data mode:**
+
+- [x] **DB-01**: User can connect the app to a database (JDBC) used by the Spring project
+- [x] **DB-02**: App lists available tables and their columns for the connected database
+- [x] **DB-03**: User picks a table for a given endpoint's request body
+- [x] **DB-04**: App fetches rows from the picked table and produces JSON shaped to match the endpoint's request body schema
+- [x] **DB-05**: App maps table columns to body schema fields (user can override the mapping when names don't match)
+- [x] **DB-06**: User can pick which row (by id, by query, or "first N") becomes the body
+- [x] **DB-07**: DB credentials are stored locally and never sent off-device
+
+**Request chaining (workflow testing):**
+
+- [x] **CHAIN-01**: User can define an ordered chain of N requests
+- [x] **CHAIN-02**: User can reference variables set from a previous chain step's response in a later step's URL/headers/body
+- [x] **CHAIN-03**: User can run the whole chain end-to-end and view per-step results in sequence
+- [x] **CHAIN-04**: User can re-run a single step in the chain without rerunning earlier steps
+- [x] **CHAIN-05**: Chain definitions are saved with the collection
+
+**Response-to-body mapping for chains:**
+
+- [x] **MAP-01**: When building a later step's body, user can pull a field from any earlier step's response (e.g., `step1.response.body.id` → `body.userId`)
+- [x] **MAP-02**: Mappings are explicit and editable (drag/select field from response tree to a field in the target body)
+- [x] **MAP-03**: Mappings resolve at chain-run time, not edit time, so changing an earlier step's response automatically flows downstream
+- [x] **MAP-04**: User can preview the resolved body for any step before running the chain
 
 ### Active
 
 <!-- Current scope. Building toward these. All are hypotheses until shipped. -->
 
-**Standard Postman parity (table stakes):**
-
-- [ ] **CORE-01**: User can build and send HTTP requests (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS)
-- [ ] **CORE-02**: User can view the equivalent cURL command for any request
-- [ ] **CORE-03**: User can define and reuse variables (environment, collection, global scopes)
-- [ ] **CORE-04**: User can save requests into named collections
-- [ ] **CORE-05**: User can set headers, query params, path params, and request body
-- [ ] **CORE-06**: User can view formatted response (status, headers, body, timing)
-- [ ] **CORE-07**: User can set authentication (Bearer, Basic, API key, none)
-- [ ] **CORE-08**: User can switch between request body modes (none, form-data, url-encoded, raw JSON/XML/text, binary)
-- [ ] **CORE-09**: User can persist a request history per collection
-- [ ] **CORE-10**: User can import/export collections (Postman v2.1 JSON format)
-
-**Spring project integration (differentiator):**
-
-- [ ] **SPRING-01**: User can point the app at a local Spring project root and the app scans it
-- [ ] **SPRING-02**: App detects all `@RestController` / `@Controller` endpoints (method, path, HTTP verb, path/query params, consumes/produces)
-- [ ] **SPRING-03**: App resolves the request body DTO class for endpoints that accept a body (POST, PUT, PATCH)
-- [ ] **SPRING-04**: Detected endpoints appear in the sidebar organized by controller
-- [ ] **SPRING-05**: User can open a detected endpoint and have a prefilled request built automatically (path, method, body schema)
-
-**Body generation — DTO schema mode:**
-
-- [ ] **BODY-01**: User can generate a JSON request body whose shape matches the DTO/class schema (field names, types, nesting, enums, collections, optionals)
-- [ ] **BODY-02**: Generated DTO-schema JSON includes sensible placeholder values (e.g., `"string"`, `0`, `true`) that the user can edit
-- [ ] **BODY-03**: App handles recursive types without infinite loops (cycle detection / `$ref` style markers)
-
-**Body generation — DB data mode:**
-
-- [ ] **DB-01**: User can connect the app to a database (JDBC) used by the Spring project
-- [ ] **DB-02**: App lists available tables and their columns for the connected database
-- [ ] **DB-03**: User picks a table for a given endpoint's request body
-- [ ] **DB-04**: App fetches rows from the picked table and produces JSON shaped to match the endpoint's request body schema
-- [ ] **DB-05**: App maps table columns to body schema fields (user can override the mapping when names don't match)
-- [ ] **DB-06**: User can pick which row (by id, by query, or "first N") becomes the body
-- [ ] **DB-07**: DB credentials are stored locally and never sent off-device
-
-**Request chaining (workflow testing):**
-
-- [ ] **CHAIN-01**: User can define an ordered chain of N requests
-- [ ] **CHAIN-02**: User can reference variables set from a previous chain step's response in a later step's URL/headers/body
-- [ ] **CHAIN-03**: User can run the whole chain end-to-end and view per-step results in sequence
-- [ ] **CHAIN-04**: User can re-run a single step in the chain without rerunning earlier steps
-- [ ] **CHAIN-05**: Chain definitions are saved with the collection
-
-**Response-to-body mapping for chains:**
-
-- [ ] **MAP-01**: When building a later step's body, user can pull a field from any earlier step's response (e.g., `step1.response.body.id` → `body.userId`)
-- [ ] **MAP-02**: Mappings are explicit and editable (drag/select field from response tree to a field in the target body)
-- [ ] **MAP-03**: Mappings resolve at chain-run time, not edit time, so changing an earlier step's response automatically flows downstream
-- [ ] **MAP-04**: User can preview the resolved body for any step before running the chain
+(None — all v1 requirements validated. See v2 requirements in REQUIREMENTS.md.)
 
 ### Out of Scope
 
@@ -107,18 +107,18 @@ A Spring project becomes a live, executable API playground the moment you point 
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Desktop app, not web | Needs filesystem + DB access without remote proxy | — Pending |
-| Spring-only in v1 | Focus enables a great Spring UX; multi-stack later | — Pending |
-| User picks endpoint↔table mapping (no inference) | User explicitly stated this; mappings are often non-obvious (DTO fields often don't match column names 1:1) | — Pending |
-| Two body generation modes (DTO / DB), not one | DTO mode for "give me a valid shape"; DB mode for "give me real-looking data" | — Pending |
-| Response-to-body mapping is explicit (user-driven) | Implicit magic creates fragile tests; explicit mappings are reviewable | — Pending |
-| Read-only access to the Spring project | App is a consumer, not a modifier — keeps blast radius small | — Pending |
-| cURL command shown as first-class output | Matches developer muscle memory; lets users paste into terminals | — Pending |
-| Chain definitions saved with the collection | Chains are reusable; treating them as first-class collection artifacts (not ephemeral) | — Pending |
+| Desktop app, not web | Needs filesystem + DB access without remote proxy | Electron 42.3.2 chosen; 3-process architecture |
+| Spring-only in v1 | Focus enables a great Spring UX; multi-stack later | JavaParser 3.28.1 + symbol-solver for annotation detection |
+| User picks endpoint↔table mapping (no inference) | User explicitly stated this; mappings are often non-obvious (DTO fields often don't match column names 1:1) | UI provides explicit mapping interface with type-compatibility indicators |
+| Two body generation modes (DTO / DB), not one | DTO mode for "give me a valid shape"; DB mode for "give me real-looking data" | Both implemented: JavaParser AST walker (DTO) + HikariCP/JDBC (DB) |
+| Response-to-body mapping is explicit (user-driven) | Implicit magic creates fragile tests; explicit mappings are reviewable | JSONata-based drag-and-drop mapping with preview |
+| Read-only access to the Spring project | App is a consumer, not a modifier — keeps blast radius small | Enforced in JVM helper; no write access to project paths |
+| cURL command shown as first-class output | Matches developer muscle memory; lets users paste into terminals | Monaco editor shows cURL with copy button |
+| Chain definitions saved with the collection | Chains are reusable; treating them as first-class collection artifacts (not ephemeral) | Postman v2.1 + `chains` extension field format |
 
 ---
 
-*Last updated: 2026-06-03 after initialization*
+*Last updated: 2026-06-06 after milestone v2.1 completion*
 
 ## Evolution
 

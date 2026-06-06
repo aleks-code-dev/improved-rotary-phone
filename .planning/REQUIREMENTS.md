@@ -9,55 +9,55 @@ Requirements for initial release. Each maps to roadmap phases. Sourced from the 
 
 ### CORE — Postman Parity (Table Stakes)
 
-- [ ] **CORE-01**: User can build and send HTTP requests (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS)
-- [ ] **CORE-02**: User can view the equivalent cURL command for any request
-- [ ] **CORE-03**: User can define and reuse variables (environment, collection, global scopes)
-- [ ] **CORE-04**: User can save requests into named collections
-- [ ] **CORE-05**: User can set headers, query params, path params, and request body
-- [ ] **CORE-06**: User can view formatted response (status, headers, body, timing)
-- [ ] **CORE-07**: User can set authentication per request (Bearer, Basic, API key, none)
-- [ ] **CORE-08**: User can switch between request body modes (none, form-data, url-encoded, raw JSON/XML/text, binary)
-- [ ] **CORE-09**: User can persist a request history per collection
-- [ ] **CORE-10**: User can import and export collections in Postman v2.1 JSON format
+- [x] **CORE-01**: User can build and send HTTP requests (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS)
+- [x] **CORE-02**: User can view the equivalent cURL command for any request
+- [x] **CORE-03**: User can define and reuse variables (environment, collection, global scopes)
+- [x] **CORE-04**: User can save requests into named collections
+- [x] **CORE-05**: User can set headers, query params, path params, and request body
+- [x] **CORE-06**: User can view formatted response (status, headers, body, timing)
+- [x] **CORE-07**: User can set authentication per request (Bearer, Basic, API key, none)
+- [x] **CORE-08**: User can switch between request body modes (none, form-data, url-encoded, raw JSON/XML/text, binary)
+- [x] **CORE-09**: User can persist a request history per collection
+- [x] **CORE-10**: User can import and export collections in Postman v2.1 JSON format
 
 ### SPRING — Spring Project Integration (Differentiator)
 
-- [ ] **SPRING-01**: User can point the app at a local Spring project root and the app scans it
-- [ ] **SPRING-02**: App detects all `@RestController` / `@Controller` endpoints (method, path, HTTP verb, path/query params, consumes/produces)
-- [ ] **SPRING-03**: App resolves the request body DTO class for endpoints that accept a body (POST, PUT, PATCH)
-- [ ] **SPRING-04**: Detected endpoints appear in the sidebar organized by controller
-- [ ] **SPRING-05**: User can open a detected endpoint and have a prefilled request built automatically (path, method, body schema)
+- [x] **SPRING-01**: User can point the app at a local Spring project root and the app scans it
+- [x] **SPRING-02**: App detects all `@RestController` / `@Controller` endpoints (method, path, HTTP verb, path/query params, consumes/produces)
+- [x] **SPRING-03**: App resolves the request body DTO class for endpoints that accept a body (POST, PUT, PATCH)
+- [x] **SPRING-04**: Detected endpoints appear in the sidebar organized by controller
+- [x] **SPRING-05**: User can open a detected endpoint and have a prefilled request built automatically (path, method, body schema)
 
 ### BODY — DTO Schema Mode (Differentiator)
 
-- [ ] **BODY-01**: User can generate a JSON request body whose shape matches the DTO/class schema (field names, types, nesting, enums, collections, optionals)
-- [ ] **BODY-02**: Generated DTO-schema JSON includes sensible placeholder values (e.g., `"string"`, `0`, `true`) that the user can edit
-- [ ] **BODY-03**: App handles recursive types without infinite loops (cycle detection / `$ref`-style markers or truncation with warning)
+- [x] **BODY-01**: User can generate a JSON request body whose shape matches the DTO/class schema (field names, types, nesting, enums, collections, optionals)
+- [x] **BODY-02**: Generated DTO-schema JSON includes sensible placeholder values (e.g., `"string"`, `0`, `true`) that the user can edit
+- [x] **BODY-03**: App handles recursive types without infinite loops (cycle detection / `$ref`-style markers or truncation with warning)
 
 ### DB — Database Data Mode (Differentiator)
 
-- [ ] **DB-01**: User can connect the app to a database (JDBC) used by the Spring project
-- [ ] **DB-02**: App lists available tables and their columns for the connected database
-- [ ] **DB-03**: User picks a table for a given endpoint's request body
-- [ ] **DB-04**: App fetches rows from the picked table and produces JSON shaped to match the endpoint's request body schema
-- [ ] **DB-05**: App maps table columns to body schema fields (user can override the mapping when names don't match)
-- [ ] **DB-06**: User can pick which row (by id, by query, or "first N") becomes the body
-- [ ] **DB-07**: DB credentials are stored locally (OS keychain) and never sent off-device or logged
+- [x] **DB-01**: User can connect the app to a database (JDBC) used by the Spring project
+- [x] **DB-02**: App lists available tables and their columns for the connected database
+- [x] **DB-03**: User picks a table for a given endpoint's request body
+- [x] **DB-04**: App fetches rows from the picked table and produces JSON shaped to match the endpoint's request body schema
+- [x] **DB-05**: App maps table columns to body schema fields (user can override the mapping when names don't match)
+- [x] **DB-06**: User can pick which row (by id, by query, or "first N") becomes the body
+- [x] **DB-07**: DB credentials are stored locally (OS keychain) and never sent off-device or logged
 
 ### CHAIN — Request Chaining (Differentiator)
 
-- [ ] **CHAIN-01**: User can define an ordered chain of N requests
-- [ ] **CHAIN-02**: User can reference variables set from a previous chain step's response in a later step's URL/headers/body
-- [ ] **CHAIN-03**: User can run the whole chain end-to-end and view per-step results in sequence
-- [ ] **CHAIN-04**: User can re-run a single step in the chain without rerunning earlier steps
-- [ ] **CHAIN-05**: Chain definitions are saved with the collection
+- [x] **CHAIN-01**: User can define an ordered chain of N requests
+- [x] **CHAIN-02**: User can reference variables set from a previous chain step's response in a later step's URL/headers/body
+- [x] **CHAIN-03**: User can run the whole chain end-to-end and view per-step results in sequence
+- [x] **CHAIN-04**: User can re-run a single step in the chain without rerunning earlier steps
+- [x] **CHAIN-05**: Chain definitions are saved with the collection
 
 ### MAP — Response-to-Body Mapping for Chains (Differentiator)
 
-- [ ] **MAP-01**: When building a later step's body, user can pull a field from any earlier step's response (e.g., `step1.response.body.id` → `body.userId`)
-- [ ] **MAP-02**: Mappings are explicit and editable (drag/select field from response tree to a field in the target body)
-- [ ] **MAP-03**: Mappings resolve at chain-run time, not edit time, so changing an earlier step's response automatically flows downstream
-- [ ] **MAP-04**: User can preview the resolved body for any step before running the chain
+- [x] **MAP-01**: When building a later step's body, user can pull a field from any earlier step's response (e.g., `step1.response.body.id` → `body.userId`)
+- [x] **MAP-02**: Mappings are explicit and editable (drag/select field from response tree to a field in the target body)
+- [x] **MAP-03**: Mappings resolve at chain-run time, not edit time, so changing an earlier step's response automatically flows downstream
+- [x] **MAP-04**: User can preview the resolved body for any step before running the chain
 
 ## v2 Requirements
 
@@ -135,40 +135,40 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CORE-01 | Phase 1 — Foundation & Postman Parity | Pending |
-| CORE-02 | Phase 1 — Foundation & Postman Parity | Pending |
-| CORE-03 | Phase 1 — Foundation & Postman Parity | Pending |
-| CORE-04 | Phase 1 — Foundation & Postman Parity | Pending |
-| CORE-05 | Phase 1 — Foundation & Postman Parity | Pending |
-| CORE-06 | Phase 1 — Foundation & Postman Parity | Pending |
-| CORE-07 | Phase 1 — Foundation & Postman Parity | Pending |
-| CORE-08 | Phase 1 — Foundation & Postman Parity | Pending |
-| CORE-09 | Phase 1 — Foundation & Postman Parity | Pending |
-| CORE-10 | Phase 1 — Foundation & Postman Parity | Pending |
-| SPRING-01 | Phase 2 — Spring Project Detection | Pending |
-| SPRING-02 | Phase 2 — Spring Project Detection | Pending |
-| SPRING-03 | Phase 2 — Spring Project Detection | Pending |
-| SPRING-04 | Phase 2 — Spring Project Detection | Pending |
-| SPRING-05 | Phase 2 — Spring Project Detection | Pending |
-| BODY-01 | Phase 3 — Body Generation (DTO + DB) | Pending |
-| BODY-02 | Phase 3 — Body Generation (DTO + DB) | Pending |
-| BODY-03 | Phase 3 — Body Generation (DTO + DB) | Pending |
-| DB-01 | Phase 3 — Body Generation (DTO + DB) | Pending |
-| DB-02 | Phase 3 — Body Generation (DTO + DB) | Pending |
-| DB-03 | Phase 3 — Body Generation (DTO + DB) | Pending |
-| DB-04 | Phase 3 — Body Generation (DTO + DB) | Pending |
-| DB-05 | Phase 3 — Body Generation (DTO + DB) | Pending |
-| DB-06 | Phase 3 — Body Generation (DTO + DB) | Pending |
-| DB-07 | Phase 3 — Body Generation (DTO + DB) | Pending |
-| CHAIN-01 | Phase 4 — Workflow Chains & Response Mapping | Pending |
-| CHAIN-02 | Phase 4 — Workflow Chains & Response Mapping | Pending |
-| CHAIN-03 | Phase 4 — Workflow Chains & Response Mapping | Pending |
-| CHAIN-04 | Phase 4 — Workflow Chains & Response Mapping | Pending |
-| CHAIN-05 | Phase 4 — Workflow Chains & Response Mapping | Pending |
-| MAP-01 | Phase 4 — Workflow Chains & Response Mapping | Pending |
-| MAP-02 | Phase 4 — Workflow Chains & Response Mapping | Pending |
-| MAP-03 | Phase 4 — Workflow Chains & Response Mapping | Pending |
-| MAP-04 | Phase 4 — Workflow Chains & Response Mapping | Pending |
+| CORE-01 | Phase 1 — Foundation & Postman Parity | Complete |
+| CORE-02 | Phase 1 — Foundation & Postman Parity | Complete |
+| CORE-03 | Phase 1 — Foundation & Postman Parity | Complete |
+| CORE-04 | Phase 1 — Foundation & Postman Parity | Complete |
+| CORE-05 | Phase 1 — Foundation & Postman Parity | Complete |
+| CORE-06 | Phase 1 — Foundation & Postman Parity | Complete |
+| CORE-07 | Phase 1 — Foundation & Postman Parity | Complete |
+| CORE-08 | Phase 1 — Foundation & Postman Parity | Complete |
+| CORE-09 | Phase 1 — Foundation & Postman Parity | Complete |
+| CORE-10 | Phase 1 — Foundation & Postman Parity | Complete |
+| SPRING-01 | Phase 2 — Spring Project Detection | Complete |
+| SPRING-02 | Phase 2 — Spring Project Detection | Complete |
+| SPRING-03 | Phase 2 — Spring Project Detection | Complete |
+| SPRING-04 | Phase 2 — Spring Project Detection | Complete |
+| SPRING-05 | Phase 2 — Spring Project Detection | Complete |
+| BODY-01 | Phase 3 — Body Generation (DTO + DB) | Complete |
+| BODY-02 | Phase 3 — Body Generation (DTO + DB) | Complete |
+| BODY-03 | Phase 3 — Body Generation (DTO + DB) | Complete |
+| DB-01 | Phase 3 — Body Generation (DTO + DB) | Complete |
+| DB-02 | Phase 3 — Body Generation (DTO + DB) | Complete |
+| DB-03 | Phase 3 — Body Generation (DTO + DB) | Complete |
+| DB-04 | Phase 3 — Body Generation (DTO + DB) | Complete |
+| DB-05 | Phase 3 — Body Generation (DTO + DB) | Complete |
+| DB-06 | Phase 3 — Body Generation (DTO + DB) | Complete |
+| DB-07 | Phase 3 — Body Generation (DTO + DB) | Complete |
+| CHAIN-01 | Phase 4 — Workflow Chains & Response Mapping | Complete |
+| CHAIN-02 | Phase 4 — Workflow Chains & Response Mapping | Complete |
+| CHAIN-03 | Phase 4 — Workflow Chains & Response Mapping | Complete |
+| CHAIN-04 | Phase 4 — Workflow Chains & Response Mapping | Complete |
+| CHAIN-05 | Phase 4 — Workflow Chains & Response Mapping | Complete |
+| MAP-01 | Phase 4 — Workflow Chains & Response Mapping | Complete |
+| MAP-02 | Phase 4 — Workflow Chains & Response Mapping | Complete |
+| MAP-03 | Phase 4 — Workflow Chains & Response Mapping | Complete |
+| MAP-04 | Phase 4 — Workflow Chains & Response Mapping | Complete |
 
 **Coverage:**
 - v1 requirements: 34 total
@@ -183,4 +183,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-06-03*
-*Last updated: 2026-06-03 — roadmap created, 34/34 v1 requirements mapped*
+*Last updated: 2026-06-06 — milestone v2.1 completed, 34/34 v1 requirements verified*
