@@ -83,6 +83,7 @@ export function registerIpcRouter() {
       jdkPath: jdk?.path ?? null,
       savedTabs: (settings.savedTabs as any[]) ?? [],
       activeTabId: (settings.activeTabId as string) ?? null,
+      lastSpringProjectPath: (settings.lastSpringProjectPath as string) ?? null,
     });
   });
 
@@ -831,6 +832,8 @@ export function registerIpcRouter() {
         projectPath: parsed.path,
       };
       await saveProjectScanResult(projectId, scanResult);
+      // Persist project path for app re-open
+      setSetting('lastSpringProjectPath', parsed.path);
       return ProjectScanResultSchema.parse(scanResult);
     } catch (err: any) {
       log.error('project:scan failed', { error: err.message });

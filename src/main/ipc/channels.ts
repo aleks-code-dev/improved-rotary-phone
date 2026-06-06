@@ -16,6 +16,7 @@ export const AppBootstrapResultSchema = z.object({
   helper: HelperStatusSchema,
   jdkFound: z.boolean(),
   jdkPath: z.string().nullable(),
+  lastSpringProjectPath: z.string().nullable().optional(),
 });
 
 export const SetDataDirArgsSchema = z.object({ path: z.string().min(1) });

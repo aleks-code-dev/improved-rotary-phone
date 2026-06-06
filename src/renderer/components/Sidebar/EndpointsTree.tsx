@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useEndpointsList, useEndpointsScan } from '../../hooks/useEndpoints';
 import { useEndpointsStore, EndpointData } from '../../store/endpoints';
 import { useTabs } from '../../state/useTabs';
@@ -37,6 +37,13 @@ export function EndpointsTree() {
   const setSelectedEndpoint = useEndpointsStore((s) => s.setSelectedEndpoint);
   const selectedEndpointId = useEndpointsStore((s) => s.selectedEndpointId);
   const addTab = useTabs((s) => s.addTab);
+
+  // Open-time rescan: trigger rescan if project path exists on mount
+  useEffect(() => {
+    if (activeProjectPath && scanStatus === 'idle' && !lastScanResult) {
+      scanMutation.mutate(activeProjectPath);
+    }
+  }, [activeProjectPath]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleExpand = useCallback((fqn: string) => {
     setExpanded((prev) => {
