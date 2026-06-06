@@ -1,8 +1,28 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import Editor from '@monaco-editor/react';
 import { useRequest, type BodyMode, type RawContentType, type RequestBody } from '../../state/useRequest';
+import { useDbSelection } from '../../store/dbSelection';
 import { formatText } from '../../lib/monaco';
 import { CycleWarningBanner } from '../BodyEditor/CycleWarningBanner';
+import { PillBar, type PillItem } from '../ui/PillBar';
+
+type BodyModeKey = 'none' | 'form-data' | 'url-encoded' | 'raw' | 'binary';
+
+const MODE_ITEMS: PillItem<BodyModeKey>[] = [
+  { id: 'none', label: 'None' },
+  { id: 'form-data', label: 'form-data' },
+  { id: 'url-encoded', label: 'x-www-form-urlencoded' },
+  { id: 'raw', label: 'raw' },
+  { id: 'binary', label: 'binary' },
+];
+
+const KEY_TO_MODE: Record<BodyModeKey, BodyMode> = {
+  'none': 'none',
+  'form-data': 'form-data',
+  'url-encoded': 'urlencoded',
+  'raw': 'raw',
+  'binary': 'binary',
+};
 
 interface BodyTabProps {
   tabId: string;
@@ -16,8 +36,12 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
   const setBody = useRequest((s) => s.setBody);
   const body = spec?.body ?? { mode: 'none' as const };
 
-  const handleModeChange = (mode: BodyMode) => {
-    // Preserve raw text when switching between raw and other modes
+  const selectedConnectionId = useDbSelection((s) => s.selectedConnectionId);
+  const selectedTableName = useDbSelection((s) => s.selectedTableName);
+  const selectedRow = useDbSelection((s) => s.selectedRow);
+
+  const handleModeChange = (key: BodyModeKey) => {
+    const mode = KEY_TO_MODE[key];
     if (mode === 'raw') {
       setBody(tabId, { mode: 'raw', contentType: 'application/json', text: '' });
     } else if (mode === 'urlencoded') {
@@ -31,6 +55,9 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     }
   };
 
+  const activeModeKey: BodyModeKey =
+    body.mode === 'urlencoded' ? 'url-encoded' : (body.mode as BodyModeKey);
+
   const handleFormat = useCallback(async () => {
     if (body.mode === 'raw' && (body.contentType === 'application/json' || body.contentType === 'application/xml')) {
       const formatted = await formatText(body.text, body.contentType === 'application/json' ? 'json' : 'xml');
@@ -43,6 +70,8 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
   const [cycleRefs, setCycleRefs] = useState<string[]>([]);
   const [selectedSubtype, setSelectedSubtype] = useState<string | null>(null);
   const [helperOnline, setHelperOnline] = useState(false);
+  const [isGeneratingRow, setIsGeneratingRow] = useState(false);
+  const [rowError, setRowError] = useState<string | null>(null);
 
   useEffect(() => {
     window.api.helper.getStatus().then((s: any) => setHelperOnline(s.state === 'healthy'));
@@ -85,23 +114,33 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     }
   }, [spec, tabId, selectedSubtype, isGenerating, setBody]);
 
+  const handleGenerateFromRow = useCallback(async () => {
+    if (!spec?.detectedDto?.fqn || !selectedConnectionId || !selectedTableName || !selectedRow || isGeneratingRow) return;
+    setIsGeneratingRow(true);
+    setRowError(null);
+    try {
+      const result = await window.api.db.mapRowToDto({
+        connectionId: selectedConnectionId,
+        tableName: selectedTableName,
+        rowId: selectedRow.row,
+        dtoFqn: spec.detectedDto.fqn,
+      });
+      if (result.ok) {
+        setBody(tabId, { mode: 'raw', contentType: 'application/json', text: result.bodyJson });
+      } else {
+        setRowError((result as any)?.error ?? 'Failed to generate from row');
+      }
+    } catch (err: any) {
+      setRowError(err?.message ?? 'Failed to generate from row');
+    } finally {
+      setIsGeneratingRow(false);
+    }
+  }, [spec, selectedConnectionId, selectedTableName, selectedRow, isGeneratingRow, tabId, setBody]);
+
   return (
     <div style={{ padding: 'var(--space-3)', overflow: 'auto', fontSize: 12 }}>
-      {/* Mode switcher (D-14) */}
-      <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-3)', flexWrap: 'wrap' }}>
-        {(['none', 'form-data', 'url-encoded', 'raw', 'binary'] as const).map((mode) => (
-          <label key={mode} style={radioLabelStyle}>
-            <input
-              type="radio"
-              name={`body-mode-${tabId}`}
-              checked={body.mode === mode || (mode === 'url-encoded' && body.mode === 'urlencoded')}
-              onChange={() => handleModeChange(mode === 'url-encoded' ? 'urlencoded' : mode as BodyMode)}
-              style={{ marginRight: 4 }}
-            />
-            {mode}
-          </label>
-        ))}
-      </div>
+      {/* Mode switcher (D-14) — 003-A pill bar */}
+      <PillBar items={MODE_ITEMS} activeId={activeModeKey} onChange={handleModeChange} style={{ marginBottom: 'var(--ds-space-3)' }} />
 
       {/* Content-Type dropdown for raw mode */}
       {body.mode === 'raw' && (
@@ -145,6 +184,28 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
               >
                 {isGenerating ? 'Generating...' : 'Generate from DTO'}
               </button>
+              {selectedConnectionId && selectedTableName && selectedRow && (
+                <>
+                  <button
+                    onClick={handleGenerateFromRow}
+                    disabled={!helperOnline || isGeneratingRow}
+                    title={'Use selected row from ' + selectedTableName + ' as body'}
+                    style={{
+                      ...formatBtnStyle,
+                      color: 'var(--color-accent)',
+                      borderColor: 'var(--color-accent)',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {isGeneratingRow ? 'Generating…' : 'Generate from DB row'}
+                  </button>
+                  {rowError && (
+                    <span style={{ color: 'var(--ds-method-delete)', fontSize: 11, marginLeft: 'var(--space-2)' }}>
+                      {rowError}
+                    </span>
+                  )}
+                </>
+              )}
             </>
           )}
         </div>
@@ -355,13 +416,6 @@ function BinaryPicker({ filePath, contentType, onSelect, onContentTypeChange }: 
   );
 }
 
-const radioLabelStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  color: 'var(--color-fg)',
-  cursor: 'pointer',
-  fontSize: 12,
-};
 const cellStyle: React.CSSProperties = { padding: 'var(--space-1) var(--space-2)', fontSize: 12 };
 const selectStyle: React.CSSProperties = {
   padding: 'var(--space-1) var(--space-2)',
