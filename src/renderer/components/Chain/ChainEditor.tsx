@@ -5,6 +5,10 @@ import { useCollection } from '../../hooks/useCollections';
 import { ChainHeader } from './ChainHeader';
 import { StepSequence } from './StepSequence';
 import { ChainRequestBuilder } from './ChainRequestBuilder';
+import { ChainDataPanel } from './ChainDataPanel';
+import { UnresolvedRefWarning } from './UnresolvedRefWarning';
+import { PreviewResolvedModal } from './PreviewResolvedModal';
+import { ChainValidationBanner } from './ChainValidationBanner';
 
 interface ChainEditorProps {
   collectionId: string;
@@ -22,6 +26,7 @@ export function ChainEditor({ collectionId, chainId }: ChainEditorProps) {
     isStopping,
     progress,
     stepResults,
+    validationIssues,
     openChain,
     selectStep,
     setRunning,
@@ -30,12 +35,15 @@ export function ChainEditor({ collectionId, chainId }: ChainEditorProps) {
     updateStepResult,
     setComplete,
     setValidationFailed,
+    clearValidation,
   } = useChain();
 
   const unsubProgress = useRef<(() => void) | null>(null);
   const unsubStepResult = useRef<(() => void) | null>(null);
   const unsubComplete = useRef<(() => void) | null>(null);
   const unsubValidation = useRef<(() => void) | null>(null);
+
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   // Open chain on mount
   useEffect(() => {
@@ -71,6 +79,21 @@ export function ChainEditor({ collectionId, chainId }: ChainEditorProps) {
     };
   }, [chainId]);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !isRunning) {
+        e.preventDefault();
+        handleRun();
+      }
+      if (e.key === 'Escape' && isRunning) {
+        handleStop();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isRunning, chainId]);
+
   const steps = chain?.steps ?? [];
   const selectedStep = steps.find((s: any) => s.stepIndex === selectedStepIndex) ?? steps[0];
   const runningStepIndex = progress?.stepIndex ?? null;
@@ -85,6 +108,10 @@ export function ChainEditor({ collectionId, chainId }: ChainEditorProps) {
       status: stepResults.get(s.stepIndex)?.status ?? 0,
     }));
 
+  // Get unresolved refs for the selected step
+  const selectedStepResult = stepResults.get(selectedStepIndex);
+  const unresolvedRefs = selectedStepResult?.unresolvedRefs ?? [];
+
   const handleSave = useCallback(async () => {
     if (!chain) return;
     await window.api.chains.update({ collectionId, chainId, chain });
@@ -92,6 +119,18 @@ export function ChainEditor({ collectionId, chainId }: ChainEditorProps) {
   }, [chain, collectionId, chainId]);
 
   const handleRun = useCallback(async () => {
+    // Validate before running
+    try {
+      const validation = await window.api.chains.validate({ collectionId, chainId });
+      if (!validation.valid) {
+        setValidationFailed({ chainId, issues: validation.issues });
+        return;
+      }
+    } catch {
+      // If validation fails, proceed anyway
+    }
+
+    clearValidation();
     setRunning(true);
     try {
       await window.api.chains.run({ collectionId, chainId });
@@ -186,6 +225,12 @@ export function ChainEditor({ collectionId, chainId }: ChainEditorProps) {
         onNameChange={handleNameChange}
       />
 
+      {/* Validation banner */}
+      <ChainValidationBanner
+        issues={validationIssues ?? []}
+        onDismiss={clearValidation}
+      />
+
       {steps.length === 0 ? (
         <div style={{
           flex: 1,
@@ -211,16 +256,40 @@ export function ChainEditor({ collectionId, chainId }: ChainEditorProps) {
           />
 
           {selectedStep && (
-            <ChainRequestBuilder
-              chainId={chainId}
-              step={selectedStep}
-              totalSteps={steps.length}
-              priorStepsWithResults={priorStepsWithResults}
-              onStepChange={handleStepChange}
-            />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <ChainRequestBuilder
+                chainId={chainId}
+                step={selectedStep}
+                totalSteps={steps.length}
+                priorStepsWithResults={priorStepsWithResults}
+                onStepChange={handleStepChange}
+              />
+
+              {/* Unresolved ref warning */}
+              <UnresolvedRefWarning unresolvedRefs={unresolvedRefs} />
+
+              {/* Data panel */}
+              <ChainDataPanel
+                steps={steps}
+                selectedStepIndex={selectedStepIndex}
+                stepResults={stepResults}
+              />
+            </div>
           )}
         </>
       )}
+
+      {/* Preview resolved modal */}
+      <PreviewResolvedModal
+        isOpen={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        collectionId={collectionId}
+        chainId={chainId}
+        stepIndex={selectedStepIndex}
+        stepName={selectedStep?.name ?? ''}
+        stepMethod={selectedStep?.request?.method ?? 'GET'}
+        stepUrl={selectedStep?.request?.url ?? ''}
+      />
     </div>
   );
 }
