@@ -61,6 +61,11 @@ export interface RequestSettings {
   saveCookiesToJar: boolean;
 }
 
+export interface DetectedDto {
+  fqn: string;
+  simpleName: string;
+}
+
 export interface RequestSpec {
   requestId: string;
   method: HttpMethod;
@@ -72,6 +77,7 @@ export interface RequestSpec {
   auth: RequestAuth;
   settings: RequestSettings;
   proxy?: string;
+  detectedDto?: DetectedDto;
 }
 
 function createDefaultSpec(): RequestSpec {

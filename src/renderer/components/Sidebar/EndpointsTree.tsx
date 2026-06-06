@@ -3,32 +3,29 @@ import { useEndpointsList, useEndpointsScan } from '../../hooks/useEndpoints';
 import { useEndpointsStore, EndpointData } from '../../store/endpoints';
 import { useTabs } from '../../state/useTabs';
 import { useRequest } from '../../state/useRequest';
-import { headerStyle, treeItemStyle, mutedStyle } from './CollectionsTree';
+import { headerStyle, treeItemStyle, mutedStyle, inputStyle } from './CollectionsTree';
 import { ScanProgress } from '../ScanProgress';
 import { SpringProjectPicker } from '../SpringProjectPicker';
+import { MethodBadge } from '../ui/MethodBadge';
 
 const METHOD_ORDER = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
 
 const rescanBtnStyle: React.CSSProperties = {
   background: 'transparent',
-  border: '1px solid var(--color-border)',
-  borderRadius: 'var(--radius-1)',
-  color: 'var(--color-fg-muted)',
+  border: '1px solid var(--ds-border)',
+  borderRadius: 'var(--ds-radius-1)',
+  color: 'var(--ds-text-muted)',
   cursor: 'pointer',
-  fontSize: 14,
-  padding: '0 4px',
+  fontSize: 12,
+  padding: '0 6px',
   lineHeight: '18px',
-  width: 18,
-  height: 18,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
 };
 
 export function EndpointsTree() {
   const { data: endpoints, isLoading } = useEndpointsList();
   const scanMutation = useEndpointsScan();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
   const activeProjectId = useEndpointsStore((s) => s.activeProjectId);
   const activeProjectPath = useEndpointsStore((s) => s.activeProjectPath);
   const scanStatus = useEndpointsStore((s) => s.scanStatus);
@@ -83,6 +80,13 @@ export function EndpointsTree() {
       ? { mode: 'raw' as const, contentType: 'application/json' as const, text: '{}' }
       : { mode: 'none' as const };
 
+    const detectedDto = endpoint.requestBodyFqn
+      ? {
+          fqn: endpoint.requestBodyFqn,
+          simpleName: endpoint.requestBodyFqn.split('.').pop() ?? endpoint.requestBodyFqn,
+        }
+      : undefined;
+
     useRequest.getState().setSpec(tabId, {
       requestId: crypto.randomUUID(),
       method: endpoint.method as any,
@@ -99,6 +103,7 @@ export function EndpointsTree() {
         sslVerify: true,
         saveCookiesToJar: false,
       },
+      detectedDto,
     });
   }, [addTab, setSelectedEndpoint]);
 
@@ -153,22 +158,22 @@ export function EndpointsTree() {
             </button>
           )}
         </div>
-        <div style={{ padding: 'var(--space-2)' }}>
+        <div style={{ padding: 'var(--ds-space-2)' }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 'var(--space-1)',
-            marginBottom: 'var(--space-2)',
+            gap: 'var(--ds-space-1)',
+            marginBottom: 'var(--ds-space-2)',
           }}>
-            <span style={{ color: 'var(--color-status-5xx)', fontSize: 14 }}>✗</span>
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-fg)' }}>
+            <span style={{ color: 'var(--ds-method-delete)', fontSize: 14 }}>✗</span>
+            <span style={{ fontSize: 'var(--ds-text-sm)', fontWeight: 600, color: 'var(--ds-text)' }}>
               Scan failed
             </span>
           </div>
           <div style={{
-            fontSize: 12,
-            color: 'var(--color-fg-muted)',
-            marginBottom: 'var(--space-3)',
+            fontSize: 'var(--ds-text-sm)',
+            color: 'var(--ds-text-muted)',
+            marginBottom: 'var(--ds-space-3)',
             lineHeight: 1.5,
           }}>
             {lastScanError || 'Unknown error'}. Check that the project is a valid Spring Boot project with source code accessible on disk.
@@ -176,12 +181,12 @@ export function EndpointsTree() {
           <button
             onClick={handleRescan}
             style={{
-              background: 'var(--color-accent)',
+              background: 'var(--ds-primary)',
               color: 'white',
               border: 'none',
-              borderRadius: 'var(--radius-1)',
-              padding: 'var(--space-1) var(--space-3)',
-              fontSize: 12,
+              borderRadius: 'var(--ds-radius-1)',
+              padding: 'var(--ds-space-1) var(--ds-space-3)',
+              fontSize: 'var(--ds-text-sm)',
               fontWeight: 600,
               cursor: 'pointer',
             }}
@@ -208,18 +213,18 @@ export function EndpointsTree() {
             ⟳
           </button>
         </div>
-        <div style={{ padding: 'var(--space-2)' }}>
+        <div style={{ padding: 'var(--ds-space-2)' }}>
           <div style={{
-            fontSize: 12,
+            fontSize: 'var(--ds-text-sm)',
             fontWeight: 600,
-            color: 'var(--color-fg)',
-            marginBottom: 'var(--space-2)',
+            color: 'var(--ds-text)',
+            marginBottom: 'var(--ds-space-2)',
           }}>
             No @RestController endpoints detected
           </div>
           <div style={{
-            fontSize: 12,
-            color: 'var(--color-fg-muted)',
+            fontSize: 'var(--ds-text-sm)',
+            color: 'var(--ds-text-muted)',
             lineHeight: 1.5,
           }}>
             This project may not be a Spring Boot project, or controllers use non-standard annotations. Try a different folder or check your project structure.
@@ -239,14 +244,27 @@ export function EndpointsTree() {
     ? '...' + (activeProjectPath ?? '').slice(-27)
     : activeProjectPath ?? '';
 
+  // Filter controllers + endpoints by search query
+  const filteredControllers = searchQuery
+    ? sortedControllers.map((ctrl) => {
+        const matchingEndpoints = ctrl.endpoints.filter(
+          (ep) =>
+            ep.fullPath.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            ep.method.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            ep.handlerMethod.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        return { ...ctrl, endpoints: matchingEndpoints };
+      }).filter((c) => c.endpoints.length > 0 || c.simpleName.toLowerCase().includes(searchQuery.toLowerCase()))
+    : sortedControllers;
+
   return (
     <div>
       <div style={headerStyle}>
         <span>Endpoints</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ds-space-1)' }}>
           <span style={{
             fontSize: 10,
-            color: 'var(--color-fg-muted)',
+            color: 'var(--ds-text-muted)',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -266,7 +284,17 @@ export function EndpointsTree() {
         </div>
       </div>
 
-      {sortedControllers.map((ctrl) => {
+      {controllers.length > 0 && (
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search paths, methods..."
+          style={{ ...inputStyle, marginBottom: 'var(--ds-space-2)' }}
+        />
+      )}
+
+      {filteredControllers.map((ctrl) => {
         const isExpanded = expanded.has(ctrl.fqn);
         const sortedEndpoints = [...ctrl.endpoints].sort((a, b) => {
           const pathCompare = a.fullPath.localeCompare(b.fullPath);
@@ -280,14 +308,27 @@ export function EndpointsTree() {
               onClick={() => toggleExpand(ctrl.fqn)}
               style={treeItemStyle}
             >
-              <span style={{ marginRight: 'var(--space-1)', fontSize: 10 }}>
-                {isExpanded ? '▼' : '▶'}
-              </span>
-              <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {ctrl.simpleName}
-              </span>
-              <span style={{ fontSize: 10, color: 'var(--color-fg-muted)' }}>
-                ({ctrl.endpoints.length})
+              <span
+                style={{
+                  fontSize: 9,
+                  color: 'var(--ds-text-muted)',
+                  transition: 'transform 120ms ease',
+                  display: 'inline-block',
+                  transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                }}
+              >▶</span>
+              <span style={{ marginRight: 'var(--ds-space-1)' }}>📦</span>
+              <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{ctrl.simpleName}</span>
+              <span style={{
+                fontSize: 10,
+                color: 'var(--ds-text-muted)',
+                background: 'var(--ds-surface)',
+                padding: '0 6px',
+                borderRadius: 'var(--ds-radius-1)',
+                minWidth: 18,
+                textAlign: 'center',
+              }}>
+                {ctrl.endpoints.length}
               </span>
             </div>
             {isExpanded && sortedEndpoints.map((ep) => (
@@ -296,24 +337,16 @@ export function EndpointsTree() {
                 onClick={() => handleEndpointClick(ep)}
                 style={{
                   ...treeItemStyle,
-                  paddingLeft: 'var(--space-5)',
+                  paddingLeft: 'var(--ds-space-5)',
                   fontWeight: selectedEndpointId === ep.id ? 600 : 400,
-                  background: selectedEndpointId === ep.id ? 'var(--color-bg-hover, oklch(0.92 0.005 250))' : 'transparent',
+                  background: selectedEndpointId === ep.id ? 'var(--ds-surface)' : 'transparent',
                 }}
                 title={`${ep.method} ${ep.fullPath}`}
               >
+                <MethodBadge method={ep.method as any} size="xs" />
                 <span style={{
-                  color: `var(--color-method-${ep.method.toLowerCase()})`,
-                  fontWeight: 600,
-                  fontSize: 10,
-                  marginRight: 'var(--space-1)',
-                  minWidth: 48,
-                }}>
-                  {ep.method}
-                </span>
-                <span style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 12,
+                  fontFamily: 'var(--ds-font-mono)',
+                  fontSize: 'var(--ds-text-xs)',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',

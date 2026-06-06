@@ -159,6 +159,29 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
           {/* DTO Generate button — visible when DTO detected */}
           {spec?.detectedDto && body.contentType === 'application/json' && (
             <>
+              {/* DTO name badge — shows the request body schema class name */}
+              <span
+                title={`Request body: ${spec.detectedDto.fqn}`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 'var(--ds-space-1)',
+                  padding: '2px var(--ds-space-2)',
+                  background: 'var(--ds-surface)',
+                  border: '1px solid var(--ds-border)',
+                  borderRadius: 'var(--ds-radius-1)',
+                  fontSize: 'var(--ds-text-xs)',
+                  fontFamily: 'var(--ds-font-mono)',
+                  color: 'var(--ds-text-muted)',
+                  maxWidth: 280,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <span style={{ color: 'var(--ds-text-muted)', fontWeight: 600, fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.4 }}>DTO</span>
+                <span style={{ color: 'var(--ds-text)' }}>{spec.detectedDto.simpleName}</span>
+              </span>
               {/* D-03: Subtype dropdown for polymorphic DTOs */}
               {(spec?.detectedSubtypes?.length ?? 0) > 1 && (
                 <select
