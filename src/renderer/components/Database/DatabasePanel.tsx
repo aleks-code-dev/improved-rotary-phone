@@ -68,13 +68,34 @@ export function DatabasePanel({ width }: { width: number }) {
     });
   }, [refreshConnections]);
 
-  const handleRowSelect = useCallback((row: Record<string, unknown>, tableName: string, schema: string | null) => {
+  const handleRowSelect = useCallback(async (row: Record<string, unknown>, tableName: string, schema: string | null) => {
     setSelectedRow({ row, tableName, schema });
     useDbSelection.getState().setSelection({
       selectedTableName: tableName,
       selectedRow: { row, schema },
     });
-  }, []);
+    // If the active endpoint has a detected DTO, also auto-fill the body
+    // in the request builder. This makes "click a row → use as body" a
+    // one-click workflow — no need to then click the button in BodyTab.
+    // Silently no-op on IPC failure (the DbRowDetail button remains a fallback).
+    if (!detectedDtoFqn || !selectedConnection) return;
+    try {
+      const result = await window.api.db.mapRowToDto({
+        connectionId: selectedConnection.id,
+        tableName,
+        rowId: row,
+        dtoFqn: detectedDtoFqn,
+      });
+      if (result.ok) {
+        setBody(tabId, {
+          mode: 'raw',
+          contentType: 'application/json',
+          text: result.bodyJson,
+        });
+        window.dispatchEvent(new CustomEvent('body:auto-filled', { detail: { tabId } }));
+      }
+    } catch { /* silent — fallback button still works */ }
+  }, [detectedDtoFqn, selectedConnection, tabId, setBody]);
 
   const handleUseRow = useCallback((bodyJson: string) => {
     // Auto-fill the body editor with the row's JSON (007-D)
