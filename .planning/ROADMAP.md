@@ -9,7 +9,7 @@ PostmanClone is a desktop API client built for Java Spring developers. The journ
 - [x] **Phase 1: Foundation & Postman Parity** - Establish 3-process architecture + ship a full Postman alternative (CORE-01..10) (completed 2026-06-04)
 - [ ] **Phase 2: Spring Project Detection** - Point at a Spring project, detect all `@RestController` endpoints, click to get a prefilled request (SPRING-01..05)
 - [ ] **Phase 3: Body Generation (DTO + DB)** - Generate request bodies from DTO schemas or real database rows (BODY-01..03 + DB-01..07)
-- [ ] **Phase 4: Workflow Chains & Response Mapping** - Build multi-step chains where later steps pull fields from earlier responses (CHAIN-01..05 + MAP-01..04)
+- [x] **Phase 4: Workflow Chains & Response Mapping** - Build multi-step chains where later steps pull fields from earlier responses (CHAIN-01..05 + MAP-01..04) (completed 2026-06-06)
 
 ## Phase Details
 
@@ -116,15 +116,15 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 04-01: Chain data model + orchestrator + IPC (CHAIN-01, CHAIN-03, CHAIN-04, CHAIN-05) — ChainSchema/ChainStepSchema, chain orchestrator (sequential undici, timeout/retry), reference resolver (JSONata 1.8.7), validator (circular refs), chain CRUD, IPC channels, preload bridge
+- [x] 04-01: Chain data model + orchestrator + IPC (CHAIN-01, CHAIN-03, CHAIN-04, CHAIN-05) — ChainSchema/ChainStepSchema, chain orchestrator (sequential undici, timeout/retry), reference resolver (JSONata 1.8.7), validator (circular refs), chain CRUD, IPC channels, preload bridge
 
 **Wave 2** *(blocked on Wave 1 — needs chain schemas + IPC)*
 
-- [ ] 04-02: Chain editor UI + sidebar integration (CHAIN-01, CHAIN-02, CHAIN-03, CHAIN-04) — sidebar "New Chain" button + chain items, ChainEditor, ChainHeader, StepSequence (horizontal cards), StepCard, ChainRequestBuilder, useChain Zustand store, Monaco reference highlighting
+- [x] 04-02: Chain editor UI + sidebar integration (CHAIN-01, CHAIN-02, CHAIN-03, CHAIN-04) — sidebar "New Chain" button + chain items, ChainEditor, ChainHeader, StepSequence (horizontal cards), StepCard, ChainRequestBuilder, useChain Zustand store, Monaco reference highlighting
 
 **Wave 3** *(blocked on Wave 2 — needs chain editor)*
 
-- [ ] 04-03: Data panel + preview resolved body (MAP-01..04) — ChainDataPanel (collapsible bottom panel), ChainStepColumn (JSON tree + copy-path), PreviewResolvedModal, ChainValidationBanner, UnresolvedRefWarning, keyboard shortcuts
+- [x] 04-03: Data panel + preview resolved body (MAP-01..04) — ChainDataPanel (collapsible bottom panel), ChainStepColumn (JSON tree + copy-path), PreviewResolvedModal, ChainValidationBanner, UnresolvedRefWarning, keyboard shortcuts
 
 ## Progress
 
@@ -136,7 +136,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Foundation & Postman Parity | 3/3 | Complete   | 2026-06-04 |
 | 2. Spring Project Detection | 0/TBD | Not started | - |
 | 3. Body Generation (DTO + DB) | 3/3 | Complete | 2026-06-06 |
-| 4. Workflow Chains & Response Mapping | 0/3 | Planning complete | - |
+| 4. Workflow Chains & Response Mapping | 3/3 | Complete | 2026-06-06 |
 
 **Coverage:**
 
