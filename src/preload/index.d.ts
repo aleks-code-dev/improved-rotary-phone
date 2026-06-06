@@ -152,4 +152,19 @@ export interface WindowApi {
             activeTabId: string | null;
         }) => Promise<any>;
     };
+    body: {
+        generateDto: (args: {
+            requestId: string;
+            dtoFqn: string;
+            subtypeName?: string;
+        }) => Promise<any>;
+    };
+    project: {
+        scan: (args: {
+            path: string;
+        }) => Promise<any>;
+        endpoints: (args: {
+            projectId: string;
+        }) => Promise<any>;
+    };
 }

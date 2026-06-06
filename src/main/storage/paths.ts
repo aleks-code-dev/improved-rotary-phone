@@ -1,10 +1,24 @@
-import { app } from 'electron';
 import path from 'node:path';
 
 let _dataDir: string | null = null;
+let _fallbackUserData: string = '';
+
+function getUserDataFallback(): string {
+  if (!_fallbackUserData) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { app } = require('electron');
+      _fallbackUserData = app.getPath('userData');
+    } catch {
+      // Running outside Electron (tests) — use temp dir
+      _fallbackUserData = require('node:os').tmpdir();
+    }
+  }
+  return _fallbackUserData;
+}
 
 export function getUserDataPath(): string {
-  return app.getPath('userData');
+  return getUserDataFallback();
 }
 
 export function getDataDir(): string | null {
@@ -20,10 +34,15 @@ export function getHelperJarPath(): string {
 }
 
 export function getBundledHelperJarPath(): string {
-  if (!app.isPackaged) {
-    return path.join(app.getAppPath(), 'resources', 'helper', 'postmanclone-helper.jar');
+  try {
+    const { app } = require('electron');
+    if (!app.isPackaged) {
+      return path.join(app.getAppPath(), 'resources', 'helper', 'postmanclone-helper.jar');
+    }
+    return path.join(process.resourcesPath || '', 'helper', 'postmanclone-helper.jar');
+  } catch {
+    return path.join(process.cwd(), 'resources', 'helper', 'postmanclone-helper.jar');
   }
-  return path.join(process.resourcesPath || '', 'helper', 'postmanclone-helper.jar');
 }
 
 export function getLogsDir(): string {
@@ -60,6 +79,10 @@ export function getEnvironmentPath(id: string): string {
 
 export function getGlobalsPath(): string {
   return path.join(_dataDir || getUserDataPath(), 'globals.json');
+}
+
+export function getProjectCacheDir(projectId: string): string {
+  return path.join(_dataDir || getUserDataPath(), 'project-cache', projectId);
 }
 
 export function ensureDirs(): void {

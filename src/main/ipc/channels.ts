@@ -457,6 +457,60 @@ export const ChainPreviewResolvedResultSchema = z.object({
   })),
 });
 
+// --- 02-01: Project scanning schemas ---
+export const ProjectScanArgsSchema = z.object({
+  path: z.string().min(1),
+});
+
+export const EndpointSchema = z.object({
+  id: z.string(),
+  method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
+  fullPath: z.string(),
+  handlerMethod: z.string(),
+  pathVariables: z.array(z.object({
+    name: z.string(),
+    type: z.string(),
+    required: z.boolean(),
+  })),
+  queryParams: z.array(z.object({
+    name: z.string(),
+    type: z.string(),
+    required: z.boolean(),
+    defaultValue: z.string().nullable(),
+  })),
+  requestBodyFqn: z.string().nullable(),
+  consumes: z.array(z.string()),
+  produces: z.array(z.string()),
+  sourceFile: z.string(),
+  lineNumber: z.number(),
+});
+
+export const ControllerSchema = z.object({
+  fqn: z.string(),
+  simpleName: z.string(),
+  basePath: z.string(),
+  sourceFile: z.string(),
+  endpoints: z.array(EndpointSchema),
+});
+
+export const ProjectScanResultSchema = z.object({
+  ok: z.boolean(),
+  projectId: z.string(),
+  projectPath: z.string(),
+  controllers: z.array(ControllerSchema),
+  scanDurationMs: z.number(),
+  totalFiles: z.number(),
+  totalEndpoints: z.number(),
+  errors: z.array(z.string()),
+  error: z.string().optional(),
+});
+
+export const ProjectEndpointsArgsSchema = z.object({
+  projectId: z.string(),
+});
+
+export const ProjectEndpointsResultSchema = ProjectScanResultSchema;
+
 // Inferred types for all schemas
 export type HelperStatus = z.infer<typeof HelperStatusSchema>;
 export type AppBootstrapResult = z.infer<typeof AppBootstrapResultSchema>;
@@ -518,3 +572,9 @@ export type ChainValidateArgs = z.infer<typeof ChainValidateArgsSchema>;
 export type ChainValidateResult = z.infer<typeof ChainValidateResultSchema>;
 export type ChainPreviewResolvedArgs = z.infer<typeof ChainPreviewResolvedArgsSchema>;
 export type ChainPreviewResolvedResult = z.infer<typeof ChainPreviewResolvedResultSchema>;
+
+// 02-01 types
+export type ProjectScanArgs = z.infer<typeof ProjectScanArgsSchema>;
+export type ProjectScanResult = z.infer<typeof ProjectScanResultSchema>;
+export type Endpoint = z.infer<typeof EndpointSchema>;
+export type Controller = z.infer<typeof ControllerSchema>;

@@ -59,7 +59,10 @@ import {
   ChainStopArgsSchema,
   ChainValidateArgsSchema, ChainValidateResultSchema,
   ChainPreviewResolvedArgsSchema, ChainPreviewResolvedResultSchema,
+  ProjectScanArgsSchema, ProjectScanResultSchema,
+  ProjectEndpointsArgsSchema, ProjectEndpointsResultSchema,
 } from './channels.js';
+import { computeProjectId, saveProjectScanResult, readProjectScanResult } from '../storage/project-cache.js';
 
 const pendingRequests = new Map<string, AbortController>();
 
@@ -804,6 +807,59 @@ export function registerIpcRouter() {
         resolvedHeaders: [],
         resolvedBody: '',
         warnings: [{ reference: '', reason: err.message }],
+      });
+    }
+  });
+
+  // --- 02-01: Spring project scanning ---
+  ipcMain.handle('project:scan', async (_, args) => {
+    const parsed = ProjectScanArgsSchema.parse(args);
+    const client = supervisor.getClient();
+    if (!client) {
+      return ProjectScanResultSchema.parse({
+        ok: false, projectId: '', projectPath: parsed.path,
+        controllers: [], scanDurationMs: 0, totalFiles: 0, totalEndpoints: 0,
+        errors: [], error: 'Helper offline',
+      });
+    }
+    try {
+      const result = await client.request('scanner:scan', { projectRoot: parsed.path });
+      const projectId = computeProjectId(parsed.path, Date.now());
+      const scanResult = {
+        ...result,
+        projectId,
+        projectPath: parsed.path,
+      };
+      await saveProjectScanResult(projectId, scanResult);
+      return ProjectScanResultSchema.parse(scanResult);
+    } catch (err: any) {
+      log.error('project:scan failed', { error: err.message });
+      return ProjectScanResultSchema.parse({
+        ok: false, projectId: '', projectPath: parsed.path,
+        controllers: [], scanDurationMs: 0, totalFiles: 0, totalEndpoints: 0,
+        errors: [err.message], error: err.message,
+      });
+    }
+  });
+
+  ipcMain.handle('project:endpoints', async (_, args) => {
+    const parsed = ProjectEndpointsArgsSchema.parse(args);
+    try {
+      const cached = await readProjectScanResult(parsed.projectId);
+      if (!cached) {
+        return ProjectEndpointsResultSchema.parse({
+          ok: false, projectId: parsed.projectId, projectPath: '',
+          controllers: [], scanDurationMs: 0, totalFiles: 0, totalEndpoints: 0,
+          errors: [], error: 'No cached scan found',
+        });
+      }
+      return ProjectEndpointsResultSchema.parse(cached);
+    } catch (err: any) {
+      log.error('project:endpoints failed', { error: err.message });
+      return ProjectEndpointsResultSchema.parse({
+        ok: false, projectId: parsed.projectId, projectPath: '',
+        controllers: [], scanDurationMs: 0, totalFiles: 0, totalEndpoints: 0,
+        errors: [err.message], error: err.message,
       });
     }
   });

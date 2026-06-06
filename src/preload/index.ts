@@ -41,6 +41,7 @@ export interface WindowApi {
   };
   history: {
     list: (args: { collectionId: string; search?: string }) => Promise<any>;
+    append: (args: { collectionId: string; timestamp: number; request: any; response?: any }) => Promise<any>;
     delete: (args: { collectionId: string; entryId: string }) => Promise<any>;
   };
   variables: {
@@ -93,6 +94,10 @@ export interface WindowApi {
     onStepResult: (cb: (data: any) => void) => () => void;
     onComplete: (cb: (data: any) => void) => () => void;
     onValidationFailed: (cb: (data: any) => void) => () => void;
+  };
+  project: {
+    scan: (args: { path: string }) => Promise<any>;
+    endpoints: (args: { projectId: string }) => Promise<any>;
   };
 }
 
@@ -214,6 +219,10 @@ const api: WindowApi = {
       ipcRenderer.on('chains:validationFailed', listener);
       return () => ipcRenderer.off('chains:validationFailed', listener);
     },
+  },
+  project: {
+    scan: (args) => ipcRenderer.invoke('project:scan', args),
+    endpoints: (args) => ipcRenderer.invoke('project:endpoints', args),
   },
 };
 
