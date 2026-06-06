@@ -55,8 +55,16 @@ public class HelperJsonRpcServer {
                     if ("initialize".equals(method)) {
                         response = mapper.writeValueAsString(
                             Map.of("jsonrpc", "2.0", "id", id,
-                                   "result", Map.of("version", "0.1.0", "capabilities", new String[]{"initialize", "helper.ping", "classpath:walkDto"}))
+                                   "result", Map.of("version", "0.1.0", "capabilities", new String[]{
+                                       "initialize", "helper.ping", "classpath:walkDto",
+                                       "scanner:scan", "scanner:rescan", "scanner:endpoints",
+                                       "db:connect", "db:disconnect", "db:testConnection", "db:listTables",
+                                       "db:fetchRows", "db:mapRowToDto"
+                                   }))
                         );
+                        writer.println(response);
+                        writer.flush();
+                        continue;
                     } else if ("helper.ping".equals(method)) {
                         // notification - no response
                         continue;
