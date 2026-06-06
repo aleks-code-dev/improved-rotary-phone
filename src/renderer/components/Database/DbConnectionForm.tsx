@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
+import { IconButton } from '../ui/IconButton';
 
 interface DbConnectionFormProps {
-  onConnectionCreated?: () => void;
+  onConnectionCreated?: (connectionId: string) => void;
 }
 
 interface ParsedUrl {
@@ -12,49 +13,43 @@ interface ParsedUrl {
   raw: string;
 }
 
-const selectStyle: React.CSSProperties = {
-  padding: 'var(--space-1) var(--space-2)',
-  border: '1px solid var(--color-border)',
-  borderRadius: 'var(--radius-1)',
-  background: 'var(--color-bg-elevated)',
-  color: 'var(--color-fg)',
-  fontSize: 12,
-};
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '4px 6px',
-  border: '1px solid var(--color-border)',
-  borderRadius: 'var(--radius-1)',
-  background: 'var(--color-bg-elevated)',
-  color: 'var(--color-fg)',
-  fontSize: 12,
-  fontFamily: 'var(--font-mono)',
-};
 const labelStyle: React.CSSProperties = {
-  fontSize: 10,
+  display: 'block',
+  fontSize: 'var(--ds-text-2xs)',
   fontWeight: 600,
-  color: 'var(--color-fg-muted)',
+  color: 'var(--ds-text-muted)',
   textTransform: 'uppercase',
   letterSpacing: '0.05em',
+  marginBottom: 'var(--ds-space-1)',
 };
-const btnPrimary: React.CSSProperties = {
-  background: 'var(--color-accent)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: 'var(--radius-1)',
-  padding: 'var(--space-1) var(--space-3)',
-  cursor: 'pointer',
-  fontSize: 12,
-  fontWeight: 600,
+
+const urlInputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: 'var(--ds-space-2) var(--ds-space-3)',
+  border: '1px solid var(--ds-border)',
+  borderRadius: 'var(--ds-radius-1)',
+  background: 'var(--ds-editor-bg)',
+  color: 'var(--ds-text)',
+  fontSize: 'var(--ds-text-sm)',
+  fontFamily: 'var(--ds-font-mono)',
+  outline: 'none',
 };
-const btnSecondary: React.CSSProperties = {
-  background: 'var(--color-bg-elevated)',
-  color: 'var(--color-accent)',
-  border: '1px solid var(--color-border)',
-  borderRadius: 'var(--radius-1)',
-  padding: 'var(--space-1) var(--space-3)',
-  cursor: 'pointer',
-  fontSize: 12,
+
+const standardInputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: 'var(--ds-space-2) var(--ds-space-3)',
+  border: '1px solid var(--ds-border)',
+  borderRadius: 'var(--ds-radius-1)',
+  background: 'var(--ds-surface)',
+  color: 'var(--ds-text)',
+  fontSize: 'var(--ds-text-sm)',
+  fontFamily: 'var(--ds-font-sans)',
+};
+
+const monoTextStyle: React.CSSProperties = {
+  fontFamily: 'var(--ds-font-mono)',
+  fontSize: 'var(--ds-text-sm)',
+  color: 'var(--ds-text)',
 };
 
 export function DbConnectionForm({ onConnectionCreated }: DbConnectionFormProps) {
@@ -66,7 +61,7 @@ export function DbConnectionForm({ onConnectionCreated }: DbConnectionFormProps)
   const [dbType, setDbType] = useState<'postgresql' | 'mysql' | 'oracle' | 'h2'>('postgresql');
   const [parsedUrl, setParsedUrl] = useState<ParsedUrl | null>(null);
   const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{ ok: boolean; latencyMs?: number; error?: string } | null>(null);
+  const [testResult, setTestResult] = useState<{ ok: boolean; latencyMs?: number; error?: string; connected?: boolean } | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Auto-detect dbType from JDBC URL
@@ -105,56 +100,78 @@ export function DbConnectionForm({ onConnectionCreated }: DbConnectionFormProps)
   const handleSave = useCallback(async () => {
     if (!name || !url) return;
     setSaving(true);
+    setTestResult(null);
     try {
-      await window.api.db.connections.create({ name, url, user, password, dbType });
-      onConnectionCreated?.();
+      const { id } = await window.api.db.connections.create({ name, url, user, password, dbType });
+      const result = await window.api.db.connect({ connectionId: id });
+      if (!result?.ok) {
+        // Keep form open so the user can fix credentials and retry.
+        setTestResult({ ok: false, error: result?.error ?? 'Connect failed after save' });
+        setSaving(false);
+        return;
+      }
+      onConnectionCreated?.(id);
       setName(''); setUrl(''); setUser(''); setPassword('');
-    } catch {
-      // Error handled silently
+    } catch (err: any) {
+      setTestResult({ ok: false, error: err?.message ?? 'Save failed' });
     } finally {
       setSaving(false);
     }
   }, [name, url, user, password, dbType, onConnectionCreated]);
 
   return (
-    <div style={{ padding: 'var(--space-3)', fontSize: 12, display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+    <div style={{ padding: 'var(--ds-space-3)', display: 'flex', flexDirection: 'column', gap: 'var(--ds-space-3)' }}>
       <div>
         <label style={labelStyle}>Connection Name</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="My App Dev DB" style={inputStyle} />
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="My App Dev DB"
+          style={standardInputStyle}
+        />
       </div>
 
       <div>
         <label style={labelStyle}>JDBC URL</label>
-        <textarea
+        <input
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="jdbc:postgresql://localhost:5432/mydb"
-          style={{ ...inputStyle, minHeight: 48, resize: 'vertical' }}
+          style={urlInputStyle}
         />
       </div>
 
-      {/* Parsed URL grid */}
+      {/* Parsed URL grid (006-B) */}
       {parsedUrl && (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr 1fr',
-          gap: 'var(--space-2)',
-          padding: 'var(--space-2)',
-          background: 'var(--color-bg)',
-          borderRadius: 'var(--radius-1)',
-          border: '1px solid var(--color-border)',
+          gridTemplateColumns: 'auto 1fr auto 1fr',
+          gap: 'var(--ds-space-2) var(--ds-space-3)',
+          padding: 'var(--ds-space-3)',
+          background: 'var(--ds-surface)',
+          borderRadius: 'var(--ds-radius-1)',
+          border: '1px solid var(--ds-border)',
         }}>
-          <div><span style={labelStyle}>Driver</span><div style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{parsedUrl.driver ?? 'Unknown'}</div></div>
-          <div><span style={labelStyle}>Host</span><div style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{parsedUrl.host ?? '-'}</div></div>
-          <div><span style={labelStyle}>Port</span><div style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{parsedUrl.port ?? '-'}</div></div>
-          <div><span style={labelStyle}>Database</span><div style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{parsedUrl.database ?? '-'}</div></div>
+          <span style={labelStyle}>Driver</span>
+          <span style={monoTextStyle}>{parsedUrl.driver ?? 'Unknown'}</span>
+          <span style={labelStyle}>Host</span>
+          <span style={monoTextStyle}>{parsedUrl.host ?? '-'}</span>
+          <span style={labelStyle}>Port</span>
+          <span style={monoTextStyle}>{parsedUrl.port ?? '-'}</span>
+          <span style={labelStyle}>Database</span>
+          <span style={monoTextStyle}>{parsedUrl.database ?? '-'}</span>
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-2)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--ds-space-3)' }}>
         <div>
           <label style={labelStyle}>Username</label>
-          <input value={user} onChange={(e) => setUser(e.target.value)} placeholder="postgres" style={inputStyle} />
+          <input
+            value={user}
+            onChange={(e) => setUser(e.target.value)}
+            placeholder="postgres"
+            style={standardInputStyle}
+          />
         </div>
         <div>
           <label style={labelStyle}>Password</label>
@@ -164,11 +181,25 @@ export function DbConnectionForm({ onConnectionCreated }: DbConnectionFormProps)
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••"
-              style={inputStyle}
+              style={{ ...standardInputStyle, paddingRight: 'var(--ds-space-7)' }}
             />
             <button
               onClick={() => setShowPassword(!showPassword)}
-              style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--color-fg-muted)', cursor: 'pointer', fontSize: 12 }}
+              type="button"
+              style={{
+                position: 'absolute',
+                right: 'var(--ds-space-2)',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                color: 'var(--ds-text-muted)',
+                cursor: 'pointer',
+                fontSize: 'var(--ds-text-sm)',
+                padding: 'var(--ds-space-1)',
+              }}
+              title={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? '🙈' : '👁'}
             </button>
@@ -176,19 +207,43 @@ export function DbConnectionForm({ onConnectionCreated }: DbConnectionFormProps)
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-        <button onClick={handleTest} disabled={!url || testing} style={btnSecondary}>
-          {testing ? 'Testing...' : 'Test Connection'}
-        </button>
+      <div style={{ display: 'flex', gap: 'var(--ds-space-2)', alignItems: 'center' }}>
+        <IconButton
+          variant="outline"
+          onClick={handleTest}
+          disabled={!url || testing}
+        >
+          {testing ? 'Testing…' : 'Test Connection'}
+        </IconButton>
         {testResult && (
-          <span style={{ fontSize: 12, color: testResult.connected ? 'var(--color-success)' : 'var(--color-danger)' }}>
-            {testResult.connected ? `Connected in ${testResult.latencyMs}ms` : `Failed: ${testResult.error ?? 'Unknown error'}`}
+          <span style={{
+            fontSize: 'var(--ds-text-sm)',
+            color: testResult.connected || testResult.ok ? 'var(--ds-method-get)' : 'var(--ds-method-delete)',
+            fontWeight: 500,
+          }}>
+            {testResult.connected || testResult.ok
+              ? `✓ Connected in ${testResult.latencyMs}ms`
+              : `✗ ${testResult.error ?? 'Unknown error'}`}
           </span>
         )}
       </div>
 
-      <button onClick={handleSave} disabled={!name || !url || saving} style={btnPrimary}>
-        {saving ? 'Saving...' : 'Save Connection'}
+      <button
+        onClick={handleSave}
+        disabled={!name || !url || saving}
+        style={{
+          background: 'var(--ds-primary)',
+          color: '#fff',
+          border: 'none',
+          borderRadius: 'var(--ds-radius-1)',
+          padding: 'var(--ds-space-2) var(--ds-space-3)',
+          cursor: !name || !url || saving ? 'not-allowed' : 'pointer',
+          fontSize: 'var(--ds-text-sm)',
+          fontWeight: 600,
+          opacity: !name || !url || saving ? 0.5 : 1,
+        }}
+      >
+        {saving ? 'Saving…' : 'Save Connection'}
       </button>
     </div>
   );

@@ -57,9 +57,14 @@ export function DatabasePanel({ width }: { width: number }) {
     refreshConnections();
   }, [refreshConnections]);
 
-  const handleConnectionCreated = useCallback(() => {
+  const handleConnectionCreated = useCallback((connectionId: string) => {
     setShowNewForm(false);
-    refreshConnections();
+    refreshConnections().then(() => {
+      // Mark the new connection as connected (Save→connect succeeded).
+      setConnections((prev) =>
+        prev.map((c) => (c.id === connectionId ? { ...c, connected: true } : c)),
+      );
+    });
   }, [refreshConnections]);
 
   const handleRowSelect = useCallback((row: Record<string, unknown>, tableName: string, schema: string | null) => {
@@ -138,9 +143,23 @@ export function DatabasePanel({ width }: { width: number }) {
               return (
                 <div
                   key={conn.id}
-                  onClick={() => {
+                  onClick={async () => {
                     setSelectedConnectionId(conn.id);
                     setSelectedRow(null);
+                    // Auto-connect on select if the pool isn't open
+                    // (e.g. helper restarted, or user never ran Test).
+                    if (!conn.connected) {
+                      try {
+                        const r = await window.api.db.connect({ connectionId: conn.id });
+                        if (r?.ok) {
+                          setConnections((prev) =>
+                            prev.map((c) => (c.id === conn.id ? { ...c, connected: true } : c)),
+                          );
+                        }
+                      } catch {
+                        // Leave dot gray; user can try again or re-Save.
+                      }
+                    }
                   }}
                   style={{
                     display: 'flex',

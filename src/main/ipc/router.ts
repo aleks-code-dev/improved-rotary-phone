@@ -593,13 +593,16 @@ export function registerIpcRouter() {
   ipcMain.handle('db:listTables', async (_, args) => {
     const parsed = DbListTablesArgsSchema.parse(args);
     const client = supervisor.getClient();
-    if (!client) return [];
+    if (!client) throw new Error('Helper offline');
     try {
       const result = await client.request('db:listTables', { connId: parsed.connectionId });
       return DbListTablesResultSchema.parse(result);
     } catch (err: any) {
       log.error('db:listTables failed', { error: err.message });
-      return [];
+      // Re-throw so the renderer's DbTableTree can surface the error
+      // (e.g. "Not connected" when the HikariCP pool is missing after
+      // a helper restart) instead of silently showing "No tables found".
+      throw err;
     }
   });
 
@@ -815,8 +818,10 @@ export function registerIpcRouter() {
   // --- 02-01: Spring project scanning ---
   ipcMain.handle('project:scan', async (_, args) => {
     const parsed = ProjectScanArgsSchema.parse(args);
+    console.log(`[scan] Starting scan for: ${parsed.path}`);
     const client = supervisor.getClient();
     if (!client) {
+      console.log('[scan] ERROR: Helper offline');
       return ProjectScanResultSchema.parse({
         ok: false, projectId: '', projectPath: parsed.path,
         controllers: [], scanDurationMs: 0, totalFiles: 0, totalEndpoints: 0,
@@ -824,7 +829,15 @@ export function registerIpcRouter() {
       });
     }
     try {
+      console.log('[scan] Sending scanner:scan to helper...');
       const result = await client.request('scanner:scan', { projectRoot: parsed.path });
+      console.log(`[scan] Scan result: ok=${result.ok}, files=${result.totalFiles}, endpoints=${result.totalEndpoints}, duration=${result.scanDurationMs}ms`);
+      if (result.controllers?.length > 0) {
+        console.log(`[scan] Controllers found: ${result.controllers.map((c: any) => c.fqn).join(', ')}`);
+      }
+      if (result.errors?.length > 0) {
+        console.log(`[scan] Errors: ${result.errors.join('; ')}`);
+      }
       const projectId = computeProjectId(parsed.path, Date.now());
       const scanResult = {
         ...result,
@@ -832,10 +845,10 @@ export function registerIpcRouter() {
         projectPath: parsed.path,
       };
       await saveProjectScanResult(projectId, scanResult);
-      // Persist project path for app re-open
       setSetting('lastSpringProjectPath', parsed.path);
       return ProjectScanResultSchema.parse(scanResult);
     } catch (err: any) {
+      console.error('[scan] FAILED:', err.message);
       log.error('project:scan failed', { error: err.message });
       return ProjectScanResultSchema.parse({
         ok: false, projectId: '', projectPath: parsed.path,
