@@ -5,8 +5,8 @@ milestone_name: ui-redesign
 milestone_slug: ui-redesign
 status: in_progress
 stopped_at: Phase 8 complete, ready for Phase 9
-last_updated: "2026-06-07T00:42:00Z"
-last_activity: 2026-06-07 -- Quick 260607-0in complete: DB panel resizable (Splitter + localStorage pc.dbPanelWidth, [240,700]px), Save→connect lifecycle wires HikariCP pool open after create, auto-connect on select, Load Tables surfaces loading + errors; 82/82 tests pass, npm run build green
+last_updated: "2026-06-07T01:17:00Z"
+last_activity: 2026-06-07 -- Quick 260607-1j5 complete: 'Generate from DB row' button in BodyTab (new useDbSelection Zustand store + button next to 'Generate from DTO' reusing db.mapRowToDto); 82/82 tests pass, npm run build green
 progress:
   total_phases: 5
   completed_phases: 4
@@ -89,6 +89,7 @@ Items acknowledged and carried forward from previous milestone close:
 |---|-------------|------|--------|-----------|
 | 260606-134 | Fix scanner:scan method not found — initialize response missing capabilities | 2026-06-06 | 8f0354c | [260606-134-scanner-method-not-found](./quick/260606-134-scanner-method-not-found/) |
 | 260607-0in | Fix DB panel not resizeable, Load Tables no-op, and 'Not connected' errors | 2026-06-07 | 3f011dc | [260607-0in-db-ui-is-bad-panel-is-not-resizeable-loa](./quick/260607-0in-db-ui-is-bad-panel-is-not-resizeable-loa/) |
+| 260607-1j5 | Add 'Generate from DB row' button in BodyTab | 2026-06-07 | 7beaf05 | [260607-1j5-add-generate-from-db-row-button-in-bodyt](./quick/260607-1j5-add-generate-from-db-row-button-in-bodyt/) |
 
 ## Session Continuity
 
