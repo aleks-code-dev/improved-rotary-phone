@@ -7,7 +7,7 @@ PostmanClone is a desktop API client built for Java Spring developers. The journ
 ## Phases
 
 - [x] **Phase 1: Foundation & Postman Parity** - Establish 3-process architecture + ship a full Postman alternative (CORE-01..10) (completed 2026-06-04)
-- [ ] **Phase 2: Spring Project Detection** - Point at a Spring project, detect all `@RestController` endpoints, click to get a prefilled request (SPRING-01..05)
+- [x] **Phase 2: Spring Project Detection** - Point at a Spring project, detect all `@RestController` endpoints, click to get a prefilled request (SPRING-01..05) (completed 2026-06-06)
 - [ ] **Phase 3: Body Generation (DTO + DB)** - Generate request bodies from DTO schemas or real database rows (BODY-01..03 + DB-01..07)
 - [x] **Phase 4: Workflow Chains & Response Mapping** - Build multi-step chains where later steps pull fields from earlier responses (CHAIN-01..05 + MAP-01..04) (completed 2026-06-06)
 
@@ -63,15 +63,15 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 02-01: JVM helper scanner module + IPC pipeline (SPRING-01, SPRING-02, SPRING-03) — EndpointScanner, ClasspathResolver, MavenModuleDetector, GradleModuleDetector, Denylist, Zod schemas, router handlers, project-cache, preload bridge
+- [x] 02-01: JVM helper scanner module + IPC pipeline (SPRING-01, SPRING-02, SPRING-03) — EndpointScanner, ClasspathResolver, MavenModuleDetector, GradleModuleDetector, Denylist, Zod schemas, router handlers, project-cache, preload bridge
 
 **Wave 2** *(blocked on Wave 1 — needs IPC contracts)*
 
-- [ ] 02-02: Sidebar EndpointsTree + Scan Progress UI (SPRING-04) — controller-grouped endpoint tree, SpringProjectPicker, ScanProgress, StatusBar scanner section, Zustand store, TanStack Query hooks
+- [x] 02-02: Sidebar EndpointsTree + Scan Progress UI (SPRING-04) — controller-grouped endpoint tree, SpringProjectPicker, ScanProgress, StatusBar scanner section, Zustand store, TanStack Query hooks
 
 **Wave 3** *(blocked on Wave 2 — needs EndpointsTree)*
 
-- [ ] 02-03: Click-to-prefill + DtoClassPanel + Rescan (SPRING-05) — endpoint click handler, prefilled request tab, DTO class info panel, open-time rescan, lastSpringProjectPath persistence
+- [x] 02-03: Click-to-prefill + DtoClassPanel + Rescan (SPRING-05) — endpoint click handler, prefilled request tab, DTO class info panel, open-time rescan, lastSpringProjectPath persistence
 
 ### Phase 3: Body Generation (DTO + DB)
 
@@ -141,7 +141,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Postman Parity | 3/3 | Complete   | 2026-06-04 |
-| 2. Spring Project Detection | 0/TBD | Not started | - |
+| 2. Spring Project Detection | 3/3 | Complete | 2026-06-06 |
 | 3. Body Generation (DTO + DB) | 3/3 | Complete | 2026-06-06 |
 | 4. Workflow Chains & Response Mapping | 3/3 | Complete | 2026-06-06 |
 
