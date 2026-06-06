@@ -4,6 +4,7 @@ import { EndpointsTree } from './Sidebar/EndpointsTree';
 import { EnvironmentsList } from './Sidebar/EnvironmentsList';
 import { HistoryList } from './Sidebar/HistoryList';
 import { VariablesTab } from './Sidebar/VariablesTab';
+import { DtoClassPanel } from './DtoClassPanel';
 
 type SidebarGroup = 'endpoints' | 'collections' | 'environments' | 'history' | 'variables';
 
@@ -53,6 +54,7 @@ export function Sidebar() {
       </div>
 
       {visibleGroups.has('endpoints') && <EndpointsTree />}
+      {visibleGroups.has('endpoints') && <DtoClassPanel />}
       {visibleGroups.has('collections') && <CollectionsTree />}
       {visibleGroups.has('environments') && <EnvironmentsList />}
       {visibleGroups.has('history') && <HistoryList />}
