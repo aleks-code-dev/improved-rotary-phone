@@ -6,6 +6,7 @@ import { IconButton } from '../ui/IconButton';
 import { useTabs } from '../../state/useTabs';
 import { useRequest } from '../../state/useRequest';
 import { useEndpointsStore } from '../../store/endpoints';
+import { useDbSelection } from '../../store/dbSelection';
 
 interface DbConnectionMeta {
   id: string;
@@ -69,6 +70,10 @@ export function DatabasePanel({ width }: { width: number }) {
 
   const handleRowSelect = useCallback((row: Record<string, unknown>, tableName: string, schema: string | null) => {
     setSelectedRow({ row, tableName, schema });
+    useDbSelection.getState().setSelection({
+      selectedTableName: tableName,
+      selectedRow: { row, schema },
+    });
   }, []);
 
   const handleUseRow = useCallback((bodyJson: string) => {
@@ -146,6 +151,11 @@ export function DatabasePanel({ width }: { width: number }) {
                   onClick={async () => {
                     setSelectedConnectionId(conn.id);
                     setSelectedRow(null);
+                    useDbSelection.getState().setSelection({
+                      selectedConnectionId: conn.id,
+                      selectedTableName: null,
+                      selectedRow: null,
+                    });
                     // Auto-connect on select if the pool isn't open
                     // (e.g. helper restarted, or user never ran Test).
                     if (!conn.connected) {
