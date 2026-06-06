@@ -28,8 +28,31 @@
   --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
   --radius-1: 4px;
   --radius-2: 8px;
+  --radius-full: 9999px;
+
+  /* Phase 4: Chain tokens */
+  --color-chain-badge: oklch(0.55 0.2 290);
+  --color-ref-highlight: oklch(0.55 0.2 290 / 0.2);
+  --color-ref-text: oklch(0.55 0.2 290);
+  --color-step-active: oklch(0.7 0.15 230);
+  --color-step-success: oklch(0.65 0.18 145);
+  --color-step-failed: oklch(0.65 0.18 25);
+  --color-step-pending: oklch(0.45 0.01 250);
+  --color-chain-bar-bg: oklch(0.55 0.2 290 / 0.08);
+  --color-progress-bar: oklch(0.7 0.15 145);
+  --color-warning: oklch(0.75 0.15 80);
+  --color-danger: oklch(0.65 0.18 25);
+  --color-success: oklch(0.65 0.18 145);
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+.chain-ref-highlight {
+  background: var(--color-ref-highlight);
+  color: var(--color-ref-text);
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 2px;
 }

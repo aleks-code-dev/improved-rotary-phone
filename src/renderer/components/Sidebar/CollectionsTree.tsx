@@ -3,6 +3,8 @@ import { useCollectionsList, useCreateCollection, useCollection } from '../../ho
 import { useTabs } from '../../state/useTabs';
 import { useRequest } from '../../state/useRequest';
 import { useCollectionsStore } from '../../store/collections';
+import { useChain } from '../../state/useChain';
+import { ChainSidebarItem } from '../Chain/ChainSidebarItem';
 
 export function CollectionsTree() {
   const { data: collections, isLoading } = useCollectionsList();
@@ -15,6 +17,8 @@ export function CollectionsTree() {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   // Track which collection's full data we need to fetch on expand
   const [loadId, setLoadId] = useState<string | null>(null);
+  const activeChainId = useChain((s) => s.activeChainId);
+  const openChain = useChain((s) => s.openChain);
 
   // Fetch full collection when expanding (includes item[] with requests)
   const { data: fullCollection } = useCollection(loadId);
@@ -93,6 +97,27 @@ export function CollectionsTree() {
                 <span style={{ marginRight: 'var(--space-1)' }}>📁</span>
                 <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{col.name}</span>
                 <span style={{ fontSize: 10, color: 'var(--color-fg-muted)' }}>{displayCount}</span>
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    await window.api.chains.create({ collectionId: col.id, name: 'New Chain' });
+                    // Invalidate to refresh the collection data
+                    setLoadId(null);
+                    setTimeout(() => setLoadId(col.id), 100);
+                  }}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--color-fg-muted)',
+                    cursor: 'pointer',
+                    fontSize: 12,
+                    padding: '0 4px',
+                    lineHeight: '18px',
+                  }}
+                  title="New chain"
+                >
+                  🔗
+                </button>
               </div>
               {isExpanded && items.map((item: any, i: number) => (
                 <div
@@ -162,6 +187,20 @@ export function CollectionsTree() {
                     {item.name ?? (item.request?.url?.raw ?? item.request?.url ?? 'Untitled')}
                   </span>
                 </div>
+              ))}
+              {/* Chain items */}
+              {(fullCollection?.chains ?? []).map((chain: any) => (
+                <ChainSidebarItem
+                  key={chain.id}
+                  chain={chain}
+                  collectionId={col.id}
+                  isActive={activeChainId === chain.id}
+                  onClick={() => {
+                    openChain(col.id, chain.id);
+                    // Open chain editor in the center pane
+                    window.dispatchEvent(new CustomEvent('chain:open', { detail: { collectionId: col.id, chainId: chain.id } }));
+                  }}
+                />
               ))}
             </div>
           );
