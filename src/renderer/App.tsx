@@ -7,6 +7,8 @@ import { StatusBar } from './components/StatusBar';
 import { FirstRunDialog } from './components/FirstRunDialog';
 import { ConfirmQuitModal } from './components/ConfirmQuitModal';
 import { ChainEditor } from './components/Chain/ChainEditor';
+import { DatabasePanel } from './components/Database/DatabasePanel';
+import { Splitter } from './components/Splitter';
 import { useTabs } from './state/useTabs';
 
 export function App() {
@@ -14,6 +16,15 @@ export function App() {
   const [theme, setTheme] = useState<'system' | 'dark' | 'light'>('system');
   const [showQuitModal, setShowQuitModal] = useState(false);
   const [activeChain, setActiveChain] = useState<{ collectionId: string; chainId: string } | null>(null);
+  const [dbPanelOpen, setDbPanelOpen] = useState(false);
+  const [dbPanelWidth, setDbPanelWidth] = useState<number>(() => {
+    const v = Number(localStorage.getItem('pc.dbPanelWidth'));
+    return Number.isFinite(v) && v >= 240 && v <= 700 ? v : 340;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('pc.dbPanelWidth', String(dbPanelWidth));
+  }, [dbPanelWidth]);
 
   useEffect(() => {
     window.api.app.bootstrap().then((result) => {
@@ -44,9 +55,14 @@ export function App() {
     };
     window.addEventListener('chain:open', handleChainOpen);
 
+    // Listen for db:toggle events from status bar
+    const handleDbToggle = () => setDbPanelOpen((prev) => !prev);
+    window.addEventListener('db:toggle', handleDbToggle);
+
     return () => {
       unsub();
       window.removeEventListener('chain:open', handleChainOpen);
+      window.removeEventListener('db:toggle', handleDbToggle);
     };
   }, []);
 
@@ -104,8 +120,17 @@ export function App() {
             </>
           )}
         </div>
+        {dbPanelOpen && (
+          <>
+            <Splitter
+              orientation="vertical"
+              onResize={(d) => setDbPanelWidth((w) => Math.max(240, Math.min(700, w - d)))}
+            />
+            <DatabasePanel width={dbPanelWidth} />
+          </>
+        )}
       </div>
-      <StatusBar />
+      <StatusBar dbPanelOpen={dbPanelOpen} onToggleDbPanel={() => setDbPanelOpen((prev) => !prev)} />
       <ConfirmQuitModal
         open={showQuitModal}
         dirtyCount={dirtyCount}
