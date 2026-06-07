@@ -95,7 +95,6 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
   const fkChannelRef = useRef<((key: string) => void) | null>(null);
   const fkDecorationsRef = useRef<string[] | null>(null);
   const fkLineMapRef = useRef<Map<number, string>>(new Map());
-  const editorContainerRef = useRef<HTMLDivElement>(null);
   const [fkBadges, setFkBadges] = useState<{ line: number; key: string; top: number }[]>([]);
 
   const handleFkLookup = useCallback(async (key: string) => {
@@ -146,15 +145,13 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     }
     const lineHeight = (() => { try { return editor.getOption(6); } catch { return 20; } })();
     const scrollTop = editor.getScrollTop();
-    const container = editorContainerRef.current;
-    if (!container) return;
-    const ch = container.clientHeight;
+    const editorHeight = (() => { try { return editor.getLayoutInfo().height; } catch { return 240; } })();
     const badges: { line: number; key: string; top: number }[] = [];
     for (let line = 1, n = model.getLineCount(); line <= n; line++) {
       const m = model.getLineContent(line).match(/^  "(\w+)"\s*:/);
       if (!m || !isFkField(m[1])) continue;
       const top = (line - 1) * lineHeight - scrollTop;
-      if (top + lineHeight >= 0 && top <= ch) badges.push({ line, key: m[1], top });
+      if (top + lineHeight >= 0 && top <= editorHeight) badges.push({ line, key: m[1], top });
     }
     setFkBadges(badges);
   }, [body.mode, body.contentType]);
@@ -163,9 +160,12 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     editorRef.current = editor;
     monacoRef.current = monaco;
     onEditorMount?.(editor, monaco);
-    setTimeout(recomputeFkBadges, 100);
-    editor.onDidScrollChange(recomputeFkBadges);
-    editor.onDidChangeModelContent(recomputeFkBadges);
+    // Compute badges after layout settles
+    const compute = () => recomputeFkBadges();
+    setTimeout(compute, 150);
+    setTimeout(compute, 500);
+    editor.onDidScrollChange(compute);
+    editor.onDidChangeModelContent(compute);
   }, [onEditorMount, recomputeFkBadges]);
 
   useEffect(() => { recomputeFkBadges(); }, [body.text, recomputeFkBadges]);
