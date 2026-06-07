@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import Editor from '@monaco-editor/react';
 import { useRequest, type BodyMode, type RawContentType, type RequestBody } from '../../state/useRequest';
 import { useDbSelection } from '../../store/dbSelection';
@@ -95,6 +95,8 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
   const fkChannelRef = useRef<((key: string) => void) | null>(null);
   const fkDecorationsRef = useRef<string[] | null>(null);
   const fkLineMapRef = useRef<Map<number, string>>(new Map());
+  const editorContainerRef = useRef<HTMLDivElement>(null);
+  const [fkBadges, setFkBadges] = useState<{ line: number; key: string; top: number }[]>([]);
 
   const handleFkLookup = useCallback(async (key: string) => {
     setFkTargetKey(key);
@@ -133,79 +135,40 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     fkChannelRef.current = (key: string) => handleFkLookup(key);
   }, [handleFkLookup]);
 
-  // Update FK glyph margin decorations when body changes
-  const updateFkDecorations = useCallback(() => {
+  // Compute FK badge positions from editor state
+  const recomputeFkBadges = useCallback(() => {
     const editor = editorRef.current;
-    const monaco = monacoRef.current;
-    if (!editor || !monaco) return;
-
+    if (!editor) return;
     const model = editor.getModel();
     if (!model || body.mode !== 'raw' || body.contentType !== 'application/json') {
-      if (fkDecorationsRef.current) {
-        editor.deltaDecorations(fkDecorationsRef.current, []);
-        fkDecorationsRef.current = null;
-      }
-      fkLineMapRef.current.clear();
+      setFkBadges([]);
       return;
     }
-
-    const fkMap = new Map<number, string>();
-    const lineCount = model.getLineCount();
-    const decorations: any[] = [];
-
-    for (let line = 1; line <= lineCount; line++) {
-      const lineText = model.getLineContent(line);
-      const match = lineText.match(/^  "(\w+)"\s*:/);
-      if (!match) continue;
-      const key = match[1];
-      if (!isFkField(key)) continue;
-
-      fkMap.set(line, key);
-      decorations.push({
-        range: new monaco.Range(line, 1, line, 2),
-        options: {
-          isWholeLine: true,
-          glyphMarginClassName: 'fk-glyph-search',
-          glyphMarginHoverMessage: { value: `**Lookup ${key}**\nClick to search DB` },
-        },
-      });
+    const lineHeight = (() => { try { return editor.getOption(6); } catch { return 20; } })();
+    const scrollTop = editor.getScrollTop();
+    const container = editorContainerRef.current;
+    if (!container) return;
+    const ch = container.clientHeight;
+    const badges: { line: number; key: string; top: number }[] = [];
+    for (let line = 1, n = model.getLineCount(); line <= n; line++) {
+      const m = model.getLineContent(line).match(/^  "(\w+)"\s*:/);
+      if (!m || !isFkField(m[1])) continue;
+      const top = (line - 1) * lineHeight - scrollTop;
+      if (top + lineHeight >= 0 && top <= ch) badges.push({ line, key: m[1], top });
     }
-
-    fkLineMapRef.current = fkMap;
-    // Remove old, apply new
-    if (fkDecorationsRef.current) {
-      editor.deltaDecorations(fkDecorationsRef.current, []);
-    }
-    fkDecorationsRef.current = editor.deltaDecorations([], decorations);
+    setFkBadges(badges);
   }, [body.mode, body.contentType]);
 
   const handleEditorMount = useCallback((editor: any, monaco: any) => {
     editorRef.current = editor;
     monacoRef.current = monaco;
     onEditorMount?.(editor, monaco);
+    setTimeout(recomputeFkBadges, 100);
+    editor.onDidScrollChange(recomputeFkBadges);
+    editor.onDidChangeModelContent(recomputeFkBadges);
+  }, [onEditorMount, recomputeFkBadges]);
 
-    // Initial decorations after layout
-    setTimeout(updateFkDecorations, 100);
-    editor.onDidChangeModelContent(() => updateFkDecorations());
-  }, [onEditorMount, updateFkDecorations]);
-
-  // Click handler for glyph margin (separate effect — survives re-renders)
-  useEffect(() => {
-    const editor = editorRef.current;
-    if (!editor) return;
-    const disposable = editor.onMouseDown((e: any) => {
-      // Glyph margin clicks have column <= 3 (leftmost gutter area)
-      if (e.position && e.position.column > 3) return;
-      const key = fkLineMapRef.current.get(e.position?.lineNumber);
-      if (key) fkChannelRef.current?.(key);
-    });
-    return () => disposable.dispose();
-  });
-
-  // Recompute FK decorations when body text changes
-  useEffect(() => {
-    updateFkDecorations();
-  }, [body.text, updateFkDecorations]);
+  useEffect(() => { recomputeFkBadges(); }, [body.text, recomputeFkBadges]);
 
   /**
    * Highlight matched field lines in the editor with a 3-second fade-out.
@@ -554,7 +517,7 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
       )}
 
       {body.mode === 'raw' && (
-        <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-1)', overflow: 'hidden' }}>
+        <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-1)', overflow: 'hidden', position: 'relative' }}>
           <Editor
             height="240px"
             language={body.contentType === 'application/json' ? 'json' : body.contentType === 'application/xml' ? 'xml' : body.contentType === 'application/graphql' ? 'graphql' : 'plaintext'}
@@ -566,13 +529,37 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
               minimap: { enabled: false },
               fontSize: 13,
               lineNumbers: 'on',
-              glyphMargin: true,
-              lineDecorationsWidth: 16,
               scrollBeyondLastLine: false,
               wordWrap: 'on',
               tabSize: 2,
             }}
           />
+          {/* FK lookup buttons overlaid on each FK line */}
+          {fkBadges.map((b) => (
+            <button
+              key={b.line}
+              onClick={() => handleFkLookup(b.key)}
+              style={{
+                position: 'absolute',
+                top: b.top,
+                right: 8,
+                height: 18,
+                background: 'none',
+                border: '1px solid #f5a623',
+                borderRadius: 3,
+                color: '#f5a623',
+                fontSize: 10,
+                fontFamily: 'monospace',
+                fontWeight: 600,
+                cursor: 'pointer',
+                padding: '0 5px',
+                lineHeight: '16px',
+                zIndex: 10,
+              }}
+            >
+              🔍 lookup
+            </button>
+          ))}
           <div style={{ padding: '4px var(--space-2)', fontSize: 10, color: 'var(--color-fg-muted)', textAlign: 'right', borderTop: '1px solid var(--color-border)' }}>
             {body.text.length} characters
           </div>
