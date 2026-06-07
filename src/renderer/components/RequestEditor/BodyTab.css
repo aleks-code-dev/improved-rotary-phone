@@ -15,15 +15,19 @@
   animation: highlightFadeOut 3s ease-out forwards !important;
 }
 
-/* FK lookup glyph margin icon — search icon in gutter next to FK lines */
+/* FK lookup glyph margin icon — amber dot in gutter */
 .fk-glyph-search {
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23f5a623' d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242.156a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E") center center / 14px 14px no-repeat;
+  background: #f5a623 !important;
+  border-radius: 50%;
+  width: 8px !important;
+  height: 8px !important;
+  margin: 6px auto !important;
   cursor: pointer;
-  opacity: 0.8;
-  transition: opacity 0.15s;
-  margin-left: 2px;
+  opacity: 0.85;
+  transition: opacity 0.15s, transform 0.15s;
 }
 
 .fk-glyph-search:hover {
   opacity: 1;
+  transform: scale(1.3);
 }
