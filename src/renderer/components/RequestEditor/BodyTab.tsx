@@ -179,15 +179,15 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
       dispose: () => {},
     });
 
-    // Register the command via monaco.commands (not editor.addCommand)
-    const cmdDisposable = monaco.commands.registerCommand('fkLookup.open', (key: string) => {
+    // Register the command via editor.addCommand
+    const cmdDisposable = editor.addCommand('fkLookup.open', (_editor: any, key: string) => {
       fkChannelRef.current?.(key);
     });
 
     return () => {
       fkLensDisposableRef.current?.dispose();
       fkLensDisposableRef.current = null;
-      cmdDisposable?.dispose();
+      // editor.addCommand commands are cleaned up with the editor
     };
   }, [body]);
 
