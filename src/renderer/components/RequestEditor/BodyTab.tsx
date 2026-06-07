@@ -102,7 +102,7 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     setDtoError(null);
     try {
       const result = await window.api.body.generateDto({
-        requestId: tabId,
+        requestId: spec.requestId,
         dtoFqn: spec.detectedDto.fqn,
         subtypeName: selectedSubtype ?? undefined,
         projectRoot: activeProjectPath ?? undefined,
