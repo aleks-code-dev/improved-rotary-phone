@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import Editor from '@monaco-editor/react';
 import { useRequest, type BodyMode, type RawContentType, type RequestBody } from '../../state/useRequest';
 import { useDbSelection } from '../../store/dbSelection';
@@ -93,6 +93,8 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
   const monacoRef = useRef<any>(null);
   const highlightDecorationRef = useRef<string[] | null>(null);
   const fkChannelRef = useRef<((key: string) => void) | null>(null);
+  const editorContainerRef = useRef<HTMLDivElement>(null);
+  const [fkBadges, setFkBadges] = useState<{ line: number; key: string; top: number; right: number }[]>([]);
 
   const handleFkLookup = useCallback(async (key: string) => {
     setFkTargetKey(key);
@@ -130,69 +132,60 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     editorRef.current = editor;
     monacoRef.current = monaco;
     onEditorMount?.(editor, monaco);
-  }, [onEditorMount]);
+
+    // Compute FK badges after layout settles
+    setTimeout(() => recomputeFkBadges(), 100);
+
+    // Recompute on scroll and content changes
+    editor.onDidScrollChange(() => recomputeFkBadges());
+    editor.onDidChangeModelContent(() => recomputeFkBadges());
+  }, [onEditorMount, recomputeFkBadges]);
 
   // Keep fkChannelRef in sync with the latest handleFkLookup
   useEffect(() => {
     fkChannelRef.current = (key: string) => handleFkLookup(key);
   }, [handleFkLookup]);
 
-  // Render inline "lookup" badges on FK lines + click handler
-  useEffect(() => {
+  // Compute FK badge positions from editor state
+  const recomputeFkBadges = useCallback(() => {
     const editor = editorRef.current;
-    const monaco = monacoRef.current;
-    if (!editor || !monaco) return;
-    if (body.mode !== 'raw' || body.contentType !== 'application/json') return;
-
+    if (!editor) return;
     const model = editor.getModel();
     if (!model) return;
+    if (body.mode !== 'raw' || body.contentType !== 'application/json') {
+      setFkBadges([]);
+      return;
+    }
 
-    // Build FK line map: line number → key
-    const fkLineMap = new Map<number, string>();
+    const lineHeight = editor.getOption(editor.EditorOption.lineHeight);
+    const scrollTop = editor.getScrollTop();
+    const container = editorContainerRef.current;
+    if (!container) return;
+    const containerHeight = container.clientHeight;
+
+    const badges: { line: number; key: string; top: number; right: number }[] = [];
     const lineCount = model.getLineCount();
+
     for (let line = 1; line <= lineCount; line++) {
       const lineText = model.getLineContent(line);
       const match = lineText.match(/^  "(\w+)"\s*:/);
       if (!match) continue;
       const key = match[1];
-      if (isFkField(key)) fkLineMap.set(line, key);
+      if (!isFkField(key)) continue;
+
+      const top = (line - 1) * lineHeight - scrollTop;
+      if (top + lineHeight < 0 || top > containerHeight) continue;
+
+      badges.push({ line, key, top, right: 50 });
     }
 
-    // Add inline "after" decorations at end of FK lines
-    const decorations = [];
-    for (const [line, key] of fkLineMap) {
-      const lineLen = model.getLineContent(line).length;
-      decorations.push({
-        range: new monaco.Range(line, lineLen, line, lineLen),
-        options: {
-          after: {
-            content: '  🔍 lookup',
-            inlineClassName: 'fk-lookup-badge',
-            cursorStops: [monaco.editor.InjectedTextCursorStops.None],
-          },
-        },
-      });
-    }
+    setFkBadges(badges);
+  }, [body.mode, body.contentType]);
 
-    const collection = editor.createDecorationsCollection(decorations);
-
-    // Click handler: check if click is on a FK line
-    const clickHandler = editor.onMouseDown((e: any) => {
-      const pos = e.position;
-      if (!pos) return;
-      const key = fkLineMap.get(pos.lineNumber);
-      if (!key) return;
-      // Only trigger if click is near end of line (past the FK value)
-      const lineText = model.getLineContent(pos.lineNumber);
-      if (pos.column < lineText.length - 3) return;
-      fkChannelRef.current?.(key);
-    });
-
-    return () => {
-      clickHandler.dispose();
-      collection.clear();
-    };
-  }, [body]);
+  // Recompute when body text changes
+  useEffect(() => {
+    recomputeFkBadges();
+  }, [body.text, recomputeFkBadges]);
 
   /**
    * Highlight matched field lines in the editor with a 3-second fade-out.
@@ -541,7 +534,7 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
       )}
 
       {body.mode === 'raw' && (
-        <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-1)', overflow: 'hidden' }}>
+        <div ref={editorContainerRef} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-1)', overflow: 'hidden', position: 'relative' }}>
           <Editor
             height="240px"
             language={body.contentType === 'application/json' ? 'json' : body.contentType === 'application/xml' ? 'xml' : body.contentType === 'application/graphql' ? 'graphql' : 'plaintext'}
@@ -558,6 +551,23 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
               tabSize: 2,
             }}
           />
+          {/* FK lookup badges overlaid on editor */}
+          {fkBadges.map((badge) => (
+            <button
+              key={badge.line}
+              className="fk-lookup-badge"
+              onClick={() => fkChannelRef.current?.(badge.key)}
+              title={selectedConnectionId ? `Lookup ${badge.key} from DB` : 'Connect to a DB first'}
+              style={{
+                position: 'absolute',
+                top: badge.top,
+                right: 8,
+                height: 20,
+              }}
+            >
+              lookup
+            </button>
+          ))}
           <div style={{ padding: '4px var(--space-2)', fontSize: 10, color: 'var(--color-fg-muted)', textAlign: 'right', borderTop: '1px solid var(--color-border)' }}>
             {body.text.length} characters
           </div>
