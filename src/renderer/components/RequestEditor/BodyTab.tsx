@@ -184,9 +184,9 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     monacoRef.current = monaco;
     onEditorMount?.(editor, monaco);
 
-    // Click handler for glyph margin
+    // Click handler for glyph margin — targetType 2 = GUTTER_GLYPH_MARGIN
     editor.onMouseDown((e: any) => {
-      if (e.targetType !== 'Gutter') return;
+      if (e.targetType !== 2) return;
       const key = fkLineMapRef.current.get(e.position.lineNumber);
       if (key) fkChannelRef.current?.(key);
     });
