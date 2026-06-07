@@ -1,5 +1,6 @@
-import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import Editor from '@monaco-editor/react';
+import type { editor as MonacoEditor } from 'monaco-editor';
 import { useRequest, type BodyMode, type RawContentType, type RequestBody } from '../../state/useRequest';
 import { useDbSelection } from '../../store/dbSelection';
 import { useEndpointsStore } from '../../store/endpoints';
@@ -92,18 +93,8 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
   const highlightDecorationRef = useRef<string[] | null>(null);
-
-  // Detect FK fields from the current JSON body
-  const fkFields = useMemo(() => {
-    if (body.mode !== 'raw' || body.contentType !== 'application/json' || !body.text) return [];
-    try {
-      const parsed = JSON.parse(body.text);
-      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return [];
-      return Object.keys(parsed).filter(isFkField);
-    } catch {
-      return [];
-    }
-  }, [body]);
+  const fkLensDisposableRef = useRef<MonacoEditor.IDisposable | null>(null);
+  const fkChannelRef = useRef<((key: string) => void) | null>(null);
 
   const handleFkLookup = useCallback(async (key: string) => {
     setFkTargetKey(key);
@@ -142,6 +133,68 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     monacoRef.current = monaco;
     onEditorMount?.(editor, monaco);
   }, [onEditorMount]);
+
+  // Keep fkChannelRef in sync with the latest handleFkLookup
+  useEffect(() => {
+    fkChannelRef.current = (key: string) => handleFkLookup(key);
+  }, [handleFkLookup]);
+
+  // Register Monaco CodeLens provider for FK fields (inline buttons at end of line)
+  useEffect(() => {
+    const editor = editorRef.current;
+    const monaco = monacoRef.current;
+    if (!editor || !monaco) return;
+    if (body.mode !== 'raw' || body.contentType !== 'application/json') return;
+
+    // Dispose previous provider
+    fkLensDisposableRef.current?.dispose();
+
+    const languageId = 'json';
+    fkLensDisposableRef.current = monaco.languages.registerCodeLensProvider(languageId, {
+      provideCodeLenses: (model: any) => {
+        const lenses: any[] = [];
+        const lineCount = model.getLineCount();
+
+        for (let line = 1; line <= lineCount; line++) {
+          const lineText = model.getLineContent(line);
+          // Match root-level FK keys: "  "key": value  (2-space indent, quoted key)
+          const match = lineText.match(/^  "(\w+)"\s*:/);
+          if (!match) continue;
+          const key = match[1];
+          if (!isFkField(key)) continue;
+
+          lenses.push({
+            range: new monaco.Range(line, 1, line, 1),
+            command: {
+              id: 'fkLookup.openDialog',
+              title: `🔍 lookup`,
+              arguments: [key],
+            },
+          });
+        }
+
+        return { lenses, dispose: () => {} };
+      },
+      dispose: () => {},
+    });
+
+    // Register the command once (idempotent)
+    try {
+      monaco.editor.addCommand({
+        id: 'fkLookup.openDialog',
+        handler: (_accessor: any, key: string) => {
+          fkChannelRef.current?.(key);
+        },
+      });
+    } catch {
+      // Command already registered — safe to ignore
+    }
+
+    return () => {
+      fkLensDisposableRef.current?.dispose();
+      fkLensDisposableRef.current = null;
+    };
+  }, [body]);
 
   /**
    * Highlight matched field lines in the editor with a 3-second fade-out.
@@ -356,29 +409,6 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
             ))}
           </select>
           <button onClick={handleFormat} style={formatBtnStyle}>Format</button>
-
-          {/* FK lookup buttons */}
-          {body.contentType === 'application/json' && fkFields.map((key) => (
-            <button
-              key={key}
-              onClick={() => handleFkLookup(key)}
-              title={
-                selectedConnectionId
-                  ? `Lookup ${key} value from DB`
-                  : 'Connect to a DB first'
-              }
-              style={{
-                ...formatBtnStyle,
-                color: selectedConnectionId ? 'var(--ds-warning, #f5a623)' : 'var(--ds-text-muted)',
-                borderColor: selectedConnectionId ? 'var(--ds-warning, #f5a623)' : 'var(--ds-border)',
-                fontWeight: 600,
-                opacity: selectedConnectionId ? 1 : 0.6,
-                cursor: selectedConnectionId ? 'pointer' : 'not-allowed',
-              }}
-            >
-              🔍 {key}
-            </button>
-          ))}
 
           {/* DTO Generate button — visible when DTO detected */}
           {spec?.detectedDto && body.contentType === 'application/json' && (
