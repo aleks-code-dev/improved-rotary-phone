@@ -163,11 +163,12 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
           const key = match[1];
           if (!isFkField(key)) continue;
 
+          const lineLen = lineText.length;
           lenses.push({
-            range: new monaco.Range(line, 1, line, 1),
+            range: new monaco.Range(line, lineLen, line, lineLen),
             command: {
-              id: 'fkLookup.openDialog',
-              title: `🔍 lookup`,
+              id: 'fkLookup.open',
+              title: `lookup`,
               arguments: [key],
             },
           });
@@ -178,21 +179,15 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
       dispose: () => {},
     });
 
-    // Register the command once (idempotent)
-    try {
-      monaco.editor.addCommand({
-        id: 'fkLookup.openDialog',
-        handler: (_accessor: any, key: string) => {
-          fkChannelRef.current?.(key);
-        },
-      });
-    } catch {
-      // Command already registered — safe to ignore
-    }
+    // Register the command via monaco.commands (not editor.addCommand)
+    const cmdDisposable = monaco.commands.registerCommand('fkLookup.open', (key: string) => {
+      fkChannelRef.current?.(key);
+    });
 
     return () => {
       fkLensDisposableRef.current?.dispose();
       fkLensDisposableRef.current = null;
+      cmdDisposable?.dispose();
     };
   }, [body]);
 
