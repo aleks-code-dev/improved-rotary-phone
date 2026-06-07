@@ -105,81 +105,112 @@ public class RowToJsonMapper {
 
     public Map<String, Object> mapRow(HikariDataSource pool, String tableName, Map<String, Object> rowId,
                                        String dtoFqn, Map<String, String> columnMapping) throws SQLException {
-        // Fetch the specific row
+        // Fetch the specific row — prefer primary key columns for the WHERE clause
         StringBuilder sql = new StringBuilder("SELECT * FROM \"" + tableName + "\" WHERE ");
         List<Object> params = new ArrayList<>();
-        int idx = 0;
-        for (Map.Entry<String, Object> entry : rowId.entrySet()) {
-            if (idx > 0) sql.append(" AND ");
-            sql.append("\"").append(entry.getKey()).append("\" = ?");
-            params.add(entry.getValue());
-            idx++;
-        }
 
-        ObjectNode bodyNode = mapper.createObjectNode();
-        List<Map<String, Object>> mappingResult = new ArrayList<>();
-        int mapped = 0, required = 0, total = 0;
-
-        try (Connection conn = pool.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
-            for (int i = 0; i < params.size(); i++) {
-                stmt.setObject(i + 1, params.get(i));
-            }
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    ResultSetMetaData rsMeta = rs.getMetaData();
-                    int colCount = rsMeta.getColumnCount();
-
-                    // Build column name set
-                    List<String> dbColumns = new ArrayList<>();
-                    Map<String, Integer> colIndexMap = new HashMap<>();
-                    for (int i = 1; i <= colCount; i++) {
-                        String colName = rsMeta.getColumnName(i);
-                        dbColumns.add(colName);
-                        colIndexMap.put(colName, i);
-                    }
-
-                    // Apply mapping
-                    Set<String> mappedColumns = new HashSet<>();
-                    for (Map.Entry<String, String> entry : columnMapping.entrySet()) {
-                        String dbCol = entry.getKey();
-                        String dtoField = entry.getValue();
-                        if ("__none__".equals(dtoField)) continue;
-
-                        Integer colIdx = colIndexMap.get(dbCol);
-                        if (colIdx == null) continue;
-
-                        String typeName = rsMeta.getColumnTypeName(colIdx);
-                        Object value = normalizer.normalize(rs, colIdx, typeName);
-                        bodyNode.put(dtoField, value != null ? value.toString() : null);
-                        mappedColumns.add(dbCol);
-
-                        Map<String, Object> m = new LinkedHashMap<>();
-                        m.put("column", dbCol);
-                        m.put("field", dtoField);
-                        m.put("compatibility", "exact");
-                        mappingResult.add(m);
-                    }
-
-                    mapped = mappedColumns.size();
-                    total = colCount;
+        try (Connection conn = pool.getConnection()) {
+            // Try to find primary key columns
+            List<String> pkColumns = new ArrayList<>();
+            DatabaseMetaData meta = conn.getMetaData();
+            try (ResultSet pkRs = meta.getPrimaryKeys(null, null, tableName)) {
+                while (pkRs.next()) {
+                    pkColumns.add(pkRs.getString("COLUMN_NAME"));
                 }
             }
+
+            // Use PK columns if found and all present in rowId, otherwise use all rowId columns
+            List<String> whereColumns;
+            if (!pkColumns.isEmpty() && rowId.keySet().containsAll(pkColumns)) {
+                whereColumns = pkColumns;
+            } else {
+                whereColumns = new ArrayList<>(rowId.keySet());
+            }
+
+            int idx = 0;
+            for (String col : whereColumns) {
+                if (idx > 0) sql.append(" AND ");
+                sql.append("\"").append(col).append("\" = ?");
+                Object val = rowId.get(col);
+                params.add(val);
+                idx++;
+            }
+
+            ObjectNode bodyNode = mapper.createObjectNode();
+            List<Map<String, Object>> mappingResult = new ArrayList<>();
+            int mapped = 0, required = 0, total = 0;
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+                for (int i = 0; i < params.size(); i++) {
+                    stmt.setObject(i + 1, params.get(i));
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        ResultSetMetaData rsMeta = rs.getMetaData();
+                        int colCount = rsMeta.getColumnCount();
+
+                        // Build column name set
+                        List<String> dbColumns = new ArrayList<>();
+                        Map<String, Integer> colIndexMap = new HashMap<>();
+                        for (int i = 1; i <= colCount; i++) {
+                            String colName = rsMeta.getColumnName(i);
+                            dbColumns.add(colName);
+                            colIndexMap.put(colName, i);
+                        }
+
+                        // Apply mapping — if no explicit mapping, auto-map all columns to camelCase
+                        Set<String> mappedColumns = new HashSet<>();
+                        if (columnMapping.isEmpty()) {
+                            for (String dbCol : dbColumns) {
+                                columnMapping.put(dbCol, ColumnFieldNameMatcher.snakeToCamel(dbCol));
+                            }
+                        }
+                        for (Map.Entry<String, String> entry : columnMapping.entrySet()) {
+                            String dbCol = entry.getKey();
+                            String dtoField = entry.getValue();
+                            if ("__none__".equals(dtoField)) continue;
+
+                            Integer colIdx = colIndexMap.get(dbCol);
+                            if (colIdx == null) continue;
+
+                            String typeName = rsMeta.getColumnTypeName(colIdx);
+                            Object value = normalizer.normalize(rs, colIdx, typeName);
+                            bodyNode.put(dtoField, value != null ? value.toString() : null);
+                            mappedColumns.add(dbCol);
+
+                            Map<String, Object> m = new LinkedHashMap<>();
+                            m.put("column", dbCol);
+                            m.put("field", dtoField);
+                            m.put("compatibility", "exact");
+                            mappingResult.add(m);
+                        }
+
+                        mapped = mappedColumns.size();
+                        total = colCount;
+                    }
+                }
+            }
+
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("ok", true);
+            String bodyJson;
+            try {
+                bodyJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(bodyNode);
+            } catch (Exception e) {
+                bodyJson = bodyNode.toString();
+            }
+            result.put("bodyJson", bodyJson);
+            result.put("mapping", mappingResult);
+
+            Map<String, Object> coverage = new LinkedHashMap<>();
+            coverage.put("mapped", mapped);
+            coverage.put("required", required);
+            coverage.put("total", total);
+            result.put("coverage", coverage);
+            result.put("warnings", Collections.emptyList());
+
+            return result;
         }
-
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("ok", true);
-        result.put("bodyJson", mapper.createObjectNode().set("body", bodyNode).toString());
-        result.put("mapping", mappingResult);
-
-        Map<String, Object> coverage = new LinkedHashMap<>();
-        coverage.put("mapped", mapped);
-        coverage.put("required", required);
-        coverage.put("total", total);
-        result.put("coverage", coverage);
-        result.put("warnings", Collections.emptyList());
-
-        return result;
     }
 
     private boolean containsDestructiveKeywords(String clause) {
