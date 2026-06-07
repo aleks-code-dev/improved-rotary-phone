@@ -37,9 +37,16 @@ public class DtoWalker {
     }
 
     public String walk(String fqn, List<Path> classpathRoots) throws IOException {
+        return walk(fqn, classpathRoots, null);
+    }
+
+    public String walk(String fqn, List<Path> classpathRoots, Path projectRoot) throws IOException {
+        this.projectRoot = projectRoot;
         ObjectNode root = walkType(fqn, classpathRoots);
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
     }
+
+    private Path projectRoot;
 
     private ObjectNode walkType(String fqn, List<Path> classpathRoots) throws IOException {
         if (cycleDetector.shouldEmitRef(fqn)) {
@@ -277,6 +284,11 @@ public class DtoWalker {
         }
     }
 
+    private static final Set<String> SKIP_DIRS = Set.of(
+        ".git", "node_modules", "target", "build", "out", "dist",
+        ".gradle", ".idea", ".vscode", "bin", "obj", ".mvn", "gradle", ".m2"
+    );
+
     private Path findSourceFile(String fqn, List<Path> classpathRoots) {
         String relativePath = fqn.replace('.', '/') + ".java";
         for (Path root : classpathRoots) {
@@ -285,7 +297,62 @@ public class DtoWalker {
                 return candidate;
             }
         }
+        // Fallback: bounded project-wide search so non-standard layouts
+        // (custom Gradle source sets, mixed Kotlin/Java, plugin-generated
+        // sources in build/...) still resolve. Bounded by depth + file count.
+        if (projectRoot != null && Files.exists(projectRoot)) {
+            Path found = scanForSourceFile(projectRoot, relativePath, fqn);
+            if (found != null) return found;
+        }
+        System.err.println("[dto-walker] Could not find source for " + fqn + " (tried roots=" + classpathRoots + ", projectRoot=" + projectRoot + ")");
         return null;
+    }
+
+    private Path scanForSourceFile(Path root, String relativePath, String fqn) {
+        Path[] result = new Path[1];
+        try {
+            java.nio.file.FileVisitor<Path> visitor = new java.nio.file.SimpleFileVisitor<>() {
+                int visited = 0;
+                @Override
+                public java.nio.file.FileVisitResult preVisitDirectory(Path dir, java.nio.file.attribute.BasicFileAttributes attrs) {
+                    String name = dir.getFileName() == null ? "" : dir.getFileName().toString();
+                    if (SKIP_DIRS.contains(name)) {
+                        return java.nio.file.FileVisitResult.SKIP_SUBTREE;
+                    }
+                    return java.nio.file.FileVisitResult.CONTINUE;
+                }
+                @Override
+                public java.nio.file.FileVisitResult visitFile(Path file, java.nio.file.attribute.BasicFileAttributes attrs) {
+                    if (result[0] != null) return java.nio.file.FileVisitResult.TERMINATE;
+                    if (++visited > 50000) {
+                        System.err.println("[dto-walker] Fallback search hit 50k file cap, giving up for " + fqn);
+                        return java.nio.file.FileVisitResult.TERMINATE;
+                    }
+                    Path fileName = file.getFileName();
+                    if (fileName != null && fileName.toString().equals(relativePath.substring(relativePath.lastIndexOf('/') + 1))) {
+                        Path parent = file.getParent();
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = parent.getNameCount() - 1; i >= 0; i--) {
+                            sb.insert(0, "/").insert(0, parent.getName(i).toString());
+                        }
+                        String dirPath = sb.length() > 0 ? sb.substring(1) : "";
+                        if (dirPath.equals(relativePath.substring(0, relativePath.lastIndexOf('/')).replace('/', java.io.File.separatorChar))
+                            || dirPath.equals(relativePath.substring(0, relativePath.lastIndexOf('/')))) {
+                            result[0] = file;
+                            return java.nio.file.FileVisitResult.TERMINATE;
+                        }
+                    }
+                    return java.nio.file.FileVisitResult.CONTINUE;
+                }
+            };
+            java.nio.file.Files.walkFileTree(root, java.util.EnumSet.noneOf(java.nio.file.FileVisitOption.class), 30, visitor);
+        } catch (IOException e) {
+            System.err.println("[dto-walker] Fallback search I/O error: " + e.getMessage());
+        }
+        if (result[0] != null) {
+            System.err.println("[dto-walker] Fallback resolved " + fqn + " -> " + result[0]);
+        }
+        return result[0];
     }
 
     private String shortName(String fqn) {

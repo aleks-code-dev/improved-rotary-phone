@@ -126,11 +126,12 @@ public class HelperJsonRpcServer {
                             if (sourceRoots.isEmpty() && projectRoot != null) {
                                 sourceRoots = detectSourceRoots(projectRoot);
                             }
+                            System.err.println("[helper] classpath:walkDto fqn=" + fqn + " projectRoot=" + projectRoot + " sourceRoots=" + sourceRoots);
                             CombinedTypeSolver solver = (projectRoot != null)
                                 ? ClasspathResolver.createSolver(sourceRoots, projectRoot)
                                 : ClasspathResolver.createSolver(sourceRoots);
                             DtoWalker walker = new DtoWalker(solver);
-                            String bodyJson = walker.walk(fqn, sourceRoots);
+                            String bodyJson = walker.walk(fqn, sourceRoots, projectRoot);
                             response = mapper.writeValueAsString(Map.of(
                                 "jsonrpc", "2.0", "id", id,
                                 "result", bodyJson
