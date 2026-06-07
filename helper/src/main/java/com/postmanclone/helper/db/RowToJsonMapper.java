@@ -1,5 +1,6 @@
 package com.postmanclone.helper.db;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.postmanclone.helper.db.type.TypeNormalizer;
@@ -175,7 +176,8 @@ public class RowToJsonMapper {
 
                             String typeName = rsMeta.getColumnTypeName(colIdx);
                             Object value = normalizer.normalize(rs, colIdx, typeName);
-                            bodyNode.put(dtoField, value != null ? value.toString() : null);
+                            JsonNode jsonNode = mapper.valueToTree(value);
+                            bodyNode.set(dtoField, jsonNode);
                             mappedColumns.add(dbCol);
 
                             Map<String, Object> m = new LinkedHashMap<>();

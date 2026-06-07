@@ -6,7 +6,7 @@ milestone_slug: ui-redesign
 status: in_progress
 stopped_at: Phase 8 complete, ready for Phase 9
 last_updated: "2026-06-07T21:18:00Z"
-last_activity: 2026-06-07 -- Quick 260607-wb9 complete: Generate from DB row should generate in camelCase
+last_activity: 2026-06-07 -- Quick 260607-vcx complete: DB row values should use proper types (number, boolean, string)
 progress:
   total_phases: 5
   completed_phases: 4
@@ -93,6 +93,7 @@ Items acknowledged and carried forward from previous milestone close:
 | 260607-2jb | Generate body from endpoint DTO + display DTO name | 2026-06-07 | eb06dd1 | [260607-2jb-okey-now-i-need-you-to-generate-the-requ](./quick/260607-2jb-okey-now-i-need-you-to-generate-the-requ/) |
 | 20260607-001 | Merge from DB button with camelCase matching and Monaco line-highlight fade-out | 2026-06-07 | 001-merge-from-db | [20260607-001-merge-from-db](./quick/20260607-001-merge-from-db/) |
 | 260607-wb9 | Generate from DB row should generate in camelCase | 2026-06-07 | 260607-wb9 | [260607-wb9-generate-from-db-row-should-generate-in-](./quick/260607-wb9-generate-from-db-row-should-generate-in-/) |
+| 260607-vcx | DB row values should use proper types (number, boolean, string) | 2026-06-07 | 260607-vcx | [260607-vcx-db-row-values-should-use-proper-types](./quick/260607-vcx-db-row-values-should-use-proper-types/) |
 
 ## Session Continuity
 
