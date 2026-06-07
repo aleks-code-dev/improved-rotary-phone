@@ -4,8 +4,10 @@ import { useRequest, type BodyMode, type RawContentType, type RequestBody } from
 import { useDbSelection } from '../../store/dbSelection';
 import { useEndpointsStore } from '../../store/endpoints';
 import { formatText } from '../../lib/monaco';
+import { toCamelCase, buildReverseCamelCaseMapping } from '../../lib/textCase';
 import { CycleWarningBanner } from '../BodyEditor/CycleWarningBanner';
 import { PillBar, type PillItem } from '../ui/PillBar';
+import './BodyTab.css';
 
 type BodyModeKey = 'none' | 'form-data' | 'url-encoded' | 'raw' | 'binary';
 
@@ -74,6 +76,67 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
   const [dtoError, setDtoError] = useState<string | null>(null);
   const [isGeneratingRow, setIsGeneratingRow] = useState(false);
   const [rowError, setRowError] = useState<string | null>(null);
+  const [isMerging, setIsMerging] = useState(false);
+  const [mergeError, setMergeError] = useState<string | null>(null);
+  const [lastMergeResult, setLastMergeResult] = useState<{ count: number; fields: string[] } | null>(null);
+
+  const editorRef = useRef<any>(null);
+  const monacoRef = useRef<any>(null);
+  const highlightDecorationRef = useRef<string[] | null>(null);
+
+  const handleEditorMount = useCallback((editor: any, monaco: any) => {
+    editorRef.current = editor;
+    monacoRef.current = monaco;
+    onEditorMount?.(editor, monaco);
+  }, [onEditorMount]);
+
+  /**
+   * Highlight matched field lines in the editor with a 3-second fade-out.
+   * Finds lines containing the given field names as JSON keys.
+   */
+  const highlightMatchedLines = useCallback((fieldNames: string[]) => {
+    const editor = editorRef.current;
+    const monaco = monacoRef.current;
+    if (!editor || !monaco || !fieldNames.length) return;
+
+    const model = editor.getModel();
+    if (!model) return;
+
+    const lineCount = model.getLineCount();
+    const decorations: any[] = [];
+
+    for (let line = 1; line <= lineCount; line++) {
+      const lineText = model.getLineContent(line);
+      for (const field of fieldNames) {
+        const pattern = `"${field}"`;
+        if (lineText.includes(pattern)) {
+          decorations.push({
+            range: new monaco.Range(line, 1, line, lineText.length + 1),
+            options: {
+              isWholeLine: true,
+              className: 'monaco-matched-field-highlight',
+            },
+          });
+          break;
+        }
+      }
+    }
+
+    // Remove previous highlight decorations
+    if (highlightDecorationRef.current) {
+      editor.deltaDecorations(highlightDecorationRef.current, []);
+    }
+
+    highlightDecorationRef.current = editor.deltaDecorations([], decorations);
+
+    // Clear after 3 seconds
+    setTimeout(() => {
+      if (highlightDecorationRef.current) {
+        editor.deltaDecorations(highlightDecorationRef.current, []);
+        highlightDecorationRef.current = null;
+      }
+    }, 3000);
+  }, []);
 
   const activeProjectPath = useEndpointsStore((s) => s.activeProjectPath);
 
@@ -108,7 +171,8 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
         projectRoot: activeProjectPath ?? undefined,
       });
       if (result.ok) {
-        setBody(tabId, { mode: 'raw', contentType: 'application/json', text: result.bodyJson });
+        const formatted = formatJson(result.bodyJson);
+        setBody(tabId, { mode: 'raw', contentType: 'application/json', text: formatted });
         if (result.cycleRefs?.length > 0) {
           setCycleRefs(result.cycleRefs);
         }
@@ -124,6 +188,77 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     }
   }, [spec, tabId, selectedSubtype, isGenerating, setBody, activeProjectPath]);
 
+  /**
+   * Merge DB row values into the existing DTO JSON body.
+   * - Converts DB field names (snake_case) to camelCase
+   * - Matches them with DTO JSON field names
+   * - Assigns DB values to matched DTO fields
+   * - Tracks which fields were matched for visual indicator
+   */
+  const handleMergeFromDb = useCallback(async () => {
+    if (!spec?.detectedDto?.fqn || !selectedRow || isMerging) return;
+    setIsMerging(true);
+    setMergeError(null);
+    setLastMergeResult(null);
+
+    try {
+      // Build reverse mapping: camelCase -> original DB key
+      const reverseMapping = buildReverseCamelCaseMapping(selectedRow.row);
+
+      // Get current DTO body as object
+      let dtoBody: Record<string, any> = {};
+      try {
+        if (body.mode === 'raw' && body.text) {
+          dtoBody = JSON.parse(body.text);
+        }
+      } catch {
+        setMergeError('Current body is not valid JSON. Generate from DTO first.');
+        return;
+      }
+
+      if (typeof dtoBody !== 'object' || dtoBody === null || Array.isArray(dtoBody)) {
+        setMergeError('Current body is not a valid JSON object. Generate from DTO first.');
+        return;
+      }
+
+      // Merge loop: for each DTO field, try to find matching DB value
+      const matchedFields: string[] = [];
+      const mergedBody = { ...dtoBody };
+
+      for (const dtoKey of Object.keys(dtoBody)) {
+        const camelDbKey = toCamelCase(dtoKey);
+        const originalDbKey = reverseMapping[camelDbKey];
+
+        if (originalDbKey !== undefined && originalDbKey in selectedRow.row) {
+          const dbValue = selectedRow.row[originalDbKey];
+          if (dbValue !== null && dbValue !== undefined) {
+            mergedBody[dtoKey] = dbValue;
+            matchedFields.push(dtoKey);
+          }
+        }
+      }
+
+      const formatted = JSON.stringify(mergedBody, null, 2);
+
+      setBody(tabId, {
+        mode: 'raw',
+        contentType: 'application/json',
+        text: formatted,
+      });
+
+      setLastMergeResult({ count: matchedFields.length, fields: matchedFields });
+
+      // Highlight matched lines in editor after React re-render
+      setTimeout(() => {
+        highlightMatchedLines(matchedFields);
+      }, 50);
+    } catch (err: any) {
+      setMergeError(err?.message ?? 'Merge from DB failed');
+    } finally {
+      setIsMerging(false);
+    }
+  }, [spec, selectedRow, isMerging, body, tabId, setBody]);
+
   const handleGenerateFromRow = useCallback(async () => {
     if (!spec?.detectedDto?.fqn || !selectedConnectionId || !selectedTableName || !selectedRow || isGeneratingRow) return;
     setIsGeneratingRow(true);
@@ -136,7 +271,8 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
         dtoFqn: spec.detectedDto.fqn,
       });
       if (result.ok) {
-        setBody(tabId, { mode: 'raw', contentType: 'application/json', text: result.bodyJson });
+        const formatted = formatJson(result.bodyJson);
+        setBody(tabId, { mode: 'raw', contentType: 'application/json', text: formatted });
       } else {
         setRowError((result as any)?.error ?? 'Failed to generate from row');
       }
@@ -224,6 +360,43 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
               )}
               {selectedConnectionId && selectedTableName && selectedRow && (
                 <>
+                  {/* Merge from DB — client-side merge, no helper needed */}
+                  <button
+                    onClick={handleMergeFromDb}
+                    disabled={isMerging || !body.text}
+                    title={!body.text ? 'Generate a DTO body first' : 'Map DB row values into the current DTO body (camelCase matching)'}
+                    style={{
+                      ...formatBtnStyle,
+                      color: 'var(--ds-success)',
+                      borderColor: 'var(--ds-success)',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {isMerging ? 'Merging…' : 'Merge from DB'}
+                  </button>
+                  {mergeError && (
+                    <span style={{ color: 'var(--ds-method-delete)', fontSize: 11, marginLeft: 'var(--space-2)' }} title={mergeError}>
+                      {mergeError}
+                    </span>
+                  )}
+                  {lastMergeResult && !mergeError && (
+                    <span
+                      style={{
+                        background: 'var(--ds-success)',
+                        color: '#fff',
+                        fontSize: 'var(--ds-text-2xs)',
+                        fontWeight: 600,
+                        padding: '2px 6px',
+                        borderRadius: 'var(--ds-radius-full, 999px)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        marginLeft: 'var(--space-2)',
+                      }}
+                      title={`Matched fields: ${lastMergeResult.fields.join(', ')}`}
+                    >
+                      {lastMergeResult.count} matched
+                    </span>
+                  )}
                   <button
                     onClick={handleGenerateFromRow}
                     disabled={!helperOnline || isGeneratingRow}
@@ -268,9 +441,7 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
             language={body.contentType === 'application/json' ? 'json' : body.contentType === 'application/xml' ? 'xml' : body.contentType === 'application/graphql' ? 'graphql' : 'plaintext'}
             value={body.text}
             onChange={(value) => setBody(tabId, { ...body, text: value ?? '' })}
-            onMount={(editor, monaco) => {
-              onEditorMount?.(editor, monaco);
-            }}
+            onMount={handleEditorMount}
             theme="vs-dark"
             options={{
               minimap: { enabled: false },
@@ -452,6 +623,14 @@ function BinaryPicker({ filePath, contentType, onSelect, onContentTypeChange }: 
       </div>
     </div>
   );
+}
+
+function formatJson(json: string): string {
+  try {
+    return JSON.stringify(JSON.parse(json), null, 2);
+  } catch {
+    return json;
+  }
 }
 
 const cellStyle: React.CSSProperties = { padding: 'var(--space-1) var(--space-2)', fontSize: 12 };

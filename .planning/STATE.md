@@ -6,7 +6,7 @@ milestone_slug: ui-redesign
 status: in_progress
 stopped_at: Phase 8 complete, ready for Phase 9
 last_updated: "2026-06-07T01:55:00Z"
-last_activity: 2026-06-07 -- Quick 260607-2jb complete: Generate body from endpoint DTO + display DTO name (EndpointsTree.handleEndpointClick now sets RequestSpec.detectedDto from requestBodyFqn; BodyTab renders a compact [DTO] SimpleName badge in the toolbar with the full FQN on hover); 82/82 tests pass, npm run build green
+last_activity: 2026-06-07 -- Quick 20260607-001 complete: Merge from DB button with camelCase matching and Monaco line-highlight fade-out
 progress:
   total_phases: 5
   completed_phases: 4
@@ -91,6 +91,7 @@ Items acknowledged and carried forward from previous milestone close:
 | 260607-0in | Fix DB panel not resizeable, Load Tables no-op, and 'Not connected' errors | 2026-06-07 | 3f011dc | [260607-0in-db-ui-is-bad-panel-is-not-resizeable-loa](./quick/260607-0in-db-ui-is-bad-panel-is-not-resizeable-loa/) |
 | 260607-1j5 | Add 'Generate from DB row' button in BodyTab | 2026-06-07 | 7beaf05 | [260607-1j5-add-generate-from-db-row-button-in-bodyt](./quick/260607-1j5-add-generate-from-db-row-button-in-bodyt/) |
 | 260607-2jb | Generate body from endpoint DTO + display DTO name | 2026-06-07 | eb06dd1 | [260607-2jb-okey-now-i-need-you-to-generate-the-requ](./quick/260607-2jb-okey-now-i-need-you-to-generate-the-requ/) |
+| 20260607-001 | Merge from DB button with camelCase matching and Monaco line-highlight fade-out | 2026-06-07 | 001-merge-from-db | [20260607-001-merge-from-db](./quick/20260607-001-merge-from-db/) |
 
 ## Session Continuity
 
