@@ -128,19 +128,6 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     } catch { /* invalid JSON, skip */ }
   }, [fkTargetKey, body, tabId, setBody]);
 
-  const handleEditorMount = useCallback((editor: any, monaco: any) => {
-    editorRef.current = editor;
-    monacoRef.current = monaco;
-    onEditorMount?.(editor, monaco);
-
-    // Compute FK badges after layout settles
-    setTimeout(() => recomputeFkBadges(), 100);
-
-    // Recompute on scroll and content changes
-    editor.onDidScrollChange(() => recomputeFkBadges());
-    editor.onDidChangeModelContent(() => recomputeFkBadges());
-  }, [onEditorMount, recomputeFkBadges]);
-
   // Keep fkChannelRef in sync with the latest handleFkLookup
   useEffect(() => {
     fkChannelRef.current = (key: string) => handleFkLookup(key);
@@ -157,7 +144,10 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
       return;
     }
 
-    const lineHeight = editor.getOption(editor.EditorOption.lineHeight);
+    // lineHeight option = 6, fallback to 20px
+    const lineHeight = (() => {
+      try { return editor.getOption(6); } catch { return 20; }
+    })();
     const scrollTop = editor.getScrollTop();
     const container = editorContainerRef.current;
     if (!container) return;
@@ -181,6 +171,19 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
 
     setFkBadges(badges);
   }, [body.mode, body.contentType]);
+
+  const handleEditorMount = useCallback((editor: any, monaco: any) => {
+    editorRef.current = editor;
+    monacoRef.current = monaco;
+    onEditorMount?.(editor, monaco);
+
+    // Compute FK badges after layout settles
+    setTimeout(() => recomputeFkBadges(), 100);
+
+    // Recompute on scroll and content changes
+    editor.onDidScrollChange(() => recomputeFkBadges());
+    editor.onDidChangeModelContent(() => recomputeFkBadges());
+  }, [onEditorMount, recomputeFkBadges]);
 
   // Recompute when body text changes
   useEffect(() => {
