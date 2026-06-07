@@ -93,7 +93,7 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
   const monacoRef = useRef<any>(null);
   const highlightDecorationRef = useRef<string[] | null>(null);
   const fkChannelRef = useRef<((key: string) => void) | null>(null);
-  const fkDecorationsRef = useRef<any>(null);
+  const fkDecorationsRef = useRef<string[] | null>(null);
   const fkLineMapRef = useRef<Map<number, string>>(new Map());
 
   const handleFkLookup = useCallback(async (key: string) => {
@@ -141,7 +141,10 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
 
     const model = editor.getModel();
     if (!model || body.mode !== 'raw' || body.contentType !== 'application/json') {
-      fkDecorationsRef.current?.clear();
+      if (fkDecorationsRef.current) {
+        editor.deltaDecorations(fkDecorationsRef.current, []);
+        fkDecorationsRef.current = null;
+      }
       fkLineMapRef.current.clear();
       return;
     }
@@ -159,9 +162,9 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
 
       fkMap.set(line, key);
       decorations.push({
-        range: new monaco.Range(line, 1, line, 1),
+        range: new monaco.Range(line, 1, line, 2),
         options: {
-          isWholeLine: false,
+          isWholeLine: true,
           glyphMarginClassName: 'fk-glyph-search',
           glyphMarginHoverMessage: { value: `**Lookup ${key}**\nClick to search DB` },
         },
@@ -169,8 +172,11 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     }
 
     fkLineMapRef.current = fkMap;
-    fkDecorationsRef.current?.clear();
-    fkDecorationsRef.current = editor.createDecorationsCollection(decorations);
+    // Remove old, apply new
+    if (fkDecorationsRef.current) {
+      editor.deltaDecorations(fkDecorationsRef.current, []);
+    }
+    fkDecorationsRef.current = editor.deltaDecorations([], decorations);
   }, [body.mode, body.contentType]);
 
   const handleEditorMount = useCallback((editor: any, monaco: any) => {
@@ -555,6 +561,7 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
               fontSize: 13,
               lineNumbers: 'on',
               glyphMargin: true,
+              lineDecorationsWidth: 16,
               scrollBeyondLastLine: false,
               wordWrap: 'on',
               tabSize: 2,
