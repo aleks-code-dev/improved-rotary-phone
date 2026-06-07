@@ -10,10 +10,10 @@ import com.postmanclone.helper.db.TableEnumerator;
 import com.postmanclone.helper.db.RowToJsonMapper;
 import com.postmanclone.helper.db.ColumnFieldNameMatcher;
 import com.postmanclone.helper.db.type.H2TypeNormalizer;
-import com.postmanclone.helper.scanner.EndpointScanner;
 import com.postmanclone.helper.scanner.ClasspathResolver;
-import com.postmanclone.helper.scanner.MavenModuleDetector;
+import com.postmanclone.helper.scanner.EndpointScanner;
 import com.postmanclone.helper.scanner.GradleModuleDetector;
+import com.postmanclone.helper.scanner.MavenModuleDetector;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 
 import java.io.*;
@@ -78,19 +78,12 @@ public class HelperJsonRpcServer {
                             JsonNode params = request.get("params");
                             String projectRoot = params.get("projectRoot").asText();
                             java.nio.file.Path projectPath = java.nio.file.Paths.get(projectRoot);
+                            System.err.println("[helper] scanner:scan received, projectRoot=" + projectRoot);
 
-                            // Detect source roots
-                            java.util.List<java.nio.file.Path> sourceRoots = new java.util.ArrayList<>();
-                            sourceRoots.addAll(MavenModuleDetector.findModuleRoots(projectPath));
-                            if (sourceRoots.isEmpty()) {
-                                sourceRoots.addAll(GradleModuleDetector.findModuleRoots(projectPath));
-                            }
-
-                            // Create solver and scanner
-                            CombinedTypeSolver solver = ClasspathResolver.createSolver(sourceRoots, projectPath);
-                            EndpointScanner scanner = new EndpointScanner(solver);
+                            EndpointScanner scanner = new EndpointScanner();
                             ObjectNode result = scanner.scan(projectPath);
 
+                            System.err.println("[helper] scanner:scan done, ok=" + result.get("ok") + " files=" + result.get("totalFiles") + " endpoints=" + result.get("totalEndpoints"));
                             response = mapper.writeValueAsString(Map.of(
                                 "jsonrpc", "2.0", "id", id,
                                 "result", result
@@ -120,13 +113,22 @@ public class HelperJsonRpcServer {
                         try {
                             JsonNode params = request.get("params");
                             String fqn = params.get("fqn").asText();
+                            Path projectRoot = null;
                             List<Path> sourceRoots = new ArrayList<>();
+                            if (params.has("projectRoot") && !params.get("projectRoot").asText().isEmpty()) {
+                                projectRoot = Paths.get(params.get("projectRoot").asText());
+                            }
                             if (params.has("classpathRoots")) {
                                 for (JsonNode root : params.get("classpathRoots")) {
                                     sourceRoots.add(Paths.get(root.asText()));
                                 }
                             }
-                            CombinedTypeSolver solver = ParserConfig.createSolver(sourceRoots);
+                            if (sourceRoots.isEmpty() && projectRoot != null) {
+                                sourceRoots = detectSourceRoots(projectRoot);
+                            }
+                            CombinedTypeSolver solver = (projectRoot != null)
+                                ? ClasspathResolver.createSolver(sourceRoots, projectRoot)
+                                : ClasspathResolver.createSolver(sourceRoots);
                             DtoWalker walker = new DtoWalker(solver);
                             String bodyJson = walker.walk(fqn, sourceRoots);
                             response = mapper.writeValueAsString(Map.of(
@@ -287,5 +289,11 @@ public class HelperJsonRpcServer {
         } catch (IOException e) {
             // EOF reached
         }
+    }
+
+    private List<Path> detectSourceRoots(Path projectRoot) {
+        List<Path> roots = MavenModuleDetector.findModuleRoots(projectRoot);
+        if (!roots.isEmpty()) return roots;
+        return GradleModuleDetector.findModuleRoots(projectRoot);
     }
 }

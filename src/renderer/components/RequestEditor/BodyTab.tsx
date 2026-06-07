@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import Editor from '@monaco-editor/react';
 import { useRequest, type BodyMode, type RawContentType, type RequestBody } from '../../state/useRequest';
 import { useDbSelection } from '../../store/dbSelection';
+import { useEndpointsStore } from '../../store/endpoints';
 import { formatText } from '../../lib/monaco';
 import { CycleWarningBanner } from '../BodyEditor/CycleWarningBanner';
 import { PillBar, type PillItem } from '../ui/PillBar';
@@ -70,8 +71,11 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
   const [cycleRefs, setCycleRefs] = useState<string[]>([]);
   const [selectedSubtype, setSelectedSubtype] = useState<string | null>(null);
   const [helperOnline, setHelperOnline] = useState(false);
+  const [dtoError, setDtoError] = useState<string | null>(null);
   const [isGeneratingRow, setIsGeneratingRow] = useState(false);
   const [rowError, setRowError] = useState<string | null>(null);
+
+  const activeProjectPath = useEndpointsStore((s) => s.activeProjectPath);
 
   useEffect(() => {
     window.api.helper.getStatus().then((s: any) => setHelperOnline(s.state === 'healthy'));
@@ -95,24 +99,30 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     if (!spec?.detectedDto || isGenerating) return;
     setIsGenerating(true);
     setCycleRefs([]);
+    setDtoError(null);
     try {
       const result = await window.api.body.generateDto({
         requestId: tabId,
         dtoFqn: spec.detectedDto.fqn,
         subtypeName: selectedSubtype ?? undefined,
+        projectRoot: activeProjectPath ?? undefined,
       });
       if (result.ok) {
         setBody(tabId, { mode: 'raw', contentType: 'application/json', text: result.bodyJson });
         if (result.cycleRefs?.length > 0) {
           setCycleRefs(result.cycleRefs);
         }
+      } else {
+        const warnings = (result.warnings ?? []) as Array<{ code: string; message: string }>;
+        const msg = warnings.map((w) => w.message).join('; ') || 'DTO generation failed';
+        setDtoError(msg);
       }
-    } catch {
-      // Error handled silently — button re-enables
+    } catch (err: any) {
+      setDtoError(err?.message ?? 'DTO generation failed');
     } finally {
       setIsGenerating(false);
     }
-  }, [spec, tabId, selectedSubtype, isGenerating, setBody]);
+  }, [spec, tabId, selectedSubtype, isGenerating, setBody, activeProjectPath]);
 
   const handleGenerateFromRow = useCallback(async () => {
     if (!spec?.detectedDto?.fqn || !selectedConnectionId || !selectedTableName || !selectedRow || isGeneratingRow) return;
@@ -207,6 +217,11 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
               >
                 {isGenerating ? 'Generating...' : 'Generate from DTO'}
               </button>
+              {dtoError && (
+                <span style={{ color: 'var(--ds-method-delete)', fontSize: 11, marginLeft: 'var(--space-2)' }} title={dtoError}>
+                  {dtoError}
+                </span>
+              )}
               {selectedConnectionId && selectedTableName && selectedRow && (
                 <>
                   <button

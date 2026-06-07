@@ -66,7 +66,7 @@ export interface WindowApi {
     save: (args: { openTabs: Array<{id: string; method: string; url: string; isDirty?: boolean}>; activeTabId: string | null }) => Promise<any>;
   };
   body: {
-    generateDto: (args: { requestId: string; dtoFqn: string; subtypeName?: string }) => Promise<any>;
+    generateDto: (args: { requestId: string; dtoFqn: string; subtypeName?: string; projectRoot?: string }) => Promise<any>;
   };
   db: {
     connections: {

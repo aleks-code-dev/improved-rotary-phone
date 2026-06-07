@@ -503,7 +503,10 @@ export function registerIpcRouter() {
     const client = supervisor.getClient();
     if (!client) return { ok: false, bodyJson: '', warnings: [{ code: 'HELPER_OFFLINE', message: 'Helper is offline' }], cycleRefs: [] };
     try {
-      const bodyJson = await client.request('classpath:walkDto', { fqn: parsed.dtoFqn });
+      const bodyJson = await client.request('classpath:walkDto', {
+        fqn: parsed.dtoFqn,
+        ...(parsed.projectRoot ? { projectRoot: parsed.projectRoot } : {}),
+      });
       const cycleRefs: string[] = [];
       try {
         const parsed_ = JSON.parse(bodyJson);

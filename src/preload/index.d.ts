@@ -157,6 +157,7 @@ export interface WindowApi {
             requestId: string;
             dtoFqn: string;
             subtypeName?: string;
+            projectRoot?: string;
         }) => Promise<any>;
     };
     project: {

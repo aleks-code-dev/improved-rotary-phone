@@ -240,6 +240,7 @@ export const DtoGenerateArgsSchema = z.object({
   requestId: z.string().uuid(),
   dtoFqn: z.string().min(1),
   subtypeName: z.string().optional(),
+  projectRoot: z.string().optional(),
 });
 export const DtoGenerateResultSchema = z.object({
   ok: z.boolean(),
