@@ -1,6 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import Editor from '@monaco-editor/react';
-import type { editor as MonacoEditor } from 'monaco-editor';
 import { useRequest, type BodyMode, type RawContentType, type RequestBody } from '../../state/useRequest';
 import { useDbSelection } from '../../store/dbSelection';
 import { useEndpointsStore } from '../../store/endpoints';
@@ -93,7 +92,6 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
   const highlightDecorationRef = useRef<string[] | null>(null);
-  const fkLensDisposableRef = useRef<MonacoEditor.IDisposable | null>(null);
   const fkChannelRef = useRef<((key: string) => void) | null>(null);
 
   const handleFkLookup = useCallback(async (key: string) => {
@@ -139,55 +137,60 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     fkChannelRef.current = (key: string) => handleFkLookup(key);
   }, [handleFkLookup]);
 
-  // Register Monaco CodeLens provider for FK fields (inline buttons at end of line)
+  // Render inline "lookup" badges on FK lines + click handler
   useEffect(() => {
     const editor = editorRef.current;
     const monaco = monacoRef.current;
     if (!editor || !monaco) return;
     if (body.mode !== 'raw' || body.contentType !== 'application/json') return;
 
-    // Dispose previous provider
-    fkLensDisposableRef.current?.dispose();
+    const model = editor.getModel();
+    if (!model) return;
 
-    const languageId = 'json';
-    fkLensDisposableRef.current = monaco.languages.registerCodeLensProvider(languageId, {
-      provideCodeLenses: (model: any) => {
-        const lenses: any[] = [];
-        const lineCount = model.getLineCount();
+    // Build FK line map: line number → key
+    const fkLineMap = new Map<number, string>();
+    const lineCount = model.getLineCount();
+    for (let line = 1; line <= lineCount; line++) {
+      const lineText = model.getLineContent(line);
+      const match = lineText.match(/^  "(\w+)"\s*:/);
+      if (!match) continue;
+      const key = match[1];
+      if (isFkField(key)) fkLineMap.set(line, key);
+    }
 
-        for (let line = 1; line <= lineCount; line++) {
-          const lineText = model.getLineContent(line);
-          // Match root-level FK keys: "  "key": value  (2-space indent, quoted key)
-          const match = lineText.match(/^  "(\w+)"\s*:/);
-          if (!match) continue;
-          const key = match[1];
-          if (!isFkField(key)) continue;
+    // Add inline "after" decorations at end of FK lines
+    const decorations = [];
+    for (const [line, key] of fkLineMap) {
+      const lineLen = model.getLineContent(line).length;
+      decorations.push({
+        range: new monaco.Range(line, lineLen, line, lineLen),
+        options: {
+          after: {
+            content: '  🔍 lookup',
+            inlineClassName: 'fk-lookup-badge',
+            cursorStops: [monaco.editor.InjectedTextCursorStops.None],
+          },
+        },
+      });
+    }
 
-          const lineLen = lineText.length;
-          lenses.push({
-            range: new monaco.Range(line, lineLen, line, lineLen),
-            command: {
-              id: 'fkLookup.open',
-              title: `lookup`,
-              arguments: [key],
-            },
-          });
-        }
+    const collection = editor.createDecorationsCollection(decorations);
 
-        return { lenses, dispose: () => {} };
-      },
-      dispose: () => {},
-    });
-
-    // Register the command via editor.addCommand
-    const cmdDisposable = editor.addCommand('fkLookup.open', (_editor: any, key: string) => {
+    // Click handler: check if click is on a FK line
+    const clickHandler = editor.onMouseDown((e: any) => {
+      const pos = e.position;
+      if (!pos) return;
+      const key = fkLineMap.get(pos.lineNumber);
+      if (!key) return;
+      // Only trigger if click is near end of line (past the FK value)
+      const lineText = model.getLineContent(pos.lineNumber);
+      if (pos.column < lineText.length - 3) return;
       fkChannelRef.current?.(key);
     });
 
     return () => {
-      fkLensDisposableRef.current?.dispose();
-      fkLensDisposableRef.current = null;
-      // editor.addCommand commands are cleaned up with the editor
+      clickHandler.dispose();
+      collection.clear();
     };
   }, [body]);
 

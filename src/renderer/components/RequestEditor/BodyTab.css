@@ -14,3 +14,19 @@
 .monaco-matched-field-highlight {
   animation: highlightFadeOut 3s ease-out forwards !important;
 }
+
+/* FK lookup inline badge at end of FK lines */
+.fk-lookup-badge {
+  color: var(--ds-warning, #f5a623) !important;
+  font-size: 11px !important;
+  font-style: normal !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.fk-lookup-badge:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
