@@ -184,17 +184,23 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     monacoRef.current = monaco;
     onEditorMount?.(editor, monaco);
 
-    // Click handler for glyph margin — targetType 2 = GUTTER_GLYPH_MARGIN
-    editor.onMouseDown((e: any) => {
-      if (e.targetType !== 2) return;
-      const key = fkLineMapRef.current.get(e.position.lineNumber);
-      if (key) fkChannelRef.current?.(key);
-    });
-
     // Initial decorations after layout
     setTimeout(updateFkDecorations, 100);
     editor.onDidChangeModelContent(() => updateFkDecorations());
   }, [onEditorMount, updateFkDecorations]);
+
+  // Click handler for glyph margin (separate effect — survives re-renders)
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const disposable = editor.onMouseDown((e: any) => {
+      // Glyph margin clicks have column <= 3 (leftmost gutter area)
+      if (e.position && e.position.column > 3) return;
+      const key = fkLineMapRef.current.get(e.position?.lineNumber);
+      if (key) fkChannelRef.current?.(key);
+    });
+    return () => disposable.dispose();
+  });
 
   // Recompute FK decorations when body text changes
   useEffect(() => {
