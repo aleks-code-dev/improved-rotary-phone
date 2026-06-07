@@ -1,10 +1,12 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import Editor from '@monaco-editor/react';
 import { useRequest, type BodyMode, type RawContentType, type RequestBody } from '../../state/useRequest';
 import { useDbSelection } from '../../store/dbSelection';
 import { useEndpointsStore } from '../../store/endpoints';
 import { formatText } from '../../lib/monaco';
 import { toCamelCase, buildReverseCamelCaseMapping } from '../../lib/textCase';
+import { isFkField, toSnakeCaseFk } from '../../lib/fkDetect';
+import { FkLookupDialog } from '../Database/FkLookupDialog';
 import { CycleWarningBanner } from '../BodyEditor/CycleWarningBanner';
 import { PillBar, type PillItem } from '../ui/PillBar';
 import './BodyTab.css';
@@ -80,9 +82,60 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
   const [mergeError, setMergeError] = useState<string | null>(null);
   const [lastMergeResult, setLastMergeResult] = useState<{ count: number; fields: string[] } | null>(null);
 
+  // FK lookup state
+  const [fkDialogOpen, setFkDialogOpen] = useState(false);
+  const [fkTargetKey, setFkTargetKey] = useState<string | null>(null);
+  const [fkSearchTerm, setFkSearchTerm] = useState('');
+  const [fkTables, setFkTables] = useState<Array<{ name: string; schema: string | null; columnCount: number; rowCountEstimate: number }>>([]);
+  const [fkTablesLoading, setFkTablesLoading] = useState(false);
+
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
   const highlightDecorationRef = useRef<string[] | null>(null);
+
+  // Detect FK fields from the current JSON body
+  const fkFields = useMemo(() => {
+    if (body.mode !== 'raw' || body.contentType !== 'application/json' || !body.text) return [];
+    try {
+      const parsed = JSON.parse(body.text);
+      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return [];
+      return Object.keys(parsed).filter(isFkField);
+    } catch {
+      return [];
+    }
+  }, [body]);
+
+  const handleFkLookup = useCallback(async (key: string) => {
+    setFkTargetKey(key);
+    setFkSearchTerm(toSnakeCaseFk(key));
+    setFkDialogOpen(true);
+    setFkTables([]);
+    setFkTablesLoading(true);
+    if (selectedConnectionId) {
+      try {
+        const result = await window.api.db.listTables({ connectionId: selectedConnectionId });
+        setFkTables(result ?? []);
+      } catch {
+        setFkTables([]);
+      } finally {
+        setFkTablesLoading(false);
+      }
+    } else {
+      setFkTablesLoading(false);
+    }
+  }, [selectedConnectionId]);
+
+  const handleFkRowSelected = useCallback((row: Record<string, unknown>) => {
+    if (!fkTargetKey || body.mode !== 'raw') return;
+    try {
+      const parsed = JSON.parse(body.text);
+      // Use the first column value as the FK value
+      const firstValue = Object.values(row)[0];
+      parsed[fkTargetKey] = firstValue ?? null;
+      const formatted = JSON.stringify(parsed, null, 2);
+      setBody(tabId, { ...body, text: formatted });
+    } catch { /* invalid JSON, skip */ }
+  }, [fkTargetKey, body, tabId, setBody]);
 
   const handleEditorMount = useCallback((editor: any, monaco: any) => {
     editorRef.current = editor;
@@ -107,6 +160,8 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
 
     for (let line = 1; line <= lineCount; line++) {
       const lineText = model.getLineContent(line);
+      // Only match root-level keys: line must start with exactly 2 spaces + quote
+      if (!lineText.match(/^  "/)) continue;
       for (const field of fieldNames) {
         const pattern = `"${field}"`;
         if (lineText.includes(pattern)) {
@@ -302,6 +357,29 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
           </select>
           <button onClick={handleFormat} style={formatBtnStyle}>Format</button>
 
+          {/* FK lookup buttons */}
+          {body.contentType === 'application/json' && fkFields.map((key) => (
+            <button
+              key={key}
+              onClick={() => handleFkLookup(key)}
+              title={
+                selectedConnectionId
+                  ? `Lookup ${key} value from DB`
+                  : 'Connect to a DB first'
+              }
+              style={{
+                ...formatBtnStyle,
+                color: selectedConnectionId ? 'var(--ds-warning, #f5a623)' : 'var(--ds-text-muted)',
+                borderColor: selectedConnectionId ? 'var(--ds-warning, #f5a623)' : 'var(--ds-border)',
+                fontWeight: 600,
+                opacity: selectedConnectionId ? 1 : 0.6,
+                cursor: selectedConnectionId ? 'pointer' : 'not-allowed',
+              }}
+            >
+              🔍 {key}
+            </button>
+          ))}
+
           {/* DTO Generate button — visible when DTO detected */}
           {spec?.detectedDto && body.contentType === 'application/json' && (
             <>
@@ -495,6 +573,17 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
           onContentTypeChange={(ct) => setBody(tabId, { ...body, contentType: ct })}
         />
       )}
+
+      {/* FK Lookup Dialog */}
+      <FkLookupDialog
+        isOpen={fkDialogOpen}
+        onClose={() => setFkDialogOpen(false)}
+        onSelectRow={handleFkRowSelected}
+        connectionId={selectedConnectionId}
+        searchTerm={fkSearchTerm}
+        tables={fkTables}
+        loadingTables={fkTablesLoading}
+      />
     </div>
   );
 }
