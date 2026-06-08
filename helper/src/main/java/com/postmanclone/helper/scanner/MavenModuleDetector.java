@@ -26,32 +26,43 @@ public class MavenModuleDetector {
      */
     public static List<Path> findModuleRoots(Path projectRoot) {
         List<Path> roots = new ArrayList<>();
+        System.err.println("[scanner] Maven: looking for pom.xml in " + projectRoot);
 
         Path pomXml = projectRoot.resolve("pom.xml");
         if (Files.exists(pomXml)) {
+            System.err.println("[scanner] Maven: found pom.xml, parsing for modules...");
             try {
                 String content = Files.readString(pomXml, StandardCharsets.UTF_8);
                 Matcher matcher = MODULE_PATTERN.matcher(content);
                 while (matcher.find()) {
                     String moduleName = matcher.group(1).trim();
                     Path moduleRoot = projectRoot.resolve(moduleName).resolve("src/main/java");
+                    System.err.println("[scanner] Maven: found module '" + moduleName + "' -> " + moduleRoot + " (exists=" + Files.exists(moduleRoot) + ")");
                     if (Files.exists(moduleRoot)) {
                         roots.add(moduleRoot);
                     }
                 }
+                if (roots.isEmpty()) {
+                    System.err.println("[scanner] Maven: no <modules> found in pom.xml");
+                }
             } catch (IOException e) {
-                // Fall through to single-module fallback
+                System.err.println("[scanner] Maven: failed to read pom.xml: " + e.getMessage());
             }
+        } else {
+            System.err.println("[scanner] Maven: no pom.xml found");
         }
 
         // Fallback: if no modules found, check for single-module src/main/java
         if (roots.isEmpty()) {
             Path srcMain = projectRoot.resolve("src/main/java");
-            if (Files.exists(srcMain)) {
+            boolean exists = Files.exists(srcMain);
+            System.err.println("[scanner] Maven: fallback single-module src/main/java exists=" + exists);
+            if (exists) {
                 roots.add(srcMain);
             }
         }
 
+        System.err.println("[scanner] Maven: found " + roots.size() + " source root(s): " + roots);
         return roots;
     }
 }

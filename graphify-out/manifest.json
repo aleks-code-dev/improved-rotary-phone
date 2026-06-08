@@ -1,0 +1,1197 @@
+{
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\opencode.json": {
+    "mtime": 1780749792.5608566,
+    "ast_hash": "1efe24ecf938911d4f23e4b1c6ec91f7",
+    "semantic_hash": "1efe24ecf938911d4f23e4b1c6ec91f7"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\package.json": {
+    "mtime": 1780749669.0861263,
+    "ast_hash": "d3ab821609ec487b22aa5b0027f5f400",
+    "semantic_hash": "d3ab821609ec487b22aa5b0027f5f400"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\plugins\\graphify.js": {
+    "mtime": 1780749818.9239552,
+    "ast_hash": "32b67963417a30cb80544e0b2a56a98d",
+    "semantic_hash": "32b67963417a30cb80544e0b2a56a98d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\config.json": {
+    "mtime": 1780596148.972634,
+    "ast_hash": "653c7c2a060b80e9ad4d7483f8bc5c3e",
+    "semantic_hash": "653c7c2a060b80e9ad4d7483f8bc5c3e"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\electron.vite.config.ts": {
+    "mtime": 1780601407.34814,
+    "ast_hash": "be29a8df7e59922c75e7b8ed15aefc72",
+    "semantic_hash": "be29a8df7e59922c75e7b8ed15aefc72"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\build.gradle.kts": {
+    "mtime": 1780699189.4604292,
+    "ast_hash": "0b88d88d95962c13529857bd153fa602",
+    "semantic_hash": "0b88d88d95962c13529857bd153fa602"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\gradlew": {
+    "mtime": 1780590589.3102448,
+    "ast_hash": "45bf2667b1fbec0e07e42808dc662b6b",
+    "semantic_hash": "45bf2667b1fbec0e07e42808dc662b6b"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\settings.gradle.kts": {
+    "mtime": 1780526691.17056,
+    "ast_hash": "afe0e576f16c78c5222d02700c232e3a",
+    "semantic_hash": "afe0e576f16c78c5222d02700c232e3a"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\HelperJsonRpcServer.java": {
+    "mtime": 1780699479.1363108,
+    "ast_hash": "47e36f24f8fb28a814ddc80187781a49",
+    "semantic_hash": "47e36f24f8fb28a814ddc80187781a49"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\Main.java": {
+    "mtime": 1780527126.943545,
+    "ast_hash": "d75f301cc4f3e33048cf34a9e01238c2",
+    "semantic_hash": "d75f301cc4f3e33048cf34a9e01238c2"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\config\\ParserConfig.java": {
+    "mtime": 1780698491.651717,
+    "ast_hash": "c3d037f6b505a3f7fe6dfb19c116c8f8",
+    "semantic_hash": "c3d037f6b505a3f7fe6dfb19c116c8f8"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\db\\ColumnFieldNameMatcher.java": {
+    "mtime": 1780699394.4871469,
+    "ast_hash": "41673416ad873d3741f5d8125b324cf7",
+    "semantic_hash": "41673416ad873d3741f5d8125b324cf7"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\db\\ConnectionPoolFactory.java": {
+    "mtime": 1780699211.7713225,
+    "ast_hash": "056894ff3bc00c9cc6f06d9bd6acf51d",
+    "semantic_hash": "056894ff3bc00c9cc6f06d9bd6acf51d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\db\\DbConnectionManager.java": {
+    "mtime": 1780699215.6258667,
+    "ast_hash": "c336d20d5481d754ba3d2f20cc46e357",
+    "semantic_hash": "c336d20d5481d754ba3d2f20cc46e357"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\db\\RowToJsonMapper.java": {
+    "mtime": 1780699414.4633143,
+    "ast_hash": "08991777e5fe0715f5e78318d09e9abd",
+    "semantic_hash": "08991777e5fe0715f5e78318d09e9abd"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\db\\TableEnumerator.java": {
+    "mtime": 1780699221.1111352,
+    "ast_hash": "c3d4742aa6be84ae6594f7df104dd167",
+    "semantic_hash": "c3d4742aa6be84ae6594f7df104dd167"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\db\\type\\H2TypeNormalizer.java": {
+    "mtime": 1780699204.9890678,
+    "ast_hash": "cdfa00e099c007f382af7da2764cc072",
+    "semantic_hash": "cdfa00e099c007f382af7da2764cc072"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\db\\type\\MySqlTypeNormalizer.java": {
+    "mtime": 1780699199.9482949,
+    "ast_hash": "b8de3860dca520e492b31ab38ad2b9ec",
+    "semantic_hash": "b8de3860dca520e492b31ab38ad2b9ec"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\db\\type\\OracleTypeNormalizer.java": {
+    "mtime": 1780699202.9267216,
+    "ast_hash": "e8b607139adba5488b8e7f76fef7ade3",
+    "semantic_hash": "e8b607139adba5488b8e7f76fef7ade3"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\db\\type\\PostgresTypeNormalizer.java": {
+    "mtime": 1780699198.1173377,
+    "ast_hash": "bd4306b90b29c549b7a2b10f40a77762",
+    "semantic_hash": "bd4306b90b29c549b7a2b10f40a77762"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\db\\type\\TypeNormalizer.java": {
+    "mtime": 1780699195.4035764,
+    "ast_hash": "3444be39fe264bb6ef54009a8ddf5361",
+    "semantic_hash": "3444be39fe264bb6ef54009a8ddf5361"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\dto\\CycleDetector.java": {
+    "mtime": 1780698493.4860673,
+    "ast_hash": "7310270eba40538974230866c139981a",
+    "semantic_hash": "7310270eba40538974230866c139981a"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\dto\\DtoWalker.java": {
+    "mtime": 1780698769.458081,
+    "ast_hash": "47ef73c0c0ce596cb7af595b00b3eb37",
+    "semantic_hash": "47ef73c0c0ce596cb7af595b00b3eb37"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\dto\\EnumCommentEmitter.java": {
+    "mtime": 1780698499.6798935,
+    "ast_hash": "83d3f88008d95588464a344f73787239",
+    "semantic_hash": "83d3f88008d95588464a344f73787239"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\helper\\src\\main\\java\\com\\postmanclone\\helper\\dto\\PlaceholderFactory.java": {
+    "mtime": 1780698498.3089778,
+    "ast_hash": "0ed859cf7bc2996ba123183adcec9c81",
+    "semantic_hash": "0ed859cf7bc2996ba123183adcec9c81"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\package.json": {
+    "mtime": 1780609114.6064155,
+    "ast_hash": "614a15352555ba8566e237e0ee25c8d0",
+    "semantic_hash": "614a15352555ba8566e237e0ee25c8d0"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\playwright.config.ts": {
+    "mtime": 1780609697.6961894,
+    "ast_hash": "fbc806254cd962767b34669bcd9fff7f",
+    "semantic_hash": "fbc806254cd962767b34669bcd9fff7f"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\auth\\api-key.ts": {
+    "mtime": 1780598768.262742,
+    "ast_hash": "eecfc8fab33e68bd6a764b7f7dc0c256",
+    "semantic_hash": "eecfc8fab33e68bd6a764b7f7dc0c256"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\auth\\basic.ts": {
+    "mtime": 1780598764.4717221,
+    "ast_hash": "442e9226803301c16a0d634d9e0a619f",
+    "semantic_hash": "442e9226803301c16a0d634d9e0a619f"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\auth\\bearer.ts": {
+    "mtime": 1780598765.7650023,
+    "ast_hash": "31f6a495dab57af67790756b2f8fba6f",
+    "semantic_hash": "31f6a495dab57af67790756b2f8fba6f"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\cloudSync.ts": {
+    "mtime": 1780527301.222516,
+    "ast_hash": "9de4701d5d2174ef37aca06e29dad403",
+    "semantic_hash": "9de4701d5d2174ef37aca06e29dad403"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\http\\curlGen.ts": {
+    "mtime": 1780597431.978345,
+    "ast_hash": "6afc6cc054d40238946114cd88fec9b1",
+    "semantic_hash": "6afc6cc054d40238946114cd88fec9b1"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\http\\undiciClient.ts": {
+    "mtime": 1780599018.4168155,
+    "ast_hash": "5c1e985d84f258c20068dee242056012",
+    "semantic_hash": "5c1e985d84f258c20068dee242056012"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\index.ts": {
+    "mtime": 1780599261.379448,
+    "ast_hash": "165b963c4bd113fbf57f3a253b7202e6",
+    "semantic_hash": "165b963c4bd113fbf57f3a253b7202e6"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\ipc\\channels.ts": {
+    "mtime": 1780699425.1859362,
+    "ast_hash": "c21cd917dfbe811be16f0cc90701a8b9",
+    "semantic_hash": "c21cd917dfbe811be16f0cc90701a8b9"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\ipc\\quitState.ts": {
+    "mtime": 1780599250.8395932,
+    "ast_hash": "fcd518e902717866bac0ee88d8c74c2f",
+    "semantic_hash": "fcd518e902717866bac0ee88d8c74c2f"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\ipc\\router.ts": {
+    "mtime": 1780699439.887988,
+    "ast_hash": "3c8ec27cbdfa592fed9c14cf12dfb17f",
+    "semantic_hash": "3c8ec27cbdfa592fed9c14cf12dfb17f"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\ipc\\safeStorage.ts": {
+    "mtime": 1780699082.8823643,
+    "ast_hash": "2113f7872c5f0580ba3bbe36ec691fc4",
+    "semantic_hash": "2113f7872c5f0580ba3bbe36ec691fc4"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\jvm\\client.ts": {
+    "mtime": 1780527547.1310282,
+    "ast_hash": "0c4e043ecb1464c49507ba530c8357e0",
+    "semantic_hash": "0c4e043ecb1464c49507ba530c8357e0"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\jvm\\jdkDetect.ts": {
+    "mtime": 1780591519.086062,
+    "ast_hash": "8c9f5d6188883e483074aec45d79e946",
+    "semantic_hash": "8c9f5d6188883e483074aec45d79e946"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\jvm\\supervisor.ts": {
+    "mtime": 1780698569.2227457,
+    "ast_hash": "d3b558a9ab23b2190af7283c78d27622",
+    "semantic_hash": "d3b558a9ab23b2190af7283c78d27622"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\logging\\log.ts": {
+    "mtime": 1780527285.161168,
+    "ast_hash": "acccd5e807260571c854b4dadc4513cb",
+    "semantic_hash": "acccd5e807260571c854b4dadc4513cb"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\logging\\redact.ts": {
+    "mtime": 1780596679.8399265,
+    "ast_hash": "37b6539fade1f4f9c147c243766dcb9c",
+    "semantic_hash": "37b6539fade1f4f9c147c243766dcb9c"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\security\\secretMask.ts": {
+    "mtime": 1780598577.0952363,
+    "ast_hash": "c4c4c2bd54ffe2943da104274ac3b467",
+    "semantic_hash": "c4c4c2bd54ffe2943da104274ac3b467"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\storage\\atomicWrite.ts": {
+    "mtime": 1780598530.5653229,
+    "ast_hash": "9d181c080638a4be1aa12fa0f761785b",
+    "semantic_hash": "9d181c080638a4be1aa12fa0f761785b"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\storage\\collections.ts": {
+    "mtime": 1780608848.135023,
+    "ast_hash": "55584e4c48349deec75a82b914923982",
+    "semantic_hash": "55584e4c48349deec75a82b914923982"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\storage\\curl.ts": {
+    "mtime": 1780598833.775104,
+    "ast_hash": "cfc67ba98316a53f258779a1b8c1210a",
+    "semantic_hash": "cfc67ba98316a53f258779a1b8c1210a"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\storage\\db-connections.ts": {
+    "mtime": 1780699102.3366926,
+    "ast_hash": "3746ff960ea7ec4ea330adc0366de9f9",
+    "semantic_hash": "3746ff960ea7ec4ea330adc0366de9f9"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\storage\\environments.ts": {
+    "mtime": 1780598662.0496247,
+    "ast_hash": "5eeb3721bb9939678235a01940ca7b0b",
+    "semantic_hash": "5eeb3721bb9939678235a01940ca7b0b"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\storage\\history.ts": {
+    "mtime": 1780611509.600068,
+    "ast_hash": "5bd836602fbf3bc261e81902ef09bbe9",
+    "semantic_hash": "5bd836602fbf3bc261e81902ef09bbe9"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\storage\\import-export.ts": {
+    "mtime": 1780600356.917874,
+    "ast_hash": "61dfe25ae6606824dfc3d56407afcd1d",
+    "semantic_hash": "61dfe25ae6606824dfc3d56407afcd1d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\storage\\paths.ts": {
+    "mtime": 1780609280.6958773,
+    "ast_hash": "440af942341561e7e95823ad96b91064",
+    "semantic_hash": "440af942341561e7e95823ad96b91064"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\storage\\settings.ts": {
+    "mtime": 1780596633.4666107,
+    "ast_hash": "db62e665a24840cfcee5f38643737242",
+    "semantic_hash": "db62e665a24840cfcee5f38643737242"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\storage\\variable-resolver.ts": {
+    "mtime": 1780598762.4401913,
+    "ast_hash": "41908d44257e47e355d6c8c899733d8b",
+    "semantic_hash": "41908d44257e47e355d6c8c899733d8b"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\main\\window.ts": {
+    "mtime": 1780600737.3384075,
+    "ast_hash": "48a9ae69c67995751587c6e0ed84dcd0",
+    "semantic_hash": "48a9ae69c67995751587c6e0ed84dcd0"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\preload\\index.d.ts": {
+    "mtime": 1780607600.917822,
+    "ast_hash": "c5c9fe6a020557f1c057924c4c5f12e9",
+    "semantic_hash": "c5c9fe6a020557f1c057924c4c5f12e9"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\preload\\index.ts": {
+    "mtime": 1780699452.3983436,
+    "ast_hash": "a213387c86c48a18c18b4333dfc76e9d",
+    "semantic_hash": "a213387c86c48a18c18b4333dfc76e9d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\App.tsx": {
+    "mtime": 1780601457.0475216,
+    "ast_hash": "d017dfb50a1bc684e7037114e9a37ba6",
+    "semantic_hash": "d017dfb50a1bc684e7037114e9a37ba6"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\BodyEditor\\CycleWarningBanner.tsx": {
+    "mtime": 1780698872.8706944,
+    "ast_hash": "885dfb8bf626b3b37d13b56e9cabd2bc",
+    "semantic_hash": "885dfb8bf626b3b37d13b56e9cabd2bc"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\ConfirmQuitModal.tsx": {
+    "mtime": 1780599128.5532892,
+    "ast_hash": "55dc9c73a6d1f26994789038bf8e2f31",
+    "semantic_hash": "55dc9c73a6d1f26994789038bf8e2f31"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\DataDirPicker.tsx": {
+    "mtime": 1780596511.1053042,
+    "ast_hash": "3f0e3c171b46be118cf73ee641225234",
+    "semantic_hash": "3f0e3c171b46be118cf73ee641225234"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\Database\\ColumnFieldMapping.tsx": {
+    "mtime": 1780699533.307493,
+    "ast_hash": "affba3e12ae3f7693fdbd1bcc1303f20",
+    "semantic_hash": "affba3e12ae3f7693fdbd1bcc1303f20"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\Database\\DbConnectionForm.tsx": {
+    "mtime": 1780699296.5488102,
+    "ast_hash": "5d4b11e3d4e9ac26c6aecb27af962901",
+    "semantic_hash": "5d4b11e3d4e9ac26c6aecb27af962901"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\Database\\DbRowDetail.tsx": {
+    "mtime": 1780699521.8792212,
+    "ast_hash": "31c0019607e1c614ba3fd2b884caaf0a",
+    "semantic_hash": "31c0019607e1c614ba3fd2b884caaf0a"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\Database\\DbTableTree.tsx": {
+    "mtime": 1780699516.587417,
+    "ast_hash": "9441937c0c8cf4e64bccc86fdb007048",
+    "semantic_hash": "9441937c0c8cf4e64bccc86fdb007048"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\ExportPostmanModal.tsx": {
+    "mtime": 1780599841.8715296,
+    "ast_hash": "6f9231830bb29073d34f263e89c87ed3",
+    "semantic_hash": "6f9231830bb29073d34f263e89c87ed3"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\FirstRunDialog.tsx": {
+    "mtime": 1780599860.8598032,
+    "ast_hash": "7fbd6200d1143f65474481f8e9277dd1",
+    "semantic_hash": "7fbd6200d1143f65474481f8e9277dd1"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\ImportPostmanModal.tsx": {
+    "mtime": 1780599825.5600748,
+    "ast_hash": "8d5a4e20a3ef0eb09d103d8ea356293b",
+    "semantic_hash": "8d5a4e20a3ef0eb09d103d8ea356293b"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\MenuBar.tsx": {
+    "mtime": 1780599686.2221732,
+    "ast_hash": "42496f6b04db540f81dc049622109c2a",
+    "semantic_hash": "42496f6b04db540f81dc049622109c2a"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\RequestEditor.tsx": {
+    "mtime": 1780613968.6210601,
+    "ast_hash": "0d4e8d9883e4fe020eddcc1d0ced9a51",
+    "semantic_hash": "0d4e8d9883e4fe020eddcc1d0ced9a51"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\RequestEditor\\AuthTab.tsx": {
+    "mtime": 1780599641.3040125,
+    "ast_hash": "ebf4c0375e735b98714c2b7d3200d392",
+    "semantic_hash": "ebf4c0375e735b98714c2b7d3200d392"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\RequestEditor\\BodyTab.tsx": {
+    "mtime": 1780698901.1589885,
+    "ast_hash": "c31181a2f935d5ebb416a7d665b3b4e0",
+    "semantic_hash": "c31181a2f935d5ebb416a7d665b3b4e0"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\RequestEditor\\CurlMenu.tsx": {
+    "mtime": 1780599650.0633936,
+    "ast_hash": "0629bbd5a5138176064a8f5aa5203777",
+    "semantic_hash": "0629bbd5a5138176064a8f5aa5203777"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\RequestEditor\\HeadersTab.tsx": {
+    "mtime": 1780597704.928894,
+    "ast_hash": "433dd52efc109ea4ffea2648fe3d8bd1",
+    "semantic_hash": "433dd52efc109ea4ffea2648fe3d8bd1"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\RequestEditor\\MethodPicker.tsx": {
+    "mtime": 1780597666.812643,
+    "ast_hash": "611c6cb2ad2450c22577de89f8dc8d5e",
+    "semantic_hash": "611c6cb2ad2450c22577de89f8dc8d5e"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\RequestEditor\\ParamsTab.tsx": {
+    "mtime": 1780606404.8978145,
+    "ast_hash": "5b3929d569aeabafd49a1ba76bd9895b",
+    "semantic_hash": "5b3929d569aeabafd49a1ba76bd9895b"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\RequestEditor\\SaveAsModal.tsx": {
+    "mtime": 1780614010.8508875,
+    "ast_hash": "4066911170d4b100178e8cbd26bef0d0",
+    "semantic_hash": "4066911170d4b100178e8cbd26bef0d0"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\RequestEditor\\SettingsTab.tsx": {
+    "mtime": 1780597784.852004,
+    "ast_hash": "fd69ae7535bb5eb6e55578304f1d4a2e",
+    "semantic_hash": "fd69ae7535bb5eb6e55578304f1d4a2e"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\RequestEditor\\SubTabs.tsx": {
+    "mtime": 1780597670.7888558,
+    "ast_hash": "7aeb06fe2c86937874e8e0183d11468d",
+    "semantic_hash": "7aeb06fe2c86937874e8e0183d11468d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\RequestEditor\\specToItem.ts": {
+    "mtime": 1780613944.0349557,
+    "ast_hash": "408a2b30afab3094b5761d025125e4cc",
+    "semantic_hash": "408a2b30afab3094b5761d025125e4cc"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\ResponseViewer.tsx": {
+    "mtime": 1780599753.2237985,
+    "ast_hash": "7aabbe7b79f37b76cdce7c74cff63da1",
+    "semantic_hash": "7aabbe7b79f37b76cdce7c74cff63da1"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\ResponseViewer\\BodyTab.tsx": {
+    "mtime": 1780598078.0836256,
+    "ast_hash": "4222f09e0358e4adf7bab43947de0be9",
+    "semantic_hash": "4222f09e0358e4adf7bab43947de0be9"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\ResponseViewer\\CookiesTab.tsx": {
+    "mtime": 1780597963.32594,
+    "ast_hash": "e7f8743a04744dc7eadafa4ebf741b62",
+    "semantic_hash": "e7f8743a04744dc7eadafa4ebf741b62"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\ResponseViewer\\HeadersTab.tsx": {
+    "mtime": 1780597950.8831837,
+    "ast_hash": "7e5c40866a8ef04afe0959edb7cee001",
+    "semantic_hash": "7e5c40866a8ef04afe0959edb7cee001"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\ResponseViewer\\StatusRow.tsx": {
+    "mtime": 1780597918.702526,
+    "ast_hash": "b803826bfe6dbb67a67e8e6c1df61af5",
+    "semantic_hash": "b803826bfe6dbb67a67e8e6c1df61af5"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\ResponseViewer\\TimingTab.tsx": {
+    "mtime": 1780597972.5220587,
+    "ast_hash": "c43d694a64cb6f5e8ae4343b0ea006ef",
+    "semantic_hash": "c43d694a64cb6f5e8ae4343b0ea006ef"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\SettingsModal.tsx": {
+    "mtime": 1780599789.7843225,
+    "ast_hash": "f7af8acb79d7a7fc30419bd261ba071a",
+    "semantic_hash": "f7af8acb79d7a7fc30419bd261ba071a"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\Settings\\DataLocation.tsx": {
+    "mtime": 1780599798.7969553,
+    "ast_hash": "83ab2db8aeafd18cbd5c5ee6115c8775",
+    "semantic_hash": "83ab2db8aeafd18cbd5c5ee6115c8775"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\Settings\\Network.tsx": {
+    "mtime": 1780599809.6338606,
+    "ast_hash": "3ee014368e05cabe4874caa1d6eed11c",
+    "semantic_hash": "3ee014368e05cabe4874caa1d6eed11c"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\Sidebar.tsx": {
+    "mtime": 1780599539.303028,
+    "ast_hash": "799e485b146cf22286d02bd28732107b",
+    "semantic_hash": "799e485b146cf22286d02bd28732107b"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\Sidebar\\CollectionsTree.tsx": {
+    "mtime": 1780613883.0949237,
+    "ast_hash": "5cfb496bfbf93239422189f809a3dd04",
+    "semantic_hash": "5cfb496bfbf93239422189f809a3dd04"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\Sidebar\\EnvironmentsList.tsx": {
+    "mtime": 1780599495.6641421,
+    "ast_hash": "c1021d2418e0e9d58ca629c430a1b986",
+    "semantic_hash": "c1021d2418e0e9d58ca629c430a1b986"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\Sidebar\\HistoryList.tsx": {
+    "mtime": 1780606552.0697691,
+    "ast_hash": "e7b24221896a1e7a1be426bee8573f4a",
+    "semantic_hash": "e7b24221896a1e7a1be426bee8573f4a"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\Sidebar\\VariablesTab.tsx": {
+    "mtime": 1780599528.7451704,
+    "ast_hash": "fe779a8b5885e45af3b5a43b91cbde7e",
+    "semantic_hash": "fe779a8b5885e45af3b5a43b91cbde7e"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\Splitter.tsx": {
+    "mtime": 1780596496.76405,
+    "ast_hash": "bade629ac19cbe4652f19eb018c9e975",
+    "semantic_hash": "bade629ac19cbe4652f19eb018c9e975"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\StatusBar.tsx": {
+    "mtime": 1780527380.0220258,
+    "ast_hash": "b753e64f82b21a24f2d3e663a07ebc5c",
+    "semantic_hash": "b753e64f82b21a24f2d3e663a07ebc5c"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\components\\TabBar.tsx": {
+    "mtime": 1780613888.9646213,
+    "ast_hash": "7294c7063e8239876224224b8bdc7a58",
+    "semantic_hash": "7294c7063e8239876224224b8bdc7a58"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\env.d.ts": {
+    "mtime": 1780528721.5571797,
+    "ast_hash": "00d511e3cbe0526b64450598bdaa0a35",
+    "semantic_hash": "00d511e3cbe0526b64450598bdaa0a35"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\hooks\\useCollections.ts": {
+    "mtime": 1780612486.2589893,
+    "ast_hash": "e54d5fba110643543ebc4d34e431cd7d",
+    "semantic_hash": "e54d5fba110643543ebc4d34e431cd7d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\hooks\\useEnvironments.ts": {
+    "mtime": 1780599391.8902907,
+    "ast_hash": "408bb46b43100ce3732bd5ff4e888e97",
+    "semantic_hash": "408bb46b43100ce3732bd5ff4e888e97"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\hooks\\useHistory.ts": {
+    "mtime": 1780606573.8278463,
+    "ast_hash": "a7cb806ac7cb30c56d1e5b820db70614",
+    "semantic_hash": "a7cb806ac7cb30c56d1e5b820db70614"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\hooks\\useImportExport.ts": {
+    "mtime": 1780599400.867759,
+    "ast_hash": "1a5b6b4f8530b0efcd82d93b99d64062",
+    "semantic_hash": "1a5b6b4f8530b0efcd82d93b99d64062"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\hooks\\useVariables.ts": {
+    "mtime": 1780599398.6457279,
+    "ast_hash": "38450754d775e0589f598a710b396615",
+    "semantic_hash": "38450754d775e0589f598a710b396615"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\lib\\curl.ts": {
+    "mtime": 1780597893.5603554,
+    "ast_hash": "12f4bb53cea1b8b2596db28f45d2ac11",
+    "semantic_hash": "12f4bb53cea1b8b2596db28f45d2ac11"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\lib\\ipc.ts": {
+    "mtime": 1780596466.875291,
+    "ast_hash": "93a8710f1f5507313f6d1a41620caeb2",
+    "semantic_hash": "93a8710f1f5507313f6d1a41620caeb2"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\lib\\monaco.ts": {
+    "mtime": 1780597626.8815281,
+    "ast_hash": "0f852ac746942543b4d890409316457b",
+    "semantic_hash": "0f852ac746942543b4d890409316457b"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\lib\\theme.ts": {
+    "mtime": 1780596471.0453389,
+    "ast_hash": "1119aa976e9408e0b8fe4f7c1325fe88",
+    "semantic_hash": "1119aa976e9408e0b8fe4f7c1325fe88"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\main.tsx": {
+    "mtime": 1780599420.77018,
+    "ast_hash": "959b0375ac75865de5c59da9aec26d68",
+    "semantic_hash": "959b0375ac75865de5c59da9aec26d68"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\state\\useBodyGeneration.ts": {
+    "mtime": 1780699496.6577547,
+    "ast_hash": "b3e1d71dbc2952fde6a07b25fa950bf7",
+    "semantic_hash": "b3e1d71dbc2952fde6a07b25fa950bf7"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\state\\useHelperStatus.ts": {
+    "mtime": 1780596489.1350915,
+    "ast_hash": "5cd558e1c13f0f2d772eb21e05ca42e5",
+    "semantic_hash": "5cd558e1c13f0f2d772eb21e05ca42e5"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\state\\useKeyboardShortcuts.ts": {
+    "mtime": 1780599697.0561342,
+    "ast_hash": "66566ef9513768bd3970494a59a05df5",
+    "semantic_hash": "66566ef9513768bd3970494a59a05df5"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\state\\useRequest.ts": {
+    "mtime": 1780613876.8721178,
+    "ast_hash": "89b41ef9cf4199cc1ec53641ffa274a2",
+    "semantic_hash": "89b41ef9cf4199cc1ec53641ffa274a2"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\state\\useResponse.ts": {
+    "mtime": 1780597863.9292142,
+    "ast_hash": "c675aa8f6fafd72b49bae2c9f068962b",
+    "semantic_hash": "c675aa8f6fafd72b49bae2c9f068962b"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\state\\useSettings.ts": {
+    "mtime": 1780596483.8428028,
+    "ast_hash": "23bad13d7a3de91cfb3b9d3c9cc4bd53",
+    "semantic_hash": "23bad13d7a3de91cfb3b9d3c9cc4bd53"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\state\\useTabs.ts": {
+    "mtime": 1780613991.350962,
+    "ast_hash": "2a9e3b9ee879e0c2f4488f33aad3435d",
+    "semantic_hash": "2a9e3b9ee879e0c2f4488f33aad3435d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\store\\collections.ts": {
+    "mtime": 1780599365.7637079,
+    "ast_hash": "22047801f68c841b047a6a736e87c844",
+    "semantic_hash": "22047801f68c841b047a6a736e87c844"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\store\\environments.ts": {
+    "mtime": 1780599369.308796,
+    "ast_hash": "974b1375f681a571f5e15db71440f813",
+    "semantic_hash": "974b1375f681a571f5e15db71440f813"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\store\\history.ts": {
+    "mtime": 1780599375.1522548,
+    "ast_hash": "1b058ae2f2a24112a576efdfeaf10812",
+    "semantic_hash": "1b058ae2f2a24112a576efdfeaf10812"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\shared\\schemas\\bootstrap.ts": {
+    "mtime": 1780599164.345187,
+    "ast_hash": "c6e8b910d4e4d4fdedde8725ed4c980e",
+    "semantic_hash": "c6e8b910d4e4d4fdedde8725ed4c980e"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\shared\\schemas\\collection.ts": {
+    "mtime": 1780600192.6153412,
+    "ast_hash": "a5ff04b5dd35e58322a5beca4932e9d2",
+    "semantic_hash": "a5ff04b5dd35e58322a5beca4932e9d2"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\shared\\schemas\\db-connection.ts": {
+    "mtime": 1780699089.4555311,
+    "ast_hash": "0727f8e7bb6e71253705722e5fa9873f",
+    "semantic_hash": "0727f8e7bb6e71253705722e5fa9873f"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\shared\\schemas\\environment.ts": {
+    "mtime": 1780598445.678754,
+    "ast_hash": "87f023d9693b4775239c303a003f1adf",
+    "semantic_hash": "87f023d9693b4775239c303a003f1adf"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\shared\\schemas\\history.ts": {
+    "mtime": 1780607545.3954897,
+    "ast_hash": "bb34c833659e19f43252c0d4af60fff0",
+    "semantic_hash": "bb34c833659e19f43252c0d4af60fff0"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\test-results\\.last-run.json": {
+    "mtime": 1780611898.1262681,
+    "ast_hash": "f196824657d8858bc7fa44eecbba38b1",
+    "semantic_hash": "f196824657d8858bc7fa44eecbba38b1"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\e2e\\app.test.ts": {
+    "mtime": 1780611069.2504954,
+    "ast_hash": "40164d7b7a3c5a6a129f2eb16ff530d6",
+    "semantic_hash": "40164d7b7a3c5a6a129f2eb16ff530d6"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\e2e\\data-flow.test.ts": {
+    "mtime": 1780611880.9664211,
+    "ast_hash": "f50497f35ef054c188198e133c039808",
+    "semantic_hash": "f50497f35ef054c188198e133c039808"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\01-minimal-collection.json": {
+    "mtime": 1780600211.5395782,
+    "ast_hash": "f14b26e46c44b5bcace384e4fac67fae",
+    "semantic_hash": "f14b26e46c44b5bcace384e4fac67fae"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\02-http-methods.json": {
+    "mtime": 1780600211.5416224,
+    "ast_hash": "66ea1b3cc605ff2c618e11d0dc023bab",
+    "semantic_hash": "66ea1b3cc605ff2c618e11d0dc023bab"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\03-with-variables.json": {
+    "mtime": 1780600211.5426223,
+    "ast_hash": "7ce9dfdf74214a603ab979df4f49976d",
+    "semantic_hash": "7ce9dfdf74214a603ab979df4f49976d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\04-nested-folders.json": {
+    "mtime": 1780600211.5436213,
+    "ast_hash": "b9d6e7edbe7d343f5b81d9767e9ede66",
+    "semantic_hash": "b9d6e7edbe7d343f5b81d9767e9ede66"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\05-bearer-auth.json": {
+    "mtime": 1780600211.545622,
+    "ast_hash": "295f9113d7e59c23329720918dea1169",
+    "semantic_hash": "295f9113d7e59c23329720918dea1169"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\06-basic-auth.json": {
+    "mtime": 1780600211.5486224,
+    "ast_hash": "d8952a56f59daaf377c0b739e173f8ef",
+    "semantic_hash": "d8952a56f59daaf377c0b739e173f8ef"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\07-apikey-auth.json": {
+    "mtime": 1780600211.5511353,
+    "ast_hash": "91c746e95b6e8e3ba87ee478ddc928b2",
+    "semantic_hash": "91c746e95b6e8e3ba87ee478ddc928b2"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\08-oauth2-auth.json": {
+    "mtime": 1780600211.553151,
+    "ast_hash": "d9a0eccb3c86c0da56181137898a5ff1",
+    "semantic_hash": "d9a0eccb3c86c0da56181137898a5ff1"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\09-noauth.json": {
+    "mtime": 1780600211.554151,
+    "ast_hash": "afe9cc6a149dfd5db70b58841f4d660d",
+    "semantic_hash": "afe9cc6a149dfd5db70b58841f4d660d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\10-with-scripts.json": {
+    "mtime": 1780600211.555151,
+    "ast_hash": "c187e4904692bcf97492e4ed9b4e6d20",
+    "semantic_hash": "c187e4904692bcf97492e4ed9b4e6d20"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\11-with-tests.json": {
+    "mtime": 1780600211.557151,
+    "ast_hash": "0800844d2a7eeb92998cdbc6c67b7676",
+    "semantic_hash": "0800844d2a7eeb92998cdbc6c67b7676"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\12-custom-headers.json": {
+    "mtime": 1780600211.5581512,
+    "ast_hash": "32773493f213b02fdc99c88939d7c2a7",
+    "semantic_hash": "32773493f213b02fdc99c88939d7c2a7"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\13-urlencoded.json": {
+    "mtime": 1780600211.5606718,
+    "ast_hash": "fcb74c3bf531b966dde0abcd970f52c1",
+    "semantic_hash": "fcb74c3bf531b966dde0abcd970f52c1"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\14-form-data.json": {
+    "mtime": 1780600211.56268,
+    "ast_hash": "58c56a2b22acad3ea43e3e166a08332c",
+    "semantic_hash": "58c56a2b22acad3ea43e3e166a08332c"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\15-query-params.json": {
+    "mtime": 1780600211.5646877,
+    "ast_hash": "8127bb4f7ecd78154190d8008dbde719",
+    "semantic_hash": "8127bb4f7ecd78154190d8008dbde719"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\16-large-collection.json": {
+    "mtime": 1780600211.567686,
+    "ast_hash": "53bdfe812944687deb73990c18ab9bf0",
+    "semantic_hash": "53bdfe812944687deb73990c18ab9bf0"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\17-with-descriptions.json": {
+    "mtime": 1780600211.569193,
+    "ast_hash": "2e7248c29f746197ae768fb64e1311e7",
+    "semantic_hash": "2e7248c29f746197ae768fb64e1311e7"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\18-protocol-behavior.json": {
+    "mtime": 1780600211.5717125,
+    "ast_hash": "0798c024633fa6f253d6eef77ccc2398",
+    "semantic_hash": "0798c024633fa6f253d6eef77ccc2398"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\19-collection-events.json": {
+    "mtime": 1780600211.5737205,
+    "ast_hash": "b1a59270e1a625b13682cc21366136d5",
+    "semantic_hash": "b1a59270e1a625b13682cc21366136d5"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\20-mixed-auth.json": {
+    "mtime": 1780600211.5747201,
+    "ast_hash": "b7d5d77101eb4cc55cbd99ac8ef3399c",
+    "semantic_hash": "b7d5d77101eb4cc55cbd99ac8ef3399c"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\21-variable-types.json": {
+    "mtime": 1780600211.57672,
+    "ast_hash": "448ec679d03af8ae7ffd03c115873f33",
+    "semantic_hash": "448ec679d03af8ae7ffd03c115873f33"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\22-deep-nesting.json": {
+    "mtime": 1780600211.579227,
+    "ast_hash": "ab22e512f861a7630b0bceee6643dc2e",
+    "semantic_hash": "ab22e512f861a7630b0bceee6643dc2e"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\http-client.test.ts": {
+    "mtime": 1780606362.7056441,
+    "ast_hash": "896e25496dbdd3da54e551c771cad5f2",
+    "semantic_hash": "896e25496dbdd3da54e551c771cad5f2"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\integration.test.ts": {
+    "mtime": 1780609425.7349896,
+    "ast_hash": "ec32be57e3214ed61da6843f0e62c869",
+    "semantic_hash": "ec32be57e3214ed61da6843f0e62c869"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\round-trip.test.ts": {
+    "mtime": 1780600306.3826838,
+    "ast_hash": "e89bb5f8796b1d5a5f983f9209d19484",
+    "semantic_hash": "e89bb5f8796b1d5a5f983f9209d19484"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tsconfig.json": {
+    "mtime": 1780526077.1384163,
+    "ast_hash": "20340495003cb80714eef25962dbe17e",
+    "semantic_hash": "20340495003cb80714eef25962dbe17e"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tsconfig.node.json": {
+    "mtime": 1780598478.3305097,
+    "ast_hash": "b78eddf470a3c547e50eb7ddb0edf59a",
+    "semantic_hash": "b78eddf470a3c547e50eb7ddb0edf59a"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tsconfig.web.json": {
+    "mtime": 1780598479.3685963,
+    "ast_hash": "704951cba56388b5dcc65502b6ae376b",
+    "semantic_hash": "704951cba56388b5dcc65502b6ae376b"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\graphify\\SKILL.md": {
+    "mtime": 1780749768.06214,
+    "ast_hash": "3284a79b13f213cbc5d06109f7a25c4e",
+    "semantic_hash": "3284a79b13f213cbc5d06109f7a25c4e"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\graphify\\references\\add-watch.md": {
+    "mtime": 1780748930.9015625,
+    "ast_hash": "0df0589623217ca38a12bdcabfb42f4c",
+    "semantic_hash": "0df0589623217ca38a12bdcabfb42f4c"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\graphify\\references\\exports.md": {
+    "mtime": 1780748930.9015625,
+    "ast_hash": "7fb1a81aca17a462db70684a324fcfb0",
+    "semantic_hash": "7fb1a81aca17a462db70684a324fcfb0"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\graphify\\references\\extraction-spec.md": {
+    "mtime": 1780748930.9025643,
+    "ast_hash": "24808b03abfeaf5f6435bb69c0125b2c",
+    "semantic_hash": "24808b03abfeaf5f6435bb69c0125b2c"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\graphify\\references\\github-and-merge.md": {
+    "mtime": 1780748930.9035623,
+    "ast_hash": "cde13df085e4c492aeb7ba298a996d0d",
+    "semantic_hash": "cde13df085e4c492aeb7ba298a996d0d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\graphify\\references\\hooks.md": {
+    "mtime": 1780748930.9035623,
+    "ast_hash": "3f545db6ce646650bb9de588f5512a27",
+    "semantic_hash": "3f545db6ce646650bb9de588f5512a27"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\graphify\\references\\query.md": {
+    "mtime": 1780748932.041947,
+    "ast_hash": "c2a8e798674a81b02aa9975f43023819",
+    "semantic_hash": "c2a8e798674a81b02aa9975f43023819"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\graphify\\references\\transcribe.md": {
+    "mtime": 1780748932.0429468,
+    "ast_hash": "70f6aa30d6211f3a2c7e9fc45479f50c",
+    "semantic_hash": "70f6aa30d6211f3a2c7e9fc45479f50c"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\graphify\\references\\update.md": {
+    "mtime": 1780748932.0439477,
+    "ast_hash": "735932eaa4f0c8fef9566c538ae3e5f8",
+    "semantic_hash": "735932eaa4f0c8fef9566c538ae3e5f8"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\sketch-findings-postman-clone\\SKILL.md": {
+    "mtime": 1780614591.9007318,
+    "ast_hash": "e8321a19f08c41e99587be277b7f8e76",
+    "semantic_hash": "e8321a19f08c41e99587be277b7f8e76"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\sketch-findings-postman-clone\\references\\chain-requests.md": {
+    "mtime": 1780614575.2262397,
+    "ast_hash": "4ca433bdd463a5e4b2b1e61a67178dab",
+    "semantic_hash": "4ca433bdd463a5e4b2b1e61a67178dab"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\sketch-findings-postman-clone\\references\\database-integration.md": {
+    "mtime": 1780614564.2903886,
+    "ast_hash": "252ab2a64b57e2983010daa88a316d8d",
+    "semantic_hash": "252ab2a64b57e2983010daa88a316d8d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\sketch-findings-postman-clone\\references\\request-builder-layout.md": {
+    "mtime": 1780614539.1562953,
+    "ast_hash": "b954a7b15031b760f6139f0d9e12045c",
+    "semantic_hash": "b954a7b15031b760f6139f0d9e12045c"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\sketch-findings-postman-clone\\references\\variables-and-collections.md": {
+    "mtime": 1780614551.41654,
+    "ast_hash": "1d2a608096dbf42285e4faa98b30115c",
+    "semantic_hash": "1d2a608096dbf42285e4faa98b30115c"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\sketch-findings-postman-clone\\sources\\001-sketch\\index.html": {
+    "mtime": 1780608729.7812746,
+    "ast_hash": "cbf2b588aae0e72a37fc0c1ad4f1a82a",
+    "semantic_hash": "cbf2b588aae0e72a37fc0c1ad4f1a82a"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\sketch-findings-postman-clone\\sources\\002-sketch\\index.html": {
+    "mtime": 1780609163.784338,
+    "ast_hash": "3c2c723c9e06f2cfdc5e351d63d70548",
+    "semantic_hash": "3c2c723c9e06f2cfdc5e351d63d70548"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\sketch-findings-postman-clone\\sources\\003-sketch\\index.html": {
+    "mtime": 1780609593.4158483,
+    "ast_hash": "d0bb85b8117db6b2f8c687cf98c0a3dc",
+    "semantic_hash": "d0bb85b8117db6b2f8c687cf98c0a3dc"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\sketch-findings-postman-clone\\sources\\004-sketch\\index.html": {
+    "mtime": 1780610474.2751007,
+    "ast_hash": "a26a0ce976a9fb59057edde599a21e9d",
+    "semantic_hash": "a26a0ce976a9fb59057edde599a21e9d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\sketch-findings-postman-clone\\sources\\005-sketch\\index.html": {
+    "mtime": 1780611489.2189128,
+    "ast_hash": "004fc24eb7e4b9f926cbce475d6ef18f",
+    "semantic_hash": "004fc24eb7e4b9f926cbce475d6ef18f"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\sketch-findings-postman-clone\\sources\\006-sketch\\index.html": {
+    "mtime": 1780611886.8410459,
+    "ast_hash": "9a37f5d2095916a36aecf6facef5d77e",
+    "semantic_hash": "9a37f5d2095916a36aecf6facef5d77e"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\sketch-findings-postman-clone\\sources\\007-sketch\\index.html": {
+    "mtime": 1780613013.9243717,
+    "ast_hash": "d397913291969020bececbde460cbbb5",
+    "semantic_hash": "d397913291969020bececbde460cbbb5"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\sketch-findings-postman-clone\\sources\\009-sketch\\index.html": {
+    "mtime": 1780614085.103379,
+    "ast_hash": "4eab893b70924fba9d36574b6dc5a487",
+    "semantic_hash": "4eab893b70924fba9d36574b6dc5a487"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.opencode\\skills\\sketch-findings-postman-clone\\sources\\010-sketch\\index.html": {
+    "mtime": 1780614374.6219318,
+    "ast_hash": "06fe9b8d1f731d95f569eccb3606fd58",
+    "semantic_hash": "06fe9b8d1f731d95f569eccb3606fd58"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\PROJECT.md": {
+    "mtime": 1780519011.4804764,
+    "ast_hash": "7e8365806acd9d2db6771fc51947e2de",
+    "semantic_hash": "7e8365806acd9d2db6771fc51947e2de"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\REQUIREMENTS.md": {
+    "mtime": 1780614126.700311,
+    "ast_hash": "f3b9595506c5fa776e288cfea20902c7",
+    "semantic_hash": "f3b9595506c5fa776e288cfea20902c7"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\ROADMAP.md": {
+    "mtime": 1780699589.5488586,
+    "ast_hash": "8effe9d963419ab1650a5d70fce6bd12",
+    "semantic_hash": "8effe9d963419ab1650a5d70fce6bd12"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\STATE.md": {
+    "mtime": 1780699630.9517927,
+    "ast_hash": "eb86581cf25836aebf58bbe906b8611c",
+    "semantic_hash": "eb86581cf25836aebf58bbe906b8611c"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\01-foundation-postman-parity\\01-01-PLAN.md": {
+    "mtime": 1780525711.938572,
+    "ast_hash": "fa14bddfd5bb0aa2b59b543abb402f83",
+    "semantic_hash": "fa14bddfd5bb0aa2b59b543abb402f83"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\01-foundation-postman-parity\\01-01-SUMMARY.md": {
+    "mtime": 1780596912.00186,
+    "ast_hash": "0cbefae106cc53215d096d6c2c9b6885",
+    "semantic_hash": "0cbefae106cc53215d096d6c2c9b6885"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\01-foundation-postman-parity\\01-02-PLAN.md": {
+    "mtime": 1780525739.29059,
+    "ast_hash": "4fdcb6ff6889af533b44531565c7697f",
+    "semantic_hash": "4fdcb6ff6889af533b44531565c7697f"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\01-foundation-postman-parity\\01-02-SUMMARY.md": {
+    "mtime": 1780598249.3395267,
+    "ast_hash": "f5d8d19dcbae3946257f7514ba840b38",
+    "semantic_hash": "f5d8d19dcbae3946257f7514ba840b38"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\01-foundation-postman-parity\\01-03-PLAN.md": {
+    "mtime": 1780525745.8471377,
+    "ast_hash": "9260117975ca940457d519028d134200",
+    "semantic_hash": "9260117975ca940457d519028d134200"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\01-foundation-postman-parity\\01-03-SUMMARY.md": {
+    "mtime": 1780600488.0048718,
+    "ast_hash": "a8e7fc63f6f78b21178f4a7bb8a338af",
+    "semantic_hash": "a8e7fc63f6f78b21178f4a7bb8a338af"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\01-foundation-postman-parity\\01-CONTEXT.md": {
+    "mtime": 1780521527.503813,
+    "ast_hash": "866884b2cdbc5b35330e07d0f87f2e22",
+    "semantic_hash": "866884b2cdbc5b35330e07d0f87f2e22"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\01-foundation-postman-parity\\01-DISCUSSION-LOG.md": {
+    "mtime": 1780521572.2114675,
+    "ast_hash": "c168f86953fa9808b0857799f9ed25b3",
+    "semantic_hash": "c168f86953fa9808b0857799f9ed25b3"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\01-foundation-postman-parity\\01-RESEARCH.md": {
+    "mtime": 1780522261.438143,
+    "ast_hash": "d5c404a92e94a35cbf1ebe6e8cd4c225",
+    "semantic_hash": "d5c404a92e94a35cbf1ebe6e8cd4c225"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\01-foundation-postman-parity\\01-SECURITY.md": {
+    "mtime": 1780595758.59503,
+    "ast_hash": "e1d15b99bc54768f85d29ed2153847a0",
+    "semantic_hash": "e1d15b99bc54768f85d29ed2153847a0"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\01-foundation-postman-parity\\01-UAT.md": {
+    "mtime": 1780602628.4894547,
+    "ast_hash": "64d89309b8754cceb26e8a122f1ff5c0",
+    "semantic_hash": "64d89309b8754cceb26e8a122f1ff5c0"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\01-foundation-postman-parity\\01-UI-SPEC.md": {
+    "mtime": 1780522377.336203,
+    "ast_hash": "857652f40ed89363748e2734970b6032",
+    "semantic_hash": "857652f40ed89363748e2734970b6032"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\01-foundation-postman-parity\\SKELETON.md": {
+    "mtime": 1780522804.3939931,
+    "ast_hash": "8986d4f8ddb8808ad0b3917d0be35088",
+    "semantic_hash": "8986d4f8ddb8808ad0b3917d0be35088"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\02-spring-project-detection\\02-UI-SPEC.md": {
+    "mtime": 1780692610.225515,
+    "ast_hash": "315377346a78ced36d1b44ec290611bc",
+    "semantic_hash": "315377346a78ced36d1b44ec290611bc"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\03-body-generation-dto-db\\03-01-PLAN.md": {
+    "mtime": 1780698210.204294,
+    "ast_hash": "a8eda16418128f4032331d22f46e50df",
+    "semantic_hash": "a8eda16418128f4032331d22f46e50df"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\03-body-generation-dto-db\\03-01-SUMMARY.md": {
+    "mtime": 1780698956.8430152,
+    "ast_hash": "e28177063b2fdd6d2819efe6b7b66e32",
+    "semantic_hash": "e28177063b2fdd6d2819efe6b7b66e32"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\03-body-generation-dto-db\\03-02-PLAN.md": {
+    "mtime": 1780698027.163796,
+    "ast_hash": "fd11e889445616a9f33251073ae51220",
+    "semantic_hash": "fd11e889445616a9f33251073ae51220"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\03-body-generation-dto-db\\03-02-SUMMARY.md": {
+    "mtime": 1780699342.6073256,
+    "ast_hash": "a0a0ce90852cc2e33fdb4153c4edf246",
+    "semantic_hash": "a0a0ce90852cc2e33fdb4153c4edf246"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\03-body-generation-dto-db\\03-03-PLAN.md": {
+    "mtime": 1780698084.6746151,
+    "ast_hash": "51da6146c858c6849000cf3b40f23fe9",
+    "semantic_hash": "51da6146c858c6849000cf3b40f23fe9"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\03-body-generation-dto-db\\03-03-SUMMARY.md": {
+    "mtime": 1780699578.2874367,
+    "ast_hash": "706708ee34bf3b84657c9ee8bb3f6472",
+    "semantic_hash": "706708ee34bf3b84657c9ee8bb3f6472"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\03-body-generation-dto-db\\03-CONTEXT.md": {
+    "mtime": 1780693856.5010984,
+    "ast_hash": "4b2cd962df6d71517701f353f3965b5f",
+    "semantic_hash": "4b2cd962df6d71517701f353f3965b5f"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\03-body-generation-dto-db\\03-DISCUSSION-LOG.md": {
+    "mtime": 1780693873.890844,
+    "ast_hash": "180eabcffd426a94de31017492e9376d",
+    "semantic_hash": "180eabcffd426a94de31017492e9376d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\03-body-generation-dto-db\\03-PATTERNS.md": {
+    "mtime": 1780696986.648771,
+    "ast_hash": "1a74808d99306f673783e67ce3f497fd",
+    "semantic_hash": "1a74808d99306f673783e67ce3f497fd"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\03-body-generation-dto-db\\03-RESEARCH.md": {
+    "mtime": 1780696557.0853767,
+    "ast_hash": "e582b0894e52ecb79080821f6e052096",
+    "semantic_hash": "e582b0894e52ecb79080821f6e052096"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\phases\\03-body-generation-dto-db\\03-UI-SPEC.md": {
+    "mtime": 1780695018.1997862,
+    "ast_hash": "04443f040709b18a15649a7d57f10828",
+    "semantic_hash": "04443f040709b18a15649a7d57f10828"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\quick\\260605-133-i-can-t-edit-a-saved-request-also-there-\\260605-133-PLAN.md": {
+    "mtime": 1780613666.5102036,
+    "ast_hash": "22e86994c88542cd583e8a431c8e5abe",
+    "semantic_hash": "22e86994c88542cd583e8a431c8e5abe"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\quick\\260605-133-i-can-t-edit-a-saved-request-also-there-\\260605-133-SUMMARY.md": {
+    "mtime": 1780614084.6084237,
+    "ast_hash": "adbfd36fdafda49f12b2e4ef444e93cd",
+    "semantic_hash": "adbfd36fdafda49f12b2e4ef444e93cd"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\research\\ARCHITECTURE.md": {
+    "mtime": 1780519651.1185987,
+    "ast_hash": "03fc45449ff5023b33b7d1e7f5e4d8fb",
+    "semantic_hash": "03fc45449ff5023b33b7d1e7f5e4d8fb"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\research\\FEATURES.md": {
+    "mtime": 1780519647.8326032,
+    "ast_hash": "a85e02bbbc14b04a9041eb48249a13c8",
+    "semantic_hash": "a85e02bbbc14b04a9041eb48249a13c8"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\research\\PITFALLS.md": {
+    "mtime": 1780519802.3951192,
+    "ast_hash": "2c8f16aca6d58b7472edc70313f44cb5",
+    "semantic_hash": "2c8f16aca6d58b7472edc70313f44cb5"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\research\\STACK.md": {
+    "mtime": 1780520443.1236851,
+    "ast_hash": "2015eb72e78d2dbd85160b8ff0796915",
+    "semantic_hash": "2015eb72e78d2dbd85160b8ff0796915"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\research\\SUMMARY.md": {
+    "mtime": 1780520694.172792,
+    "ast_hash": "4f321d9c507a75ed67ebe1f2309368f9",
+    "semantic_hash": "4f321d9c507a75ed67ebe1f2309368f9"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\001-url-bar-composition\\README.md": {
+    "mtime": 1780608728.2130337,
+    "ast_hash": "b03bc8ea5b98fdd5e32ec214101d6fe1",
+    "semantic_hash": "b03bc8ea5b98fdd5e32ec214101d6fe1"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\001-url-bar-composition\\index.html": {
+    "mtime": 1780608729.7812746,
+    "ast_hash": "cbf2b588aae0e72a37fc0c1ad4f1a82a",
+    "semantic_hash": "cbf2b588aae0e72a37fc0c1ad4f1a82a"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\002-request-section-grouping\\README.md": {
+    "mtime": 1780609162.494139,
+    "ast_hash": "7e118dc54ae59e3dab8c2069f4a0f889",
+    "semantic_hash": "7e118dc54ae59e3dab8c2069f4a0f889"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\002-request-section-grouping\\index.html": {
+    "mtime": 1780609163.784338,
+    "ast_hash": "3c2c723c9e06f2cfdc5e351d63d70548",
+    "semantic_hash": "3c2c723c9e06f2cfdc5e351d63d70548"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\003-body-editor-area\\README.md": {
+    "mtime": 1780609591.7382078,
+    "ast_hash": "e3b19e7fd6e6f07f03a2124f04e044d5",
+    "semantic_hash": "e3b19e7fd6e6f07f03a2124f04e044d5"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\003-body-editor-area\\index.html": {
+    "mtime": 1780609593.4158483,
+    "ast_hash": "d0bb85b8117db6b2f8c687cf98c0a3dc",
+    "semantic_hash": "d0bb85b8117db6b2f8c687cf98c0a3dc"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\004-variable-editor\\README.md": {
+    "mtime": 1780610473.284912,
+    "ast_hash": "db27aa12ab34a1ba59591b911a86a038",
+    "semantic_hash": "db27aa12ab34a1ba59591b911a86a038"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\004-variable-editor\\index.html": {
+    "mtime": 1780610474.2751007,
+    "ast_hash": "a26a0ce976a9fb59057edde599a21e9d",
+    "semantic_hash": "a26a0ce976a9fb59057edde599a21e9d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\005-collection-management\\README.md": {
+    "mtime": 1780611487.7765365,
+    "ast_hash": "3a421dc57e483cf3a5b3137f0c50f1d6",
+    "semantic_hash": "3a421dc57e483cf3a5b3137f0c50f1d6"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\005-collection-management\\index.html": {
+    "mtime": 1780611489.2189128,
+    "ast_hash": "004fc24eb7e4b9f926cbce475d6ef18f",
+    "semantic_hash": "004fc24eb7e4b9f926cbce475d6ef18f"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\006-database-connection\\README.md": {
+    "mtime": 1780611885.3549092,
+    "ast_hash": "2dd10c4e05ded6c666bee0afe9cbbae3",
+    "semantic_hash": "2dd10c4e05ded6c666bee0afe9cbbae3"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\006-database-connection\\index.html": {
+    "mtime": 1780611886.8410459,
+    "ast_hash": "9a37f5d2095916a36aecf6facef5d77e",
+    "semantic_hash": "9a37f5d2095916a36aecf6facef5d77e"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\007-db-table-row-picker\\README.md": {
+    "mtime": 1780613012.7331767,
+    "ast_hash": "2d1c1a5c05e2634cb681bf7b81ce8a1d",
+    "semantic_hash": "2d1c1a5c05e2634cb681bf7b81ce8a1d"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\007-db-table-row-picker\\index.html": {
+    "mtime": 1780613013.9243717,
+    "ast_hash": "d397913291969020bececbde460cbbb5",
+    "semantic_hash": "d397913291969020bececbde460cbbb5"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\008-db-body-preview\\README.md": {
+    "mtime": 1780613331.6274135,
+    "ast_hash": "7c5e696f0c6a226ec05226c0498a2741",
+    "semantic_hash": "7c5e696f0c6a226ec05226c0498a2741"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\008-db-body-preview\\index.html": {
+    "mtime": 1780613111.7324605,
+    "ast_hash": "54e0157674707e62271f5db6c7a89b38",
+    "semantic_hash": "54e0157674707e62271f5db6c7a89b38"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\009-chain-overview\\README.md": {
+    "mtime": 1780614082.5902953,
+    "ast_hash": "19be0b1531d59a8f4dd37d5dde2e0a88",
+    "semantic_hash": "19be0b1531d59a8f4dd37d5dde2e0a88"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\009-chain-overview\\index.html": {
+    "mtime": 1780614085.103379,
+    "ast_hash": "4eab893b70924fba9d36574b6dc5a487",
+    "semantic_hash": "4eab893b70924fba9d36574b6dc5a487"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\010-chain-link-builder\\README.md": {
+    "mtime": 1780614373.127359,
+    "ast_hash": "c98a783f6c87d122dc36bb58b473f690",
+    "semantic_hash": "c98a783f6c87d122dc36bb58b473f690"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\010-chain-link-builder\\index.html": {
+    "mtime": 1780614374.6219318,
+    "ast_hash": "06fe9b8d1f731d95f569eccb3606fd58",
+    "semantic_hash": "06fe9b8d1f731d95f569eccb3606fd58"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\MANIFEST.md": {
+    "mtime": 1780614376.5299118,
+    "ast_hash": "51ff1f26200103943e5969bb8e85f0c8",
+    "semantic_hash": "51ff1f26200103943e5969bb8e85f0c8"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\.planning\\sketches\\WRAP-UP-SUMMARY.md": {
+    "mtime": 1780614598.7638516,
+    "ast_hash": "ef385399507ac238a22e1a26578b29f0",
+    "semantic_hash": "ef385399507ac238a22e1a26578b29f0"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\AGENTS.md": {
+    "mtime": 1780749768.0777674,
+    "ast_hash": "cbb1b931060593d424e6b7ea4deedc54",
+    "semantic_hash": "cbb1b931060593d424e6b7ea4deedc54"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\src\\renderer\\index.html": {
+    "mtime": 1780597657.1095617,
+    "ast_hash": "acf8f5297fd4ba75a890132d9d0dcf49",
+    "semantic_hash": "acf8f5297fd4ba75a890132d9d0dcf49"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\tests\\fixtures\\postman\\README.md": {
+    "mtime": 1780599999.567893,
+    "ast_hash": "2dd8f90cc9f265499d581e78aa0d5879",
+    "semantic_hash": "2dd8f90cc9f265499d581e78aa0d5879"
+  },
+  "C:\\Users\\aleks\\Desktop\\postman-clone\\test-results\\verification.png": {
+    "mtime": 1780612575.0320103,
+    "ast_hash": "24c82634623a3e367fe721cad8bb6fa4",
+    "semantic_hash": "24c82634623a3e367fe721cad8bb6fa4"
+  }
+}

@@ -1,0 +1,57 @@
+:root {
+  /* Colors — developer tool: dark-leaning, high contrast, method-color-driven */
+  --color-bg: #1a1b1e;
+  --color-surface: #25262b;
+  --color-surface-raised: #2c2e33;
+  --color-border: #373a40;
+  --color-border-focus: #4c9aff;
+  --color-text: #c1c2c5;
+  --color-text-muted: #909296;
+  --color-text-dim: #5c5f66;
+  --color-primary: #4c9aff;
+  --color-primary-hover: #74b3ff;
+  --color-accent: #f08c00;
+  --color-accent-hover: #faa02f;
+  --color-danger: #e03131;
+  --color-success: #2f9e44;
+
+  /* Method colors */
+  --color-method-get: #2f9e44;
+  --color-method-post: #f08c00;
+  --color-method-put: #4c9aff;
+  --color-method-patch: #9c3ce0;
+  --color-method-delete: #e03131;
+  --color-method-head: #909296;
+  --color-method-options: #909296;
+
+  /* Typography — system sans for UI, monospace for code/URLs */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  --text-2xs: 0.625rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-lg: 1rem;
+  --text-xl: 1.125rem;
+  --text-2xl: 1.25rem;
+
+  /* Spacing — tighter than default, developer-density */
+  --space-1: 4px;
+  --space-2: 6px;
+  --space-3: 10px;
+  --space-4: 14px;
+  --space-6: 20px;
+  --space-8: 28px;
+  --space-12: 40px;
+
+  /* Shapes — minimal rounding for tool feel */
+  --radius-1: 3px;
+  --radius-2: 6px;
+  --radius-3: 8px;
+  --radius-full: 9999px;
+
+  /* Shadows — subtle, desktop-native */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+}

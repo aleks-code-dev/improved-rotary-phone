@@ -2,6 +2,7 @@ package com.postmanclone.helper.scanner;
 
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
@@ -21,10 +22,12 @@ import java.util.Set;
 public class ClasspathResolver {
 
     private static final Set<String> scannedDirs = new HashSet<>();
+    private static volatile JavaSymbolSolver attachedSolver;
+    private static final Object ATTACH_LOCK = new Object();
 
     /**
      * Create a CombinedTypeSolver with full classpath resolution.
-     * 
+     *
      * @param sourceRoots Source root directories (src/main/java for each module)
      * @param projectRoot Project root for detecting Maven/Gradle caches
      * @return CombinedTypeSolver configured for the project
@@ -51,6 +54,7 @@ public class ClasspathResolver {
         // Configure JavaParser for Java 21
         StaticJavaParser.getParserConfiguration()
             .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_21);
+        attachSolver(solver);
 
         return solver;
     }
@@ -69,7 +73,24 @@ public class ClasspathResolver {
         }
         StaticJavaParser.getParserConfiguration()
             .setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_21);
+        attachSolver(solver);
         return solver;
+    }
+
+    /**
+     * Attach a JavaSymbolSolver to the global StaticJavaParser config so that
+     * any type resolution (param.getType().resolve(), etc.) uses the project's
+     * type solver. Replacing the global config is safe because the helper is
+     * a single-process, single-project tool — concurrent classpath:walkDto
+     * calls share the same project root and therefore the same solver.
+     */
+    private static void attachSolver(CombinedTypeSolver solver) {
+        synchronized (ATTACH_LOCK) {
+            JavaSymbolSolver newSymbolSolver = new JavaSymbolSolver(solver);
+            StaticJavaParser.getParserConfiguration()
+                .setSymbolResolver(newSymbolSolver);
+            attachedSolver = newSymbolSolver;
+        }
     }
 
     private static void addMavenDependencies(CombinedTypeSolver solver) {

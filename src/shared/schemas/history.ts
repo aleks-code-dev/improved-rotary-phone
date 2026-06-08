@@ -6,7 +6,7 @@ import { RequestSpecSchema } from './collection.js';
 export const HistoryEntrySchema = z.object({
   id: z.string().uuid(),
   timestamp: z.number(), // epoch ms
-  collectionId: z.string().uuid(),
+  collectionId: z.string(),
   request: z.object({
     method: z.string(),
     url: z.string(), // post-resolution
@@ -22,7 +22,7 @@ export const HistoryEntrySchema = z.object({
     startedAt: z.number(),
     completedAt: z.number(),
   }).nullable(), // null if request errored
-  envSnapshotId: z.string().uuid().nullable(),
+  envSnapshotId: z.string().nullable(),
 }).passthrough();
 
 export type HistoryEntry = z.infer<typeof HistoryEntrySchema>;

@@ -33,50 +33,60 @@ public class GradleModuleDetector {
     public static List<Path> findModuleRoots(Path projectRoot) {
         List<Path> roots = new ArrayList<>();
 
-        // Try settings.gradle.kts first, then settings.gradle
         Path settingsGradle = projectRoot.resolve("settings.gradle.kts");
         if (!Files.exists(settingsGradle)) {
             settingsGradle = projectRoot.resolve("settings.gradle");
         }
 
+        System.err.println("[scanner] Gradle: looking for settings.gradle in " + projectRoot);
+
         if (Files.exists(settingsGradle)) {
+            System.err.println("[scanner] Gradle: found " + settingsGradle.getFileName() + ", parsing for includes...");
             try {
                 String content = Files.readString(settingsGradle, StandardCharsets.UTF_8);
 
-                // Match include('module') pattern
                 Matcher includeMatcher = INCLUDE_PATTERN.matcher(content);
                 while (includeMatcher.find()) {
                     String moduleName = includeMatcher.group(1).trim();
                     Path moduleRoot = projectRoot.resolve(moduleName).resolve("src/main/java");
+                    System.err.println("[scanner] Gradle: found include '" + moduleName + "' -> " + moduleRoot + " (exists=" + Files.exists(moduleRoot) + ")");
                     if (Files.exists(moduleRoot)) {
                         roots.add(moduleRoot);
                     }
                 }
 
-                // Match include project(':module') pattern
                 if (roots.isEmpty()) {
                     Matcher projectMatcher = PROJECT_PATTERN.matcher(content);
                     while (projectMatcher.find()) {
                         String moduleName = projectMatcher.group(1).trim();
                         Path moduleRoot = projectRoot.resolve(moduleName).resolve("src/main/java");
+                        System.err.println("[scanner] Gradle: found project '" + moduleName + "' -> " + moduleRoot + " (exists=" + Files.exists(moduleRoot) + ")");
                         if (Files.exists(moduleRoot)) {
                             roots.add(moduleRoot);
                         }
                     }
                 }
+
+                if (roots.isEmpty()) {
+                    System.err.println("[scanner] Gradle: no includes found in " + settingsGradle.getFileName());
+                }
             } catch (IOException e) {
-                // Fall through to single-module fallback
+                System.err.println("[scanner] Gradle: failed to read " + settingsGradle.getFileName() + ": " + e.getMessage());
             }
+        } else {
+            System.err.println("[scanner] Gradle: no settings.gradle(.kts) found");
         }
 
-        // Fallback: if no modules found, check for single-module src/main/java
         if (roots.isEmpty()) {
             Path srcMain = projectRoot.resolve("src/main/java");
-            if (Files.exists(srcMain)) {
+            boolean exists = Files.exists(srcMain);
+            System.err.println("[scanner] Gradle: fallback single-module src/main/java exists=" + exists);
+            if (exists) {
                 roots.add(srcMain);
             }
         }
 
+        System.err.println("[scanner] Gradle: found " + roots.size() + " source root(s): " + roots);
         return roots;
     }
 }

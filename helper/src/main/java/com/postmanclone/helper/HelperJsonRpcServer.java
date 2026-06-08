@@ -137,6 +137,8 @@ public class HelperJsonRpcServer {
                                 "result", bodyJson
                             ));
                         } catch (Exception e) {
+                            System.err.println("[helper] classpath:walkDto FAILED: " + e.getMessage());
+                            e.printStackTrace(System.err);
                             response = mapper.writeValueAsString(Map.of(
                                 "jsonrpc", "2.0", "id", id,
                                 "error", Map.of("code", -32603, "message", "DTO walk failed: " + e.getMessage())

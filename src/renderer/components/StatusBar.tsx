@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useEndpointsStore } from '../store/endpoints';
 
-export function StatusBar() {
+interface StatusBarProps {
+  dbPanelOpen: boolean;
+  onToggleDbPanel: () => void;
+}
+
+export function StatusBar({ dbPanelOpen, onToggleDbPanel }: StatusBarProps) {
   const [status, setStatus] = useState<any>({ state: 'starting' });
   const scanStatus = useEndpointsStore((s) => s.scanStatus);
   const lastScanResult = useEndpointsStore((s) => s.lastScanResult);
@@ -66,6 +71,23 @@ export function StatusBar() {
       <span style={{ color: 'var(--color-fg-muted)' }}>·</span>
       <span style={{ color: 'var(--color-fg-muted)' }}>Env: No env</span>
       <div style={{ flex: 1 }} />
+      <button
+        onClick={onToggleDbPanel}
+        style={{
+          background: dbPanelOpen ? 'var(--color-accent)' : 'transparent',
+          color: dbPanelOpen ? '#fff' : 'var(--color-fg-muted)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-1)',
+          cursor: 'pointer',
+          fontSize: 12,
+          padding: '2px 8px',
+          fontWeight: dbPanelOpen ? 600 : 400,
+        }}
+        title="Toggle Database panel"
+        aria-label="Toggle Database panel"
+      >
+        🗄 Database
+      </button>
       <button
         onClick={() => window.api.helper.restart()}
         style={{

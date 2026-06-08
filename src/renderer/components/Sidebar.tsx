@@ -5,8 +5,17 @@ import { EnvironmentsList } from './Sidebar/EnvironmentsList';
 import { HistoryList } from './Sidebar/HistoryList';
 import { VariablesTab } from './Sidebar/VariablesTab';
 import { DtoClassPanel } from './DtoClassPanel';
+import { IconButton } from './ui/IconButton';
 
 type SidebarGroup = 'endpoints' | 'collections' | 'environments' | 'history' | 'variables';
+
+const GROUP_LABELS: Record<SidebarGroup, string> = {
+  endpoints: 'Endpoints',
+  collections: 'Collections',
+  environments: 'Environments',
+  history: 'History',
+  variables: 'Variables',
+};
 
 export function Sidebar() {
   const [status, setStatus] = useState<any>({ state: 'starting' });
@@ -30,26 +39,19 @@ export function Sidebar() {
   };
 
   return (
-    <div style={{ width: 240, borderRight: '1px solid var(--color-border)', padding: 'var(--space-2)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', overflow: 'auto' }}>
+    <div style={{ width: 240, borderRight: '1px solid var(--ds-border)', padding: 'var(--ds-space-2)', display: 'flex', flexDirection: 'column', gap: 'var(--ds-space-3)', overflow: 'auto' }}>
       {/* Sidebar toolbar */}
-      <div style={{ display: 'flex', gap: 'var(--space-1)', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 'var(--ds-space-1)', flexWrap: 'wrap' }}>
         {(['endpoints', 'collections', 'environments', 'history', 'variables'] as SidebarGroup[]).map((g) => (
-          <button
+          <IconButton
             key={g}
+            variant={visibleGroups.has(g) ? 'solid' : 'ghost'}
             onClick={() => toggleGroup(g)}
-            style={{
-              padding: '2px 6px',
-              fontSize: 10,
-              textTransform: 'capitalize',
-              background: visibleGroups.has(g) ? 'var(--color-bg-elevated)' : 'transparent',
-              color: visibleGroups.has(g) ? 'var(--color-fg)' : 'var(--color-fg-muted)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-1)',
-              cursor: 'pointer',
-            }}
+            size="sm"
+            style={{ textTransform: 'capitalize', fontSize: 'var(--ds-text-xs)' }}
           >
-            {g}
-          </button>
+            {GROUP_LABELS[g]}
+          </IconButton>
         ))}
       </div>
 

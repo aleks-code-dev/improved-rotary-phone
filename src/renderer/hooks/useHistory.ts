@@ -3,16 +3,16 @@ import { useHistoryStore } from '../store/history';
 
 export function useHistoryList(collectionId: string | null, search?: string) {
   const setHistory = useHistoryStore((s) => s.setHistory);
+  const effectiveCollectionId = collectionId || '__global__';
 
   return useQuery({
-    queryKey: ['history', collectionId, search],
+    queryKey: ['history', effectiveCollectionId, search],
     queryFn: async () => {
-      if (!collectionId) return [];
-      const result = await window.api.history.list({ collectionId, search });
-      setHistory(collectionId, result);
+      const result = await window.api.history.list({ collectionId: effectiveCollectionId, search });
+      setHistory(effectiveCollectionId, result);
       return result;
     },
-    enabled: !!collectionId,
+    enabled: true,
   });
 }
 

@@ -1,3 +1,5 @@
+import { Fragment } from 'react';
+
 interface DbRowDetailProps {
   row: Record<string, unknown>;
   tableName: string;
@@ -23,49 +25,96 @@ export function DbRowDetail({ row, tableName, schema, connectionId, dtoFqn, onUs
     } catch { /* ignore */ }
   };
 
+  const fullTableName = schema ? `${schema}.${tableName}` : tableName;
+
   return (
     <div style={{
       maxHeight: 180,
       overflow: 'auto',
-      borderTop: '1px solid var(--color-border)',
-      padding: 'var(--space-2)',
-      fontSize: 11,
+      borderTop: '1px solid var(--ds-border)',
+      background: 'var(--ds-surface)',
     }}>
+      {/* Sticky header (007-D) */}
       <div style={{
+        position: 'sticky',
+        top: 0,
+        background: 'var(--ds-bg)',
+        padding: 'var(--ds-space-2) var(--ds-space-3)',
+        borderBottom: '1px solid var(--ds-border)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 'var(--ds-space-2)',
+        zIndex: 1,
+      }}>
+        <span style={{
+          background: 'var(--ds-primary)',
+          color: '#fff',
+          fontSize: 'var(--ds-text-2xs)',
+          fontWeight: 600,
+          padding: '2px 6px',
+          borderRadius: 'var(--ds-radius-full, 999px)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.04em',
+        }}>
+          DB Row
+        </span>
+        <span style={{
+          fontFamily: 'var(--ds-font-mono)',
+          fontSize: 'var(--ds-text-xs)',
+          color: 'var(--ds-text-muted)',
+        }}>
+          {fullTableName}
+        </span>
+      </div>
+
+      {/* Column/value grid */}
+      <div style={{
+        padding: 'var(--ds-space-2) var(--ds-space-3)',
         display: 'grid',
-        gridTemplateColumns: '1fr 2fr',
-        gap: '2px var(--space-2)',
+        gridTemplateColumns: 'auto 1fr',
+        gap: 'var(--ds-space-1) var(--ds-space-3)',
+        fontSize: 'var(--ds-text-xs)',
       }}>
         {Object.entries(row).map(([key, value]) => (
           <Fragment key={key}>
-            <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-fg-muted)', fontWeight: 600 }}>{key}</span>
-            <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-fg)' }}>
+            <span style={{
+              fontFamily: 'var(--ds-font-mono)',
+              color: 'var(--ds-text-muted)',
+              fontWeight: 600,
+            }}>{key}</span>
+            <span style={{
+              fontFamily: 'var(--ds-font-mono)',
+              color: value === null ? 'var(--ds-text-muted)' : 'var(--ds-text)',
+              fontStyle: value === null ? 'italic' : 'normal',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }} title={String(value ?? '')}>
               {value === null ? 'NULL' : String(value).substring(0, 100)}
             </span>
           </Fragment>
         ))}
       </div>
+
       {dtoFqn && (
-        <button
-          onClick={handleUseRow}
-          style={{
-            marginTop: 'var(--space-2)',
-            background: 'var(--color-accent)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 'var(--radius-1)',
-            padding: 'var(--space-1) var(--space-3)',
-            cursor: 'pointer',
-            fontSize: 11,
-            fontWeight: 600,
-          }}
-        >
-          Use this row → body
-        </button>
+        <div style={{ padding: 'var(--ds-space-2) var(--ds-space-3)' }}>
+          <button
+            onClick={handleUseRow}
+            style={{
+              background: 'var(--ds-primary)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 'var(--ds-radius-1)',
+              padding: 'var(--ds-space-1) var(--ds-space-3)',
+              cursor: 'pointer',
+              fontSize: 'var(--ds-text-xs)',
+              fontWeight: 600,
+            }}
+          >
+            Use this row → body
+          </button>
+        </div>
       )}
     </div>
   );
 }
-
-// Fragment import
-import { Fragment } from 'react';

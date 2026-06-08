@@ -90,6 +90,12 @@ public class DtoWalker {
             }
 
             return walkClass(typeDecl.asClassOrInterfaceDeclaration(), classpathRoots);
+        } catch (Exception e) {
+            System.err.println("[dto-walker] walkType failed for " + fqn + ": " + e.getMessage());
+            e.printStackTrace(System.err);
+            ObjectNode error = mapper.createObjectNode();
+            error.put("_walk_error", fqn + ": " + e.getMessage());
+            return error;
         } finally {
             cycleDetector.leave(fqn);
         }
@@ -107,15 +113,19 @@ public class DtoWalker {
     private ObjectNode walkRecord(RecordDeclaration record, List<Path> classpathRoots) throws IOException {
         ObjectNode node = mapper.createObjectNode();
         for (Parameter param : record.getParameters()) {
-            String paramName = param.getNameAsString();
-            Type paramType = param.getType();
-            String fieldName = getJsonFieldName(param.getAnnotations(), paramName);
+            try {
+                String paramName = param.getNameAsString();
+                Type paramType = param.getType();
+                String fieldName = getJsonFieldName(param.getAnnotations(), paramName);
 
-            ResolvedType resolved = resolveType(paramType);
-            if (resolved != null) {
-                node.set(fieldName, resolveValue(resolved, classpathRoots));
-            } else {
-                node.put(fieldName, "<object>");
+                ResolvedType resolved = resolveType(paramType);
+                if (resolved != null) {
+                    node.set(fieldName, resolveValue(resolved, classpathRoots));
+                } else {
+                    node.put(fieldName, "<object>");
+                }
+            } catch (Exception e) {
+                System.err.println("[dto-walker] Skipping record param " + param.getNameAsString() + ": " + e.getMessage());
             }
         }
         return node;
@@ -137,13 +147,17 @@ public class DtoWalker {
             for (FieldDeclaration field : cls.getFields()) {
                 if (field.isStatic()) continue;
                 for (VariableDeclarator var : field.getVariables()) {
-                    String fieldName = var.getNameAsString();
-                    String jsonName = getJsonFieldName(field.getAnnotations(), fieldName);
-                    ResolvedType resolved = resolveType(var.getType());
-                    if (resolved != null) {
-                        node.set(jsonName, resolveValue(resolved, classpathRoots));
-                    } else {
-                        node.put(jsonName, "<object>");
+                    try {
+                        String fieldName = var.getNameAsString();
+                        String jsonName = getJsonFieldName(field.getAnnotations(), fieldName);
+                        ResolvedType resolved = resolveType(var.getType());
+                        if (resolved != null) {
+                            node.set(jsonName, resolveValue(resolved, classpathRoots));
+                        } else {
+                            node.put(jsonName, "<object>");
+                        }
+                    } catch (Exception e) {
+                        System.err.println("[dto-walker] Skipping Lombok field " + var.getNameAsString() + ": " + e.getMessage());
                     }
                 }
             }
@@ -165,14 +179,19 @@ public class DtoWalker {
                 if (fieldName == null) continue;
                 if (addedFields.contains(fieldName)) continue;
 
-                String jsonName = getJsonFieldName(method.getAnnotations(), fieldName);
-                ResolvedType resolved = resolveType(method.getType());
-                if (resolved != null) {
-                    node.set(jsonName, resolveValue(resolved, classpathRoots));
-                } else {
-                    node.put(jsonName, "<object>");
+                try {
+                    String jsonName = getJsonFieldName(method.getAnnotations(), fieldName);
+                    ResolvedType resolved = resolveType(method.getType());
+                    if (resolved != null) {
+                        node.set(jsonName, resolveValue(resolved, classpathRoots));
+                    } else {
+                        node.put(jsonName, "<object>");
+                    }
+                    addedFields.add(fieldName);
+                } catch (Exception e) {
+                    System.err.println("[dto-walker] Skipping getter " + methodName + ": " + e.getMessage());
+                    addedFields.add(fieldName);
                 }
-                addedFields.add(fieldName);
             }
 
             // Fallback: if no getters found, walk fields
@@ -180,13 +199,17 @@ public class DtoWalker {
                 for (FieldDeclaration field : cls.getFields()) {
                     if (field.isStatic()) continue;
                     for (VariableDeclarator var : field.getVariables()) {
-                        String fieldName = var.getNameAsString();
-                        String jsonName = getJsonFieldName(field.getAnnotations(), fieldName);
-                        ResolvedType resolved = resolveType(var.getType());
-                        if (resolved != null) {
-                            node.set(jsonName, resolveValue(resolved, classpathRoots));
-                        } else {
-                            node.put(jsonName, "<object>");
+                        try {
+                            String fieldName = var.getNameAsString();
+                            String jsonName = getJsonFieldName(field.getAnnotations(), fieldName);
+                            ResolvedType resolved = resolveType(var.getType());
+                            if (resolved != null) {
+                                node.set(jsonName, resolveValue(resolved, classpathRoots));
+                            } else {
+                                node.put(jsonName, "<object>");
+                            }
+                        } catch (Exception e) {
+                            System.err.println("[dto-walker] Skipping field " + var.getNameAsString() + ": " + e.getMessage());
                         }
                     }
                 }
@@ -201,61 +224,70 @@ public class DtoWalker {
             return TextNode.valueOf("<object>");
         }
 
-        // Check for cycle on reference types
-        if (resolved.isReferenceType()) {
-            String fqn = resolved.asReferenceType().getQualifiedName();
-
-            // Handle Optional<T>
-            if ("java.util.Optional".equals(fqn)) {
-                List<ResolvedType> typeParams = resolved.asReferenceType().typeParametersValues();
-                if (!typeParams.isEmpty()) {
-                    ResolvedType inner = typeParams.get(0);
-                    JsonNode innerVal = resolveValue(inner, classpathRoots);
-                    // Return inner value (Optional fields are included, not omitted per D-07)
-                    return innerVal;
+        try {
+            // Check for cycle on reference types
+            if (resolved.isReferenceType()) {
+                String fqn;
+                try {
+                    fqn = resolved.asReferenceType().getQualifiedName();
+                } catch (Exception e) {
+                    return TextNode.valueOf("<object>");
                 }
-                return TextNode.valueOf("<object>");
+
+                // Handle Optional<T>
+                if ("java.util.Optional".equals(fqn)) {
+                    List<ResolvedType> typeParams = resolved.asReferenceType().typeParametersValues();
+                    if (!typeParams.isEmpty()) {
+                        ResolvedType inner = typeParams.get(0);
+                        JsonNode innerVal = resolveValue(inner, classpathRoots);
+                        return innerVal;
+                    }
+                    return TextNode.valueOf("<object>");
+                }
+
+                // Handle collections
+                if ("java.util.List".equals(fqn) || "java.util.Set".equals(fqn)
+                    || "java.util.Collection".equals(fqn)) {
+                    List<ResolvedType> typeParams = resolved.asReferenceType().typeParametersValues();
+                    ArrayNode arr = mapper.createArrayNode();
+                    if (!typeParams.isEmpty()) {
+                        arr.add(resolveValue(typeParams.get(0), classpathRoots));
+                    } else {
+                        arr.add(TextNode.valueOf("<object>"));
+                    }
+                    return arr;
+                }
+
+                // Handle Map<K,V>
+                if ("java.util.Map".equals(fqn)) {
+                    List<ResolvedType> typeParams = resolved.asReferenceType().typeParametersValues();
+                    ObjectNode map = mapper.createObjectNode();
+                    String key = typeParams.size() > 0 ? PlaceholderFactory.forType(typeParams.get(0)) : "<key>";
+                    if (typeParams.size() > 1) {
+                        map.set(stripAngleBrackets(key), resolveValue(typeParams.get(1), classpathRoots));
+                    } else {
+                        map.put(stripAngleBrackets(key), "<value>");
+                    }
+                    return map;
+                }
+
+                // Handle primitive wrapper types
+                String placeholder = PlaceholderFactory.forType(resolved);
+                if (!"<object>".equals(placeholder)) {
+                    return TextNode.valueOf(placeholder);
+                }
+
+                // Nested DTO — recursive walk
+                return walkType(fqn, classpathRoots);
             }
 
-            // Handle collections
-            if ("java.util.List".equals(fqn) || "java.util.Set".equals(fqn)
-                || "java.util.Collection".equals(fqn)) {
-                List<ResolvedType> typeParams = resolved.asReferenceType().typeParametersValues();
-                ArrayNode arr = mapper.createArrayNode();
-                if (!typeParams.isEmpty()) {
-                    arr.add(resolveValue(typeParams.get(0), classpathRoots));
-                } else {
-                    arr.add(TextNode.valueOf("<object>"));
-                }
-                return arr;
-            }
-
-            // Handle Map<K,V>
-            if ("java.util.Map".equals(fqn)) {
-                List<ResolvedType> typeParams = resolved.asReferenceType().typeParametersValues();
-                ObjectNode map = mapper.createObjectNode();
-                String key = typeParams.size() > 0 ? PlaceholderFactory.forType(typeParams.get(0)) : "<key>";
-                if (typeParams.size() > 1) {
-                    map.set(stripAngleBrackets(key), resolveValue(typeParams.get(1), classpathRoots));
-                } else {
-                    map.put(stripAngleBrackets(key), "<value>");
-                }
-                return map;
-            }
-
-            // Handle primitive wrapper types
+            // Primitive types
             String placeholder = PlaceholderFactory.forType(resolved);
-            if (!"<object>".equals(placeholder)) {
-                return TextNode.valueOf(placeholder);
-            }
-
-            // Nested DTO — recursive walk
-            return walkType(fqn, classpathRoots);
+            return TextNode.valueOf(placeholder);
+        } catch (Exception e) {
+            System.err.println("[dto-walker] resolveValue failed: " + e.getMessage());
+            return TextNode.valueOf("<object>");
         }
-
-        // Primitive types
-        String placeholder = PlaceholderFactory.forType(resolved);
-        return TextNode.valueOf(placeholder);
     }
 
     private String getJsonFieldName(List<?> annotations, String defaultName) {
@@ -309,6 +341,14 @@ public class DtoWalker {
     }
 
     private Path scanForSourceFile(Path root, String relativePath, String fqn) {
+        final int lastSlash = relativePath.lastIndexOf('/');
+        final String fileNameOnly = relativePath.substring(lastSlash + 1);
+        final String expectedDir = lastSlash >= 0
+            ? relativePath.substring(0, lastSlash)
+            : "";
+        final String expectedDirOs = lastSlash >= 0
+            ? expectedDir.replace('/', java.io.File.separatorChar)
+            : "";
         Path[] result = new Path[1];
         try {
             java.nio.file.FileVisitor<Path> visitor = new java.nio.file.SimpleFileVisitor<>() {
@@ -329,18 +369,26 @@ public class DtoWalker {
                         return java.nio.file.FileVisitResult.TERMINATE;
                     }
                     Path fileName = file.getFileName();
-                    if (fileName != null && fileName.toString().equals(relativePath.substring(relativePath.lastIndexOf('/') + 1))) {
-                        Path parent = file.getParent();
-                        StringBuilder sb = new StringBuilder();
-                        for (int i = parent.getNameCount() - 1; i >= 0; i--) {
-                            sb.insert(0, "/").insert(0, parent.getName(i).toString());
-                        }
-                        String dirPath = sb.length() > 0 ? sb.substring(1) : "";
-                        if (dirPath.equals(relativePath.substring(0, relativePath.lastIndexOf('/')).replace('/', java.io.File.separatorChar))
-                            || dirPath.equals(relativePath.substring(0, relativePath.lastIndexOf('/')))) {
-                            result[0] = file;
-                            return java.nio.file.FileVisitResult.TERMINATE;
-                        }
+                    if (fileName == null || !fileName.toString().equals(fileNameOnly)) {
+                        return java.nio.file.FileVisitResult.CONTINUE;
+                    }
+                    if (expectedDir.isEmpty()) {
+                        result[0] = file;
+                        return java.nio.file.FileVisitResult.TERMINATE;
+                    }
+                    Path parent = file.getParent();
+                    if (parent == null) {
+                        return java.nio.file.FileVisitResult.CONTINUE;
+                    }
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < parent.getNameCount(); i++) {
+                        if (i > 0) sb.append("/");
+                        sb.append(parent.getName(i).toString());
+                    }
+                    String dirPath = sb.toString();
+                    if (dirPath.equals(expectedDirOs) || dirPath.equals(expectedDir)) {
+                        result[0] = file;
+                        return java.nio.file.FileVisitResult.TERMINATE;
                     }
                     return java.nio.file.FileVisitResult.CONTINUE;
                 }

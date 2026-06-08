@@ -95,7 +95,7 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
   const fkChannelRef = useRef<((key: string) => void) | null>(null);
   const fkDecorationsRef = useRef<string[] | null>(null);
   const fkLineMapRef = useRef<Map<number, string>>(new Map());
-  const [fkBadges, setFkBadges] = useState<{ line: number; key: string; top: number }[]>([]);
+  // FK badge state removed — using Monaco content widgets instead
 
   const handleFkLookup = useCallback(async (key: string) => {
     setFkTargetKey(key);
@@ -121,9 +121,9 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     if (!fkTargetKey || body.mode !== 'raw') return;
     try {
       const parsed = JSON.parse(body.text);
-      // Use the first column value as the FK value
-      const firstValue = Object.values(row)[0];
-      parsed[fkTargetKey] = firstValue ?? null;
+      const idKey = Object.keys(row).find((k) => k.toLowerCase() === 'id');
+      const fkValue = idKey ? row[idKey] : Object.values(row)[0];
+      parsed[fkTargetKey] = fkValue ?? null;
       const formatted = JSON.stringify(parsed, null, 2);
       setBody(tabId, { ...body, text: formatted });
     } catch { /* invalid JSON, skip */ }
@@ -134,33 +134,67 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
     fkChannelRef.current = (key: string) => handleFkLookup(key);
   }, [handleFkLookup]);
 
-  // Compute FK badge positions from editor state
+  // FK badge positions computed via content widgets
+  const fkWidgetRefs = useRef<Map<string, any>>(new Map());
+  const fkLookupRef = useRef<(key: string) => void>(() => {});
+  fkLookupRef.current = handleFkLookup;
+
   const recomputeFkBadges = useCallback(() => {
     const editor = editorRef.current;
-    if (!editor) return;
+    const monaco = monacoRef.current;
+    if (!editor || !monaco) return;
     const model = editor.getModel();
     if (!model || body.mode !== 'raw' || body.contentType !== 'application/json') {
-      setFkBadges([]);
+      // Remove all FK widgets
+      fkWidgetRefs.current.forEach((w) => { try { editor.removeContentWidget(w); } catch {} });
+      fkWidgetRefs.current.clear();
       return;
     }
-    const lineHeight = (() => { try { return editor.getOption(6); } catch { return 20; } })();
-    const scrollTop = editor.getScrollTop();
-    const editorHeight = (() => { try { return editor.getLayoutInfo().height; } catch { return 240; } })();
-    const badges: { line: number; key: string; top: number }[] = [];
+
+    const fkLines = new Map<number, string>();
     for (let line = 1, n = model.getLineCount(); line <= n; line++) {
       const m = model.getLineContent(line).match(/^  "(\w+)"\s*:/);
-      if (!m || !isFkField(m[1])) continue;
-      const top = (line - 1) * lineHeight - scrollTop;
-      if (top + lineHeight >= 0 && top <= editorHeight) badges.push({ line, key: m[1], top });
+      if (m && isFkField(m[1])) fkLines.set(line, m[1]);
     }
-    setFkBadges(badges);
+
+    // Remove widgets for lines that no longer have FK fields
+    fkWidgetRefs.current.forEach((w, key) => {
+      const lineNum = parseInt(key, 10);
+      if (!fkLines.has(lineNum)) {
+        try { editor.removeContentWidget(w); } catch {}
+        fkWidgetRefs.current.delete(key);
+      }
+    });
+
+    // Add or update widgets for FK lines
+    fkLines.forEach((key, lineNum) => {
+      const widgetId = `fk-badge-${lineNum}`;
+      if (fkWidgetRefs.current.has(widgetId)) return; // already placed
+
+      const el = document.createElement('div');
+      el.className = 'fk-badge-widget';
+      el.textContent = '🔍 lookup';
+      el.style.cssText = 'cursor:pointer;color:#f5a623;border:1px solid #f5a623;border-radius:3px;padding:0 5px;font-size:10px;font-family:monospace;font-weight:600;line-height:16px;height:16px;white-space:nowrap;';
+      el.addEventListener('click', (e) => { e.stopPropagation(); fkLookupRef.current(key); });
+
+      const widget = {
+        getId: () => widgetId,
+        getDomNode: () => el,
+        getPosition: () => ({
+          position: { lineNumber: lineNum, column: model.getLineMaxColumn(lineNum) + 1 },
+          preference: [monaco.editor.ContentWidgetPositionPreference.Exact],
+        }),
+      };
+
+      try { editor.addContentWidget(widget); } catch {}
+      fkWidgetRefs.current.set(widgetId, widget);
+    });
   }, [body.mode, body.contentType]);
 
   const handleEditorMount = useCallback((editor: any, monaco: any) => {
     editorRef.current = editor;
     monacoRef.current = monaco;
     onEditorMount?.(editor, monaco);
-    // Compute badges after layout settles
     const compute = () => recomputeFkBadges();
     setTimeout(compute, 150);
     setTimeout(compute, 500);
@@ -517,7 +551,7 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
       )}
 
       {body.mode === 'raw' && (
-        <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-1)', overflow: 'hidden', position: 'relative' }}>
+        <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-1)', overflow: 'hidden' }}>
           <Editor
             height="240px"
             language={body.contentType === 'application/json' ? 'json' : body.contentType === 'application/xml' ? 'xml' : body.contentType === 'application/graphql' ? 'graphql' : 'plaintext'}
@@ -534,32 +568,6 @@ export function BodyTab({ tabId, onEditorMount }: BodyTabProps) {
               tabSize: 2,
             }}
           />
-          {/* FK lookup buttons overlaid on each FK line */}
-          {fkBadges.map((b) => (
-            <button
-              key={b.line}
-              onClick={() => handleFkLookup(b.key)}
-              style={{
-                position: 'absolute',
-                top: b.top,
-                right: 8,
-                height: 18,
-                background: 'none',
-                border: '1px solid #f5a623',
-                borderRadius: 3,
-                color: '#f5a623',
-                fontSize: 10,
-                fontFamily: 'monospace',
-                fontWeight: 600,
-                cursor: 'pointer',
-                padding: '0 5px',
-                lineHeight: '16px',
-                zIndex: 10,
-              }}
-            >
-              🔍 lookup
-            </button>
-          ))}
           <div style={{ padding: '4px var(--space-2)', fontSize: 10, color: 'var(--color-fg-muted)', textAlign: 'right', borderTop: '1px solid var(--color-border)' }}>
             {body.text.length} characters
           </div>

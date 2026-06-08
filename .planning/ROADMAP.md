@@ -2,158 +2,169 @@
 
 ## Overview
 
-PostmanClone is a desktop API client built for Java Spring developers. The journey starts with a 3-process architecture (Electron renderer + Node main + Java 21 helper) and a full Postman alternative (CORE parity), then layers on three Spring-aware differentiators: project scanning with prefilled requests, schema- and database-driven body generation, and multi-step request chains with response-to-body field mapping. Each phase ships a vertically-complete MVP slice — at the end of any phase, the app is useful on its own.
+PostmanClone is a desktop API client built for Java Spring developers. Milestone v2.1 shipped the full 3-process architecture, CORE Postman parity, Spring project detection, DTO/DB body generation, and workflow chains with response mapping. Milestone v3 is a UI redesign grounded in 9 validated design sketches (dated 2026-06-05) that established a developer-tool-dense visual direction: dark theme, method-color accents, vertical tab strips, attached URL bar, table grid variable editor, tree sidebar, IntelliJ-style DB tool window, horizontal chain step sequence, and bottom data panel for response mapping.
+
+## Milestones
+
+- ✅ **v2.1 Core + Spring + Chains** - Phases 1-4 (shipped 2026-06-06)
+- 🚧 **v3.0 UI Redesign** - Phases 5-9 (in progress)
 
 ## Phases
 
-- [x] **Phase 1: Foundation & Postman Parity** - Establish 3-process architecture + ship a full Postman alternative (CORE-01..10) (completed 2026-06-04)
-- [x] **Phase 2: Spring Project Detection** - Point at a Spring project, detect all `@RestController` endpoints, click to get a prefilled request (SPRING-01..05) (completed 2026-06-06)
-- [x] **Phase 3: Body Generation (DTO + DB)** - Generate request bodies from DTO schemas or real database rows (BODY-01..03 + DB-01..07) (completed 2026-06-06)
-- [x] **Phase 4: Workflow Chains & Response Mapping** - Build multi-step chains where later steps pull fields from earlier responses (CHAIN-01..05 + MAP-01..04) (completed 2026-06-06)
-
-## Phase Details
+<details>
+<summary>✅ v2.1 Core + Spring + Chains (Phases 1-4) - SHIPPED 2026-06-06</summary>
 
 ### Phase 1: Foundation & Postman Parity
-
 **Goal**: Establish the 3-process desktop architecture (Electron renderer + Node main + Java 21 helper) and ship a fully usable Postman alternative covering all CORE requirements.
-**Mode:** mvp
-**Depends on**: Nothing (first phase)
-**Requirements**: CORE-01, CORE-02, CORE-03, CORE-04, CORE-05, CORE-06, CORE-07, CORE-08, CORE-09, CORE-10
-**Success Criteria** (what must be TRUE):
-
-  1. User can launch the desktop app and see the 3-pane UI (sidebar / request editor / response viewer) with the JVM helper subprocess running and healthy in the background.
-  2. User can build and send any HTTP request (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS) and view the formatted response (status, headers, body, timing) — all HTTP goes through the main process (no browser CORS).
-  3. User can set headers, query params, path params, a body (none / form-data / url-encoded / raw JSON·XML·text / binary), and per-request auth (None / Bearer / Basic / API key), and see the equivalent cURL command for any request.
-  4. User can save requests into named collections (with nested folders), define variables in 4 scopes (global / environment / collection / request) with proper precedence, and view a per-collection request history.
-  5. User can import a Postman v2.1 collection and export it back round-trip without data loss, and the helper-supervisor proves itself by surviving a forced kill (auto-restart with exponential backoff).
-
-**Plans**: TBD (1-3 plans for coarse granularity)
-**UI hint**: yes
+**Plans**: 3 plans
 
 Plans:
-**Wave 1**
-
-- [x] 01-01: Scaffold 3-process architecture (Electron 42 + Vite 8 + React 19 + TS, preload `contextBridge`, JSON-RPC 2.0 stdio wire, JVM helper supervisor with restart policy)
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
+- [x] 01-01: Scaffold 3-process architecture (Electron 42 + Vite 8 + React 19 + TS, preload contextBridge, JSON-RPC 2.0 stdio wire, JVM helper supervisor with restart policy)
 - [x] 01-02: HTTP client + request/response editor (CORE-01, CORE-05, CORE-06, CORE-08, CORE-02) — main-process undici 7 client, Monaco body editor, response viewer
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
 - [x] 01-03: Collections, variables, auth, history, import/export (CORE-03, CORE-04, CORE-07, CORE-09, CORE-10) — Postman v2.1 storage layout, 4-scope resolver, electron-store + safeStorage
 
 ### Phase 2: Spring Project Detection
-
 **Goal**: User can point the app at a local Spring project and see every `@RestController` endpoint in a sidebar — clicking one builds a prefilled request with the DTO body shape already filled in.
-**Mode:** mvp
-**Depends on**: Phase 1
-**Requirements**: SPRING-01, SPRING-02, SPRING-03, SPRING-04, SPRING-05
-**Success Criteria** (what must be TRUE):
-
-  1. User can point the app at a local Spring project root; the JVM helper scans it and the sidebar shows all detected `@RestController` / `@Controller` endpoints grouped by controller.
-  2. Each detected endpoint exposes method, full merged path, path variables, query params, `consumes`, and `produces` — and works on Spring Boot 2.7+ and 3.x (Jakarta vs javax annotation drift does not break detection).
-  3. User can click a detected endpoint and the app opens a prefilled request: URL, method, headers, and the request body DTO class resolved and ready to use.
-  4. The scanner hits 100% endpoint coverage on a 10+ real Spring project test corpus (petclinic, realworld, mall, etc.), surviving Lombok, records, sealed types, multi-module Maven, and inner-class scope.
-  5. Scan completes in under 10 seconds for a typical Spring project (~100 controllers / ~500 endpoints), with a denylist for `.git/` / `target/` / `node_modules/` / `build/` and a 1MB per-file size cap.
-
-**Plans:** 3 plans
-**UI hint**: yes
+**Plans**: 3 plans
 
 Plans:
-**Wave 1**
-
-- [x] 02-01: JVM helper scanner module + IPC pipeline (SPRING-01, SPRING-02, SPRING-03) — EndpointScanner, ClasspathResolver, MavenModuleDetector, GradleModuleDetector, Denylist, Zod schemas, router handlers, project-cache, preload bridge
-
-**Wave 2** *(blocked on Wave 1 — needs IPC contracts)*
-
-- [x] 02-02: Sidebar EndpointsTree + Scan Progress UI (SPRING-04) — controller-grouped endpoint tree, SpringProjectPicker, ScanProgress, StatusBar scanner section, Zustand store, TanStack Query hooks
-
-**Wave 3** *(blocked on Wave 2 — needs EndpointsTree)*
-
-- [x] 02-03: Click-to-prefill + DtoClassPanel + Rescan (SPRING-05) — endpoint click handler, prefilled request tab, DTO class info panel, open-time rescan, lastSpringProjectPath persistence
+- [x] 02-01: JVM helper scanner module + IPC pipeline (SPRING-01, SPRING-02, SPRING-03)
+- [x] 02-02: Sidebar EndpointsTree + Scan Progress UI (SPRING-04)
+- [x] 02-03: Click-to-prefill + DtoClassPanel + Rescan (SPRING-05)
 
 ### Phase 3: Body Generation (DTO + DB)
-
-**Goal**: User can generate valid-shape request bodies either from a DTO schema (placeholder values) or from real database rows (mapped to the DTO) — both modes build on Phase 2's endpoint and DTO detection.
-**Mode:** mvp
-**Depends on**: Phase 2
-**Requirements**: BODY-01, BODY-02, BODY-03, DB-01, DB-02, DB-03, DB-04, DB-05, DB-06, DB-07
-**Success Criteria** (what must be TRUE):
-
-  1. User can click "Generate from DTO" on a detected endpoint and the body editor shows a JSON body whose shape matches the DTO schema (field names, types, nesting, enums, collections, Optional, records) with sensible editable placeholders (`"string"`, `0`, `true`, etc.).
-  2. Recursive DTOs (bidirectional `@OneToMany` / `@ManyToOne`) do not crash the app — the body emits `$ref`-style cycle markers or a `_cycle` placeholder with a visible warning, and recursion depth is capped at 6.
-  3. User can create a database connection (PostgreSQL, MySQL, Oracle, H2) with credentials encrypted via Electron `safeStorage` (DPAPI/Keychain/libsecret); plaintext is never written to disk, never logged, never sent off-device.
-  4. User can pick a table and a row (by id, by custom WHERE query, or "first N rows") and the app produces a JSON body from that row, shaped to match the endpoint's DTO schema.
-  5. User can override column→field mappings when column names don't match DTO field names, with color-coded type-compatibility indicators (green / yellow / red) and a required-field coverage badge.
-
-**Plans**: 3 plans in 3 waves
-**UI hint**: yes
+**Goal**: User can generate valid-shape request bodies either from a DTO schema or from real database rows.
+**Plans**: 3 plans
 
 Plans:
-**Wave 1**
-
-- [x] 03-01: DTO schema body generation + cycle detection (BODY-01..03) — JavaParser walker, CycleDetector, PlaceholderFactory, EnumCommentEmitter, IPC bridge, Generate button in BodyTab
-
-**Wave 2** *(blocked on Wave 1 — needs supervisor.getClient())*
-
-- [x] 03-02: DB connection management (DB-01, DB-02, DB-07) — safeStorage wrapper, db-connections CRUD, HikariCP pool (size 2), JDBC drivers, DbConnectionForm with JDBC URL auto-parse
-
-**Wave 3** *(blocked on Wave 2 — needs DB connection infrastructure)*
-
-- [x] 03-03: Table→row selection + column→field mapping UI (DB-03..06) — RowToJsonMapper, ColumnFieldNameMatcher, DbTableTree sidebar, DbRowDetail, ColumnFieldMapping editor
+- [x] 03-01: DTO schema body generation + cycle detection (BODY-01..03)
+- [x] 03-02: DB connection management (DB-01, DB-02, DB-07)
+- [x] 03-03: Table→row selection + column→field mapping UI (DB-03..06)
 
 ### Phase 4: Workflow Chains & Response Mapping
-
-**Goal**: User can build ordered multi-step chains where later steps reference earlier responses — completing the "Spring project → live API playground" story end to end.
-**Mode:** mvp
-**Depends on**: Phase 3
-**Requirements**: CHAIN-01, CHAIN-02, CHAIN-03, CHAIN-04, CHAIN-05, MAP-01, MAP-02, MAP-03, MAP-04
-**Success Criteria** (what must be TRUE):
-
-  1. User can define an ordered chain of N requests inside a collection, save it with the collection (Postman v2.1 + `chains` extension), and re-open it later.
-  2. User can run the whole chain end-to-end and see per-step results in sequence (status, response body, applied mappings, timing).
-  3. User can re-run a single step in the chain without rerunning earlier steps, and per-step timeout / retry policy is honored without freezing the UI.
-  4. User can drag a field from any earlier step's response tree onto a field in a later step's body / header / URL — the mapping is explicit, editable, and shows in a clear source→target view.
-  5. Mappings resolve at chain-run time (not edit time) and the user can preview the resolved body for any step before running the chain, so a changed earlier response automatically flows downstream.
-
-**Plans**: 3 plans in 3 waves
-**UI hint**: yes
+**Goal**: User can build ordered multi-step chains where later steps reference earlier responses.
+**Plans**: 3 plans
 
 Plans:
-**Wave 1**
+- [x] 04-01: Chain data model + orchestrator + IPC (CHAIN-01, CHAIN-03, CHAIN-04, CHAIN-05)
+- [x] 04-02: Chain editor UI + sidebar integration (CHAIN-01..04)
+- [x] 04-03: Data panel + preview resolved body (MAP-01..04)
 
-- [x] 04-01: Chain data model + orchestrator + IPC (CHAIN-01, CHAIN-03, CHAIN-04, CHAIN-05) — ChainSchema/ChainStepSchema, chain orchestrator (sequential undici, timeout/retry), reference resolver (JSONata 1.8.7), validator (circular refs), chain CRUD, IPC channels, preload bridge
+</details>
 
-**Wave 2** *(blocked on Wave 1 — needs chain schemas + IPC)*
+### 🚧 v3.0 UI Redesign (In Progress)
 
-- [x] 04-02: Chain editor UI + sidebar integration (CHAIN-01, CHAIN-02, CHAIN-03, CHAIN-04) — sidebar "New Chain" button + chain items, ChainEditor, ChainHeader, StepSequence (horizontal cards), StepCard, ChainRequestBuilder, useChain Zustand store, Monaco reference highlighting
+**Milestone Goal:** Apply the 9 validated sketch winners across all renderer UI surfaces. Tighten density, apply the dark theme with method-color accents, switch to vertical tab strips for section navigation, and ship the IntelliJ-style DB tool window. Preserve all IPC contracts, main process logic, and storage layout — only the renderer UI changes.
 
-**Wave 3** *(blocked on Wave 2 — needs chain editor)*
+**Design system source:** `.opencode/skills/sketch-findings-postman-clone/references/` and `.planning/sketches/themes/default.css`
 
-- [x] 04-03: Data panel + preview resolved body (MAP-01..04) — ChainDataPanel (collapsible bottom panel), ChainStepColumn (JSON tree + copy-path), PreviewResolvedModal, ChainValidationBanner, UnresolvedRefWarning, keyboard shortcuts
+**Constraint:** Renderer-only changes (`src/renderer/`). No main process, IPC, JVM helper, or storage changes. Reuse existing Zustand stores and TanStack Query hooks.
+
+#### Phase 5: Design System & Theme Foundation
+**Goal**: Establish the new visual foundation — design tokens, theme CSS, and shared component primitives (buttons, badges, method-color mappings). All other phases depend on this.
+**Depends on**: Phase 4
+**Requirements**: REDESIGN-01
+**Status**: Complete (2026-06-06)
+**Success Criteria** (what must be TRUE):
+  1. ✓ The renderer loads the new design tokens from `theme-dark.css` matching `default.css` (colors, spacing, typography, radii) and the existing light theme still functions. Legacy oklch tokens preserved for backward compat.
+  2. ✓ A shared `<MethodBadge method="..." />` primitive exists at `src/renderer/components/ui/MethodBadge.tsx`, renders with the correct method color (GET=green, POST=orange, PUT=blue, PATCH=purple, DELETE=red, HEAD/OPTIONS=gray), and is used by `MethodPicker` (refactored to wrap a `<MethodBadge>` + transparent `<select>`).
+  3. ✓ A shared `<VerticalTabStrip>` and `<PillBar>` primitive exist in `src/renderer/components/ui/` and are exported via `index.ts`. The existing `RequestEditor.SubTabs` is the next consumer (Phase 6).
+  4. ✓ A `<SendButton>` (accent orange) and `<IconButton>` primitive exist and are exported. They will replace ad-hoc buttons in Phase 6.
+**Plans**: 1 plan
+
+Plans:
+- [x] 05-01: Design tokens, theme CSS, shared UI primitives (MethodBadge, VerticalTabStrip, PillBar, SendButton, IconButton) — completed 2026-06-06
+
+#### Phase 6: Request Builder Redesign
+**Goal**: Apply sketches 001-A (URL bar attached method badge), 002-C (vertical tab strip sections), 003-A (pill bar body modes) to the request editor — the most visible surface in the app.
+**Depends on**: Phase 5
+**Requirements**: REDESIGN-02
+**Status**: Complete (2026-06-06)
+**Success Criteria** (what must be TRUE):
+  1. ✓ The URL bar is a single bordered container with the method badge attached on the left, URL input (monospace) in the middle, and the send button (accent) on the right. The method badge opens a dropdown when clicked.
+  2. ✓ Request section navigation (Params / Headers / Body / Auth / Settings) is a vertical tab strip on the left (140px min-width) with the active tab showing a left border accent. Each tab shows an icon + label + count badge (live counts: enabled params, enabled headers, body content presence, auth configured).
+  3. ✓ The Body section uses a horizontal pill bar at the top for mode selection (none / form-data / url-encoded / raw / binary), with a content-type selector below for raw mode. The Monaco editor fills the remaining vertical space.
+  4. ✓ Existing functionality is preserved — sending requests, viewing responses, switching tabs all continue to work; only the visual layout changes. Save / Copy as cURL / Diagnose actions moved to a secondary toolbar row below the URL bar.
+**Plans**: 1 plan
+
+Plans:
+- [x] 06-01: URL bar (001-A), vertical tab strip (002-C), body pill bar (003-A) — refactor RequestEditor.tsx, SubTabs.tsx, BodyTab.tsx — completed 2026-06-06
+
+#### Phase 7: Sidebar & Variable Editor Redesign
+**Goal**: Apply sketches 004-A (table grid variable editor) and 005-A (tree sidebar collections) — the sidebar gets a polished tree and a dense table editor for variables.
+**Depends on**: Phase 5
+**Requirements**: REDESIGN-03
+**Status**: Complete (2026-06-06)
+**Success Criteria** (what must be TRUE):
+  1. ✓ The Collections tree uses the tree sidebar pattern from sketch 005-A: compact rows (`4px var(--ds-space-2)` padding), icon per node (folder 📁 / request), right-aligned count badge, monospace for URLs, `<MethodBadge size="xs">` for methods, rotating chevron (`transform: rotate(90deg)`) on expand, search filter input.
+  2. ✓ The Variables editor uses the table grid pattern from sketch 004-A: dense rows (`3px 6px` padding), inline editing of name/value columns (`border: 1px solid transparent` with focus ring), secret checkbox toggle (`-webkit-text-security: disc`), scope column with colored badges (Env=blue, Collection=orange, Global=green), `✕` delete button, environment switcher chips, bulk export toolbar (Copy JSON / Copy .env).
+  3. ✓ Sidebar section switching (Collections / Endpoints / Environments / History / Variables) uses `<IconButton variant="solid|ghost">` from Phase 5 design system.
+  4. ✓ Endpoints tree, Environments list, History list all follow the same tree pattern: compact rows, rotating chevrons, count badges, monospace fonts, method-color accent borders. Search input on Endpoints tree.
+  5. ✓ Existing functionality is preserved — creating folders, saving requests, switching environments, viewing history, selecting endpoints all continue to work.
+**Plans**: 1 plan
+
+Plans:
+- [x] 07-01: Collections tree (005-A), variables table editor (004-A), Endpoints/Environments/History trees — refactor Sidebar.tsx, CollectionsTree.tsx, VariablesTab.tsx, EnvironmentsList.tsx, HistoryList.tsx, EndpointsTree.tsx, DtoClassPanel.tsx — completed 2026-06-06
+
+#### Phase 8: Database Integration Redesign
+**Goal**: Apply sketches 006-B (JDBC URL + Parse connection form) and 007-D (right tree + inline rows table picker) — the DB tool window gets an IntelliJ-style polish.
+**Depends on**: Phase 5
+**Requirements**: REDESIGN-04
+**Status**: Complete (2026-06-06)
+**Success Criteria** (what must be TRUE):
+  1. ✓ The DB connection form uses the JDBC URL + auto-parse pattern from sketch 006-B: a single JDBC URL input (dark `--ds-editor-bg` background, monospace, `--ds-radius-1` border on focus), a 4-column parsed grid (Driver / Host / Port / Database, all uppercase labels, monospace values), and a 2-column user/password field row below. Test Connection uses `<IconButton variant="outline">`. Save Connection is a solid primary button.
+  2. ✓ The DB table picker uses the right-tree + inline-rows pattern from sketch 007-D: mode switcher (First N / By ID / WHERE) replaced with `<PillBar>`, table rows with rotating chevron + count badge, inline rows showing first 3 key=value pairs in monospace, "Load 10 more →" link at the bottom. Clicking a row triggers `onRowSelect`.
+  3. ✓ The DB row detail uses the 007-D sticky header pattern: `position: sticky; top: 0` header with a "DB Row" pill badge (`var(--ds-primary)` background, rounded full) and the schema.table name in monospace, then a 2-column grid (key in muted / value in regular, with `NULL` shown italic in muted). The `Use this row → body` button is a solid primary button.
+  4. ✓ The ColumnFieldMapping editor uses the type-compatibility color indicators: green dot for exact match, orange for compatible (auto-converts), red for incompatible. The coverage badge shows "X/Y required" with color matching the state (all green / partial orange / none red). A legend below the table explains each color. Action buttons row uses dashed-border ghost buttons + a solid primary Apply button.
+  5. ✓ All four database components are migrated to `--ds-*` design tokens (no legacy oklch references remain).
+  6. ✓ `DatabasePanel` container is created and wired into `App.tsx` as a toggleable right-pane tool window (340px wide). StatusBar gets a `🗄 Database` toggle button that highlights when active. The panel composes the four refactored DB components: left column (130px) = connections list with db-type emoji icons (🐘 🐬 🔴 💧 🗄) + connection-status dot; right column = selected connection's workspace (form when creating, tree + row detail when browsing). Clicking `Use this row → body` auto-fills the active tab's body editor with the row's JSON.
+  7. ✓ Existing functionality is preserved — connecting, browsing tables, mapping columns, generating bodies all work end-to-end.
+**Plans**: 1 plan
+
+Plans:
+- [x] 08-01: DB connection form (006-B), DB table picker + inline rows (007-D), column-field mapping panel + DatabasePanel container integration — refactor Database/DbConnectionForm.tsx, DbTableTree.tsx, DbRowDetail.tsx, ColumnFieldMapping.tsx; create DatabasePanel.tsx; wire into App.tsx; add DB toggle to StatusBar — completed 2026-06-06
+
+#### Phase 9: Chain UI Redesign
+**Goal**: Apply sketches 009-A (horizontal step sequence) and 010-B (bottom data panel chain link builder) — chains get a visual step ribbon and a collapsible bottom data panel for response field reference.
+**Depends on**: Phase 5
+**Requirements**: REDESIGN-05
+**Success Criteria** (what must be TRUE):
+  1. The chain header shows a horizontal step sequence (009-A): each step as a card with method badge, name, and an arrow between steps. Clicking a step scrolls to its body. The active step has an accent border.
+  2. The chain link builder has a collapsible bottom data panel (010-B) showing the previous step's response tree. Steps are arranged in columns; clicking a field in the data panel copies its JSONata reference (`$['step-id'].body.path`).
+  3. The ChainDataPanel and ChainStepColumn components render the data tree with monospace JSON, copy-path button on each node, and a clear source→target mapping view.
+  4. Existing functionality is preserved — running chains, editing steps, mapping responses to body/header/URL fields, previewing resolved bodies all continue to work.
+**Plans**: 1 plan
+
+Plans:
+- [ ] 09-01: Chain horizontal steps (009-A), bottom data panel (010-B) — refactor Chain/ChainHeader, StepSequence, StepCard, ChainRequestBuilder, ChainDataPanel, ChainStepColumn, PreviewResolvedModal, ChainValidationBanner, UnresolvedRefWarning
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order: 5 → 6 → 7 → 8 → 9
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Foundation & Postman Parity | 3/3 | Complete   | 2026-06-04 |
-| 2. Spring Project Detection | 3/3 | Complete | 2026-06-06 |
-| 3. Body Generation (DTO + DB) | 3/3 | Complete | 2026-06-06 |
-| 4. Workflow Chains & Response Mapping | 3/3 | Complete | 2026-06-06 |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Foundation & Postman Parity | v2.1 | 3/3 | Complete | 2026-06-04 |
+| 2. Spring Project Detection | v2.1 | 3/3 | Complete | 2026-06-06 |
+| 3. Body Generation (DTO + DB) | v2.1 | 3/3 | Complete | 2026-06-06 |
+| 4. Workflow Chains & Response Mapping | v2.1 | 3/3 | Complete | 2026-06-06 |
+| 5. Design System & Theme Foundation | v3.0 | 1/1 | Complete | 2026-06-06 |
+| 6. Request Builder Redesign | v3.0 | 1/1 | Complete | 2026-06-06 |
+| 7. Sidebar & Variable Editor Redesign | v3.0 | 1/1 | Complete | 2026-06-06 |
+| 8. Database Integration Redesign | v3.0 | 1/1 | Complete | 2026-06-06 |
+| 9. Chain UI Redesign | v3.0 | 0/1 | Not started | - |
 
 **Coverage:**
 
-- v1 requirements: 34 total
-- Mapped to phases: 34/34 ✓
-- Unmapped: 0
+- v1 requirements: 34 total (shipped in v2.1)
+- v3 redesign requirements: 5 total (REDESIGN-01..05)
+- Mapped to phases: 5/5 ✓
 
 **Phase distribution:**
 
-- Phase 1: 10 requirements (CORE-01..10)
-- Phase 2: 5 requirements (SPRING-01..05)
-- Phase 3: 10 requirements (BODY-01..03 + DB-01..07)
-- Phase 4: 9 requirements (CHAIN-01..05 + MAP-01..04)
+- Phase 5: 1 requirement (REDESIGN-01)
+- Phase 6: 1 requirement (REDESIGN-02)
+- Phase 7: 1 requirement (REDESIGN-03)
+- Phase 8: 1 requirement (REDESIGN-04)
+- Phase 9: 1 requirement (REDESIGN-05)

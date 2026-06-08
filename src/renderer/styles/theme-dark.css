@@ -1,10 +1,21 @@
 :root[data-theme="dark"] {
+  /* Legacy oklch overrides (preserved for existing components) */
   --color-bg: oklch(0.18 0.01 250);
   --color-bg-elevated: oklch(0.22 0.01 250);
   --color-fg: oklch(0.92 0.01 250);
   --color-fg-muted: oklch(0.65 0.01 250);
   --color-border: oklch(0.3 0.01 250);
   --color-accent: oklch(0.7 0.15 230);
+
+  /* v3 redesign — dark surfaces / text. Method colors stay constant. */
+  --ds-bg: #1a1b1e;
+  --ds-surface: #25262b;
+  --ds-surface-raised: #2c2e33;
+  --ds-border: #373a40;
+  --ds-text: #c1c2c5;
+  --ds-text-muted: #909296;
+  --ds-text-dim: #5c5f66;
+  --ds-editor-bg: #0d1117;
 }
 
 * {
@@ -14,12 +25,40 @@
 }
 
 body {
-  font-family: var(--font-sans);
-  background: var(--color-bg);
-  color: var(--color-fg);
+  font-family: var(--ds-font-sans);
+  background: var(--ds-bg);
+  color: var(--ds-text);
+  font-size: var(--ds-text-base);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .app-shell {
-  background: var(--color-bg);
-  color: var(--color-fg);
+  background: var(--ds-bg);
+  color: var(--ds-text);
+  font-family: var(--ds-font-sans);
+}
+
+/* Scrollbar — slim, dark-theme native */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ds-border);
+  border-radius: var(--ds-radius-full);
+  border: 2px solid var(--ds-bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ds-text-dim);
+}
+
+/* Focus ring — single source of truth */
+:focus-visible {
+  outline: 2px solid var(--ds-border-focus);
+  outline-offset: 1px;
 }

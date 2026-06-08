@@ -1,4 +1,5 @@
 :root {
+  /* Legacy oklch tokens (preserved for existing components — keep in sync with v2.1) */
   --color-method-get: oklch(0.7 0.15 230);
   --color-method-post: oklch(0.7 0.15 145);
   --color-method-put: oklch(0.75 0.15 50);
@@ -43,6 +44,118 @@
   --color-warning: oklch(0.75 0.15 80);
   --color-danger: oklch(0.65 0.18 25);
   --color-success: oklch(0.65 0.18 145);
+}
+
+/* v3 redesign tokens — developer-tool dense Postman/Insomnia-inspired.
+   Source: .planning/sketches/themes/default.css
+   These are the canonical design tokens. The legacy oklch block above is
+   preserved for backward compatibility; new components must use these. */
+:root,
+:root[data-theme="light"] {
+  /* Surfaces */
+  --ds-bg: #ffffff;
+  --ds-surface: #f5f5f7;
+  --ds-surface-raised: #ffffff;
+  --ds-border: #e4e4e7;
+  --ds-border-focus: #4c9aff;
+
+  /* Text */
+  --ds-text: #1a1b1e;
+  --ds-text-muted: #5c5f66;
+  --ds-text-dim: #909296;
+
+  /* Brand / actions */
+  --ds-primary: #4c9aff;
+  --ds-primary-hover: #74b3ff;
+  --ds-accent: #f08c00;
+  --ds-accent-hover: #faa02f;
+  --ds-danger: #e03131;
+  --ds-success: #2f9e44;
+  --ds-warning: #fab005;
+
+  /* Method colors — must match across light + dark */
+  --ds-method-get: #2f9e44;
+  --ds-method-post: #f08c00;
+  --ds-method-put: #4c9aff;
+  --ds-method-patch: #9c3ce0;
+  --ds-method-delete: #e03131;
+  --ds-method-head: #909296;
+  --ds-method-options: #909296;
+
+  /* Status (HTTP response codes) */
+  --ds-status-2xx: #2f9e44;
+  --ds-status-3xx: #4c9aff;
+  --ds-status-4xx: #f08c00;
+  --ds-status-5xx: #e03131;
+
+  /* Editor-specific (Monaco host) */
+  --ds-editor-bg: #fafafa;
+}
+
+:root[data-theme="dark"] {
+  /* Surfaces */
+  --ds-bg: #1a1b1e;
+  --ds-surface: #25262b;
+  --ds-surface-raised: #2c2e33;
+  --ds-border: #373a40;
+  --ds-border-focus: #4c9aff;
+
+  /* Text */
+  --ds-text: #c1c2c5;
+  --ds-text-muted: #909296;
+  --ds-text-dim: #5c5f66;
+
+  /* Method colors stay constant across themes */
+  --ds-method-get: #2f9e44;
+  --ds-method-post: #f08c00;
+  --ds-method-put: #4c9aff;
+  --ds-method-patch: #9c3ce0;
+  --ds-method-delete: #e03131;
+  --ds-method-head: #909296;
+  --ds-method-options: #909296;
+
+  /* Editor-specific (Monaco host in dark mode) */
+  --ds-editor-bg: #0d1117;
+}
+
+:root {
+  /* Typography scale */
+  --ds-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --ds-font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  --ds-text-2xs: 0.625rem;
+  --ds-text-xs: 0.75rem;
+  --ds-text-sm: 0.8125rem;
+  --ds-text-base: 0.875rem;
+  --ds-text-lg: 1rem;
+  --ds-text-xl: 1.125rem;
+  --ds-text-2xl: 1.25rem;
+
+  /* Spacing — 4 / 6 / 10 / 14 / 20 / 28 / 40 */
+  --ds-space-1: 4px;
+  --ds-space-2: 6px;
+  --ds-space-3: 10px;
+  --ds-space-4: 14px;
+  --ds-space-6: 20px;
+  --ds-space-8: 28px;
+  --ds-space-12: 40px;
+
+  /* Radii */
+  --ds-radius-1: 3px;
+  --ds-radius-2: 6px;
+  --ds-radius-3: 8px;
+  --ds-radius-full: 9999px;
+
+  /* Shadows */
+  --ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --ds-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --ds-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  /* Z-index scale */
+  --ds-z-base: 0;
+  --ds-z-dropdown: 100;
+  --ds-z-sticky: 200;
+  --ds-z-modal: 1000;
+  --ds-z-toast: 2000;
 }
 
 @keyframes spin {

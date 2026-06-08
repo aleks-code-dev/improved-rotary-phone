@@ -7,14 +7,10 @@ interface ParamsTabProps {
 export function ParamsTab({ tabId }: ParamsTabProps) {
   const spec = useRequest((s) => s.specs[tabId]);
   const queryParams = spec?.queryParams ?? [];
-  const pathParams = spec?.pathParams ?? [];
 
   const addQueryParam = useRequest((s) => s.addQueryParam);
   const updateQueryParam = useRequest((s) => s.updateQueryParam);
   const removeQueryParam = useRequest((s) => s.removeQueryParam);
-  const addPathParam = useRequest((s) => s.addPathParam);
-  const updatePathParam = useRequest((s) => s.updatePathParam);
-  const removePathParam = useRequest((s) => s.removePathParam);
 
   const cellStyle: React.CSSProperties = {
     padding: 'var(--space-1) var(--space-2)',
@@ -69,45 +65,6 @@ export function ParamsTab({ tabId }: ParamsTabProps) {
         </tbody>
       </table>
       <button onClick={() => addQueryParam(tabId)} style={addBtnStyle}>+ Add row</button>
-
-      <h4 style={{ margin: 'var(--space-4) 0 var(--space-2)', color: 'var(--color-fg)', fontSize: 13 }}>Path Params</h4>
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 'var(--space-3)' }}>
-        <thead>
-          <tr style={{ color: 'var(--color-fg-muted)', fontSize: 11 }}>
-            <th style={{ ...cellStyle, textAlign: 'left' }}>Key</th>
-            <th style={{ ...cellStyle, textAlign: 'left' }}>Value</th>
-            <th style={{ ...cellStyle, width: 30 }}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {pathParams.map((p, i) => (
-            <tr key={i}>
-              <td style={cellStyle}>
-                <input
-                  type="text"
-                  value={p.key}
-                  onChange={(e) => updatePathParam(tabId, i, { key: e.target.value })}
-                  placeholder="{key}"
-                  style={inputStyle}
-                />
-              </td>
-              <td style={cellStyle}>
-                <input
-                  type="text"
-                  value={p.value}
-                  onChange={(e) => updatePathParam(tabId, i, { value: e.target.value })}
-                  placeholder="value"
-                  style={inputStyle}
-                />
-              </td>
-              <td style={cellStyle}>
-                <button onClick={() => removePathParam(tabId, i)} style={removeBtnStyle}>✕</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <button onClick={() => addPathParam(tabId)} style={addBtnStyle}>+ Add row</button>
     </div>
   );
 }

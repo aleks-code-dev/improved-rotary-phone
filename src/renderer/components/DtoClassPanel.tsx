@@ -21,16 +21,16 @@ export function DtoClassPanel() {
 
   return (
     <div style={{
-      padding: 'var(--space-2) 0',
-      borderTop: '1px solid var(--color-border)',
+      padding: 'var(--ds-space-2) 0',
+      borderTop: '1px solid var(--ds-border)',
     }}>
       <div style={{
-        fontSize: 11,
+        fontSize: 'var(--ds-text-xs)',
         fontWeight: 600,
         textTransform: 'uppercase',
-        color: 'var(--color-fg-muted)',
+        color: 'var(--ds-text-muted)',
         letterSpacing: '0.05em',
-        marginBottom: 'var(--space-2)',
+        marginBottom: 'var(--ds-space-2)',
       }}>
         Request Body Class
       </div>
@@ -38,26 +38,26 @@ export function DtoClassPanel() {
       {selectedEndpoint.requestBodyFqn ? (
         <>
           <div style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: 12,
+            fontFamily: 'var(--ds-font-mono)',
+            fontSize: 'var(--ds-text-sm)',
             fontWeight: 600,
-            color: 'var(--color-fg)',
-            marginBottom: 'var(--space-2)',
+            color: 'var(--ds-text)',
+            marginBottom: 'var(--ds-space-2)',
             wordBreak: 'break-all',
           }}>
             {selectedEndpoint.requestBodyFqn}
           </div>
           <div style={{
-            fontSize: 11,
-            color: 'var(--color-fg-muted)',
+            fontSize: 'var(--ds-text-xs)',
+            color: 'var(--ds-text-muted)',
           }}>
             Full DTO body generation is available in Phase 3
           </div>
         </>
       ) : (
         <div style={{
-          fontSize: 12,
-          color: 'var(--color-fg-muted)',
+          fontSize: 'var(--ds-text-sm)',
+          color: 'var(--ds-text-muted)',
         }}>
           No DTO class resolved for this endpoint
         </div>

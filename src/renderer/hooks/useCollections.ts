@@ -28,7 +28,9 @@ export function useCreateCollection() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (name: string) => window.api.collections.create({ name }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['collections'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['collections'] });
+    },
   });
 }
 
@@ -37,7 +39,10 @@ export function useUpdateCollection() {
   return useMutation({
     mutationFn: ({ id, collection }: { id: string; collection: any }) =>
       window.api.collections.update({ id, collection }),
-    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: ['collections', vars.id] }),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ['collections'] });
+      qc.invalidateQueries({ queryKey: ['collections', vars.id] });
+    },
   });
 }
 

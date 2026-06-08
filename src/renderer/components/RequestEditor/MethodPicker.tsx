@@ -1,4 +1,5 @@
 import type { HttpMethod } from '../../state/useRequest';
+import { MethodBadge } from '../ui/MethodBadge';
 
 const METHODS: HttpMethod[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
 
@@ -9,26 +10,34 @@ interface MethodPickerProps {
 
 export function MethodPicker({ value, onChange }: MethodPickerProps) {
   return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value as HttpMethod)}
+    <div
       style={{
-        background: `var(--color-method-${value.toLowerCase()})`,
-        color: 'white',
-        border: 'none',
-        borderRadius: 'var(--radius-1)',
-        padding: 'var(--space-2) var(--space-3)',
-        fontWeight: 600,
-        cursor: 'pointer',
-        fontSize: 13,
-        minWidth: 100,
+        position: 'relative',
+        display: 'inline-flex',
+        alignItems: 'center',
       }}
     >
-      {METHODS.map((m) => (
-        <option key={m} value={m} style={{ background: 'var(--color-bg-elevated)', color: 'var(--color-fg)' }}>
-          {m}
-        </option>
-      ))}
-    </select>
+      <MethodBadge method={value} size="md" style={{ minWidth: 72 }} />
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value as HttpMethod)}
+        aria-label="HTTP method"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          opacity: 0,
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+        }}
+      >
+        {METHODS.map((m) => (
+          <option key={m} value={m}>
+            {m}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }

@@ -15,7 +15,7 @@ export interface HistoryEntryInput {
   request: {
     method: string;
     url: string;
-    headers: Array<{ key: string; value: string }>;
+    headers?: Array<{ key: string; value: string }>;
     auth?: AuthConfig;
     body?: any;
     [key: string]: unknown;
@@ -23,11 +23,11 @@ export interface HistoryEntryInput {
   response: {
     status: number;
     statusText: string;
-    headers: Array<{ key: string; value: string }>;
-    bodyBase64: string;
+    headers?: Array<{ key: string; value: string }>;
+    bodyBase64?: string;
     durationMs: number;
-    startedAt: number;
-    completedAt: number;
+    startedAt?: number;
+    completedAt?: number;
   } | null;
   envSnapshotId?: string | null;
 }
@@ -98,10 +98,12 @@ export async function appendHistoryEntry(
   // 5. Build response with body truncation (PITFALLS m-1)
   let responseEntry: HistoryEntry['response'] = null;
   if (input.response) {
-    const maskedRespHeaders = maskHeadersForStorage(input.response.headers);
-    let bodyBase64 = input.response.bodyBase64;
+    const respHeaders = Array.isArray(input.response.headers)
+      ? maskHeadersForStorage(input.response.headers)
+      : [];
+    let bodyBase64 = input.response.bodyBase64 || '';
     let bodyTruncated = false;
-    let bodySizeBytes = Buffer.from(bodyBase64, 'base64').byteLength;
+    let bodySizeBytes = bodyBase64 ? Buffer.from(bodyBase64, 'base64').byteLength : 0;
 
     if (bodySizeBytes > BODY_CAP_BYTES) {
       bodyTruncated = true;
@@ -111,13 +113,13 @@ export async function appendHistoryEntry(
     responseEntry = {
       status: input.response.status,
       statusText: input.response.statusText,
-      headers: maskedRespHeaders,
+      headers: respHeaders,
       bodyBase64,
       bodyTruncated,
       bodySizeBytes,
       durationMs: input.response.durationMs,
-      startedAt: input.response.startedAt,
-      completedAt: input.response.completedAt,
+      startedAt: input.response.startedAt ?? Date.now(),
+      completedAt: input.response.completedAt ?? Date.now(),
     };
   }
 

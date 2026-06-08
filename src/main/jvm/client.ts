@@ -15,11 +15,14 @@ export class JsonRpcClientImpl implements JsonRpcClient {
   private nextId = 1;
   private writing = false;
   private writeQueue: string[] = [];
+  private stdoutBuffer = '';
 
   constructor(child: ChildProcess) {
     this.child = child;
     child.stdout?.on('data', (chunk: Buffer) => {
-      const lines = chunk.toString().split('\n');
+      this.stdoutBuffer += chunk.toString();
+      const lines = this.stdoutBuffer.split('\n');
+      this.stdoutBuffer = lines.pop() ?? '';
       for (const line of lines) {
         if (line.trim()) this.handleLine(line);
       }
@@ -37,14 +40,18 @@ export class JsonRpcClientImpl implements JsonRpcClient {
       } else if (msg.method && this.handlers.has(msg.method)) {
         for (const h of this.handlers.get(msg.method)!) h(msg.params);
       }
-    } catch {}
+    } catch (e) {
+      console.error('[jsonrpc] Failed to parse helper line:', line.substring(0, 200), 'error:', e);
+    }
   }
 
   async request(method: string, params?: object): Promise<any> {
     return new Promise((resolve, reject) => {
       const id = this.nextId++;
       this.pending.set(id, { resolve, reject });
-      this.send(JSON.stringify({ jsonrpc: '2.0', id, method, params }));
+      const msg = JSON.stringify({ jsonrpc: '2.0', id, method, params });
+      console.log(`[jsonrpc] Sending request id=${id} method=${method}`);
+      this.send(msg);
     });
   }
 
@@ -62,6 +69,7 @@ export class JsonRpcClientImpl implements JsonRpcClient {
       this.writeQueue.push(msg);
     } else {
       this.writing = true;
+      console.log(`[jsonrpc] Writing to stdin: ${msg.substring(0, 200)}`);
       this.child.stdin?.write(msg + '\n', () => { this.writing = false; });
     }
   }
